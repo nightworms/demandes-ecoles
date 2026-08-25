@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Le problème est-il réglé ? — Demandes des écoles</title>
+<style>
+:root{
+  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
+  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
+  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
+  --agir:#8A5B00; --agir-pale:#FDF3E0;
+  --fait:#2E6B3E; --fait-pale:#E8F2EA;
+  --alerte:#B3261E; --alerte-pale:#FCECEA;
+  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
+     font-size:16px;line-height:1.55}
+header{background:var(--marine);color:#fff;padding:20px 18px;
+       padding-top:calc(20px + env(safe-area-inset-top))}
+header .dedans{max-width:660px;margin:0 auto}
+header h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
+header p{margin:5px 0 0;font-size:13.5px;opacity:.85}
+main{max-width:660px;margin:0 auto;padding:18px 14px 60px}
+.bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
+      padding:20px 18px;margin-bottom:14px}
+h2{margin:0 0 6px;font-size:17px;font-weight:650}
+p.aide{margin:0 0 18px;font-size:14.5px;color:var(--encre-doux)}
+label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;color:var(--encre)}
+label .opt{font-weight:400;color:var(--encre-pale)}
+textarea{width:100%;min-height:104px;padding:12px 13px;font-size:16px;font-family:inherit;
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);
+  border-radius:9px;resize:vertical;line-height:1.5;appearance:none}
+textarea:focus{border-color:var(--marine-clair)}
+textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
+.choix:focus-within{outline:3px solid var(--marine-clair);outline-offset:2px}
+fieldset{border:0;padding:0;margin:0 0 18px}
+legend{margin-bottom:10px}
+.choix{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:14px 15px;
+       border:1.5px solid var(--trait);border-radius:10px;margin-bottom:9px;cursor:pointer;
+       background:var(--blanc);font-size:15.5px;font-weight:600}
+.choix input{margin:2px 0 0;width:22px;height:22px;flex:none;accent-color:var(--marine)}
+.choix small{display:block;font-size:13.5px;font-weight:400;color:var(--encre-doux);margin-top:3px}
+.choix:has(input:checked){border-color:var(--marine);background:var(--marine-pale)}
+.choix.refus:has(input:checked){border-color:var(--alerte);background:var(--alerte-pale)}
+button.principal{width:100%;min-height:54px;margin-top:4px;background:var(--marine);color:#fff;
+  border:0;border-radius:10px;font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
+button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
+.encart{border-radius:9px;padding:14px 16px;font-size:14.5px;margin:16px 0}
+.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
+.encart strong{display:block;margin-bottom:4px}
+.fiche{width:100%;border-collapse:collapse;margin:2px 0 4px}
+.fiche td{padding:9px 2px;font-size:14.5px;vertical-align:top;border-bottom:1px solid var(--trait)}
+.fiche tr:last-child td{border-bottom:0}
+.fiche td.cle{color:var(--encre-doux);width:40%;white-space:nowrap;padding-right:12px}
+.numero{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13.5px;
+        color:var(--encre-pale);letter-spacing:.02em;display:block;margin-bottom:3px}
+.desc{background:var(--fond);border-radius:9px;padding:13px 15px;margin-top:14px;
+      font-size:14.5px;white-space:pre-wrap}
+.desc strong{display:block;margin-bottom:5px;font-size:13.5px;color:var(--encre-doux);
+             font-weight:650;text-transform:uppercase;letter-spacing:.03em}
+.fini{text-align:center;padding:26px 20px}
+.fini .marque{width:62px;height:62px;border-radius:50%;background:var(--fait-pale);color:var(--fait);
+      display:flex;align-items:center;justify-content:center;font-size:31px;margin:0 auto 16px}
+.fini .marque.repart{background:var(--agir-pale);color:var(--agir)}
+.fini h2{font-size:20px;margin-bottom:8px}
+.lien-bas{display:block;text-align:center;margin-top:22px;color:var(--marine);font-weight:600}
+.chargement{text-align:center;padding:40px 20px;color:var(--encre-doux)}
+.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dedans">
+    <h1>Le problème est-il réglé ?</h1>
+    <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+  </div>
+</header>
+
+<main>
+  <div id="erreur" class="encart erreur" role="alert" hidden></div>
+
+  <p class="chargement" id="chargement">Chargement de la demande…</p>
+
+  <!-- ─── La demande ───────────────────────────────────────────────── -->
+  <section class="bloc" id="ecran-action" hidden>
+    <h2>Votre demande</h2>
+    <div id="fiche"></div>
+    <div id="description"></div>
+  </section>
+
+  <!-- ─── La réponse ───────────────────────────────────────────────── -->
+  <section class="bloc" id="ecran-formulaire" hidden>
+    <h2>Votre réponse</h2>
+    <p class="aide">Le service déclare être intervenu. Votre réponse referme la
+       demande, ou la relance — rien n'est clos sans vous.</p>
+    <form id="formulaire" novalidate>
+      <fieldset>
+        <legend>Le problème signalé est-il réglé ?</legend>
+        <label class="choix">
+          <input type="radio" name="reponse" value="oui" required>
+          <span>Oui, c'est réglé
+            <small>La demande sera close.</small></span>
+        </label>
+        <label class="choix refus">
+          <input type="radio" name="reponse" value="non" required>
+          <span>Non, le problème persiste
+            <small>Le service en sera averti et reprendra l'intervention.</small></span>
+        </label>
+      </fieldset>
+
+      <div id="champ-commentaire" hidden>
+        <label for="commentaire" id="etiquette-commentaire">Votre commentaire</label>
+        <textarea id="commentaire" maxlength="1500"
+                  aria-describedby="aide-commentaire"></textarea>
+        <p class="aide" id="aide-commentaire" style="margin:7px 0 0"></p>
+      </div>
+
+      <button type="submit" class="principal" id="valider" disabled>Envoyer ma réponse</button>
+    </form>
+  </section>
+
+  <!-- ─── Après coup ───────────────────────────────────────────────── -->
+  <section class="bloc fini" id="ecran-fait" hidden>
+    <div class="marque" aria-hidden="true">✓</div>
+    <h2 id="fait-titre">C'est enregistré</h2>
+    <p id="fait-texte"></p>
+    <a class="lien-bas" href="connexion.html" id="lien-espace" hidden>Voir mes demandes</a>
+  </section>
+</main>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Page atteinte par le lien reçu dans l'email « intervention terminée ».
+//  Le jeton contenu dans l'adresse tient lieu d'autorisation : le connaître,
+//  c'est avoir reçu le message. Il n'y a donc ni compte ni mot de passe.
+//
+//  L'adresse peut porter « &reponse=oui » ou « &reponse=non » selon le bouton
+//  cliqué dans le message. Ce n'est qu'une présélection : rien n'est envoyé
+//  sans un second geste, sur cette page. Un clic dans une messagerie est trop
+//  facile à faire par mégarde — et certains antivirus visitent les liens tout
+//  seuls, ce qui clôturerait des demandes sans que personne n'ait rien dit.
+//
+//  La clé publiable est faite pour partir dans le navigateur : c'est la
+//  sécurité par ligne qui protège, jamais son secret. Ne jamais placer ici
+//  une clé « sb_secret_ ».
+// ─────────────────────────────────────────────────────────────────────────
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'sb_publishable_nTCosqebGOjUK3jGwoxhfQ_BnnkRpNn';
+
+const entetes = { 'apikey': CLE, 'Authorization': 'Bearer ' + CLE, 'Content-Type': 'application/json' };
+const $ = s => document.querySelector(s);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(texte) {
+  $('#chargement').hidden = true;
+  const e = $('#erreur'); e.textContent = texte; e.hidden = false;
+}
+async function appeler(fonction, corps) {
+  const r = await fetch(API + '/rest/v1/rpc/' + fonction, {
+    method: 'POST', headers: entetes, body: JSON.stringify(corps) });
+  if (!r.ok) throw new Error('Appel impossible (' + r.status + ')');
+  return r.json();
+}
+
+const parametres = new URLSearchParams(location.search);
+const jeton = parametres.get('jeton') || '';
+const presuppose = parametres.get('reponse');
+
+// ─── Affichage de la demande ─────────────────────────────────────────────
+function afficherFiche(d) {
+  const lignes = [
+    ['École',        d.ecole],
+    ['Nature',       [d.domaine, d.type].filter(Boolean).join(' — ')],
+    ['Localisation', d.localisation],
+    ['Déposée le',   d.depose_le]
+  ].filter(l => l[1]);
+
+  $('#fiche').innerHTML =
+    '<span class="numero">' + echapper(d.numero) + '</span><table class="fiche"><tbody>' +
+    lignes.map(([cle, val]) =>
+      '<tr><td class="cle">' + cle + '</td><td>' + echapper(val) + '</td></tr>'
+    ).join('') + '</tbody></table>';
+
+  $('#description').innerHTML = d.description
+    ? '<div class="desc"><strong>Ce que vous aviez signalé</strong>' + echapper(d.description) + '</div>'
+    : '';
+  $('#ecran-action').hidden = false;
+}
+
+// La base refuse ces états. On le dit ici plutôt que de laisser cliquer.
+const CLOS = ['resolu', 'cloture', 'annule', 'archive'];
+
+// ─── Le commentaire, dont l'exigence dépend de la réponse ────────────────
+function ajusterCommentaire() {
+  const choix = document.querySelector('input[name=reponse]:checked');
+  const zone = $('#champ-commentaire');
+  const aire = $('#commentaire');
+
+  if (!choix) { zone.hidden = true; $('#valider').disabled = true; return; }
+  zone.hidden = false;
+
+  if (choix.value === 'non') {
+    $('#etiquette-commentaire').textContent = 'Qu\'est-ce qui ne va toujours pas ?';
+    $('#aide-commentaire').textContent =
+      "Décrivez ce qui reste à faire : c'est ce que lira le service pour reprendre l'intervention.";
+    aire.placeholder = 'Ex : la fuite a repris dès le lendemain matin.';
+    aire.required = true;
+  } else {
+    $('#etiquette-commentaire').innerHTML =
+      'Un mot pour le service <span class="opt">— facultatif</span>';
+    $('#aide-commentaire').textContent = '';
+    aire.placeholder = '';
+    aire.required = false;
+  }
+  verifierComplet();
+}
+
+function verifierComplet() {
+  const choix = document.querySelector('input[name=reponse]:checked');
+  const texte = $('#commentaire').value.trim();
+  // Un refus sans explication ne dit rien au service : il serait renvoyé
+  // sur place sans savoir quoi chercher.
+  $('#valider').disabled = !choix || (choix.value === 'non' && texte.length < 5);
+  $('#valider').textContent = choix && choix.value === 'non'
+    ? 'Signaler que le problème persiste' : 'Envoyer ma réponse';
+}
+
+document.querySelectorAll('input[name=reponse]').forEach(
+  r => r.addEventListener('change', ajusterCommentaire));
+$('#commentaire').addEventListener('input', verifierComplet);
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  if (!jeton) {
+    return erreur("Ce lien est incomplet. Ouvrez-le directement depuis le message "
+                + "que vous avez reçu, sans le recopier à la main.");
+  }
+  if (!UUID.test(jeton)) {
+    return erreur("Ce lien n'est pas valide. Ouvrez-le directement depuis le message "
+                + "que vous avez reçu.");
+  }
+
+  let d;
+  try {
+    d = await appeler('apercu_par_jeton', { _jeton: jeton });
+  } catch (e) {
+    return erreur("La demande n'a pas pu être chargée. Vérifiez votre connexion, "
+                + "puis rechargez la page.");
+  }
+
+  $('#chargement').hidden = true;
+
+  if (!d) {
+    return erreur("Ce lien ne correspond à aucune demande. Il a peut-être été tronqué "
+                + "par votre messagerie : réessayez en l'ouvrant depuis le message d'origine.");
+  }
+
+  if (d.role !== 'ecole') {
+    afficherFiche(d);
+    $('#erreur').innerHTML = "Ce lien est celui du service, pas celui de l'école. "
+      + '<a href="intervention-v3.html?jeton=' + encodeURIComponent(jeton) + '">Ouvrir la bonne page</a>.';
+    $('#erreur').hidden = false;
+    return;
+  }
+
+  afficherFiche(d);
+
+  if (CLOS.includes(d.statut)) {
+    $('#fait-titre').textContent = 'Demande déjà close';
+    $('#fait-texte').textContent =
+      "Cette demande est close : il n'y a plus de réponse à donner. "
+      + "Si le problème réapparaît, déposez une nouvelle demande depuis votre espace.";
+    $('#ecran-fait').querySelector('.marque').textContent = 'i';
+    $('#lien-espace').hidden = false;
+    $('#ecran-fait').hidden = false;
+    return;
+  }
+
+  $('#ecran-formulaire').hidden = false;
+
+  // Présélection du bouton cliqué dans l'email, sans rien envoyer.
+  if (presuppose === 'oui' || presuppose === 'non') {
+    const r = document.querySelector('input[name=reponse][value="' + presuppose + '"]');
+    if (r) { r.checked = true; ajusterCommentaire(); }
+  }
+})();
+
+// ─── Envoi ───────────────────────────────────────────────────────────────
+$('#formulaire').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const choix = document.querySelector('input[name=reponse]:checked');
+  if (!choix) return;
+
+  const satisfait = choix.value === 'oui';
+  const bouton = $('#valider');
+  const libelle = bouton.textContent;
+  bouton.disabled = true;
+  bouton.textContent = 'Envoi…';
+
+  let r;
+  try {
+    r = await appeler('cloturer_demande', {
+      _jeton: jeton,
+      _satisfait: satisfait,
+      _commentaire: $('#commentaire').value.trim() || null
+    });
+  } catch (e) {
+    bouton.disabled = false;
+    bouton.textContent = libelle;
+    return erreur("Votre réponse n'a pas pu être envoyée. Vérifiez votre connexion et réessayez.");
+  }
+
+  $('#ecran-formulaire').hidden = true;
+
+  if (!r || r.ok !== true) {
+    $('#erreur').textContent = (r && r.motif) || "Votre réponse n'a pas pu être enregistrée.";
+    $('#erreur').hidden = false;
+    return;
+  }
+
+  const marque = $('#ecran-fait').querySelector('.marque');
+  if (satisfait) {
+    marque.textContent = '✓';
+    $('#fait-titre').textContent = 'Merci, la demande est close';
+    $('#fait-texte').textContent =
+      'La demande ' + r.numero + ' est close. Le service en est informé. '
+      + 'Si le problème réapparaît, déposez une nouvelle demande : cela permet de '
+      + 'garder trace d’une panne qui revient.';
+  } else {
+    marque.textContent = '↺';
+    marque.classList.add('repart');
+    $('#fait-titre').textContent = 'Le service est prévenu';
+    $('#fait-texte').textContent =
+      'La demande ' + r.numero + ' est rouverte. Le service vient de recevoir votre '
+      + 'message et reprendra l’intervention. Vous serez recontacté pour confirmer.';
+  }
+  $('#lien-espace').hidden = false;
+  $('#ecran-fait').hidden = false;
+  $('#ecran-fait').scrollIntoView({ block: 'center' });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signaler une demande — Écoles de Saint-Denis</title>
+<style>
+:root{
+  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
+  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
+  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
+  --urgent:#B3261E; --urgent-pale:#FCECEA;
+  --attention:#8A5B00; --attention-pale:#FDF3E0;
+  --rayon:12px;
+  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
+     font-size:16px;line-height:1.55;padding-bottom:96px}
+header{background:var(--marine);color:#fff;padding:20px 18px;
+       padding-top:calc(20px + env(safe-area-inset-top))}
+header h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
+header p{margin:5px 0 0;font-size:13.5px;opacity:.85}
+main{max-width:660px;margin:0 auto;padding:16px 14px}
+.bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:var(--rayon);
+      padding:18px 16px;margin-bottom:14px}
+.bloc > h2{margin:0 0 4px;font-size:17px;font-weight:650;display:flex;align-items:center;gap:9px}
+.num{background:var(--marine-pale);color:var(--marine);width:26px;height:26px;border-radius:50%;
+     display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.bloc > p.aide{margin:0 0 16px 35px;font-size:14px;color:var(--encre-doux)}
+.champ{margin-bottom:15px}
+label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;color:var(--encre)}
+label .opt{font-weight:400;color:var(--encre-pale)}
+input[type=text],input[type=email],input[type=tel],select,textarea{
+  width:100%;min-height:48px;padding:12px 13px;font-size:16px;font-family:inherit;color:var(--encre);
+  background:var(--blanc);border:1.5px solid var(--trait);border-radius:9px;appearance:none}
+textarea{min-height:110px;resize:vertical;line-height:1.5}
+select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+       background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,
+.domaine:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
+input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
+fieldset{border:0;padding:0;margin:0 0 15px}
+.domaines{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.domaine{position:relative;display:flex;flex-direction:column;justify-content:center;
+         min-height:78px;padding:12px 13px;background:var(--blanc);border:1.5px solid var(--trait);
+         border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px;
+         font-weight:600;color:var(--encre);line-height:1.3}
+.domaine small{display:block;font-weight:400;font-size:12.5px;color:var(--encre-pale);margin-top:3px}
+.domaine[aria-pressed="true"]{border-color:var(--marine);background:var(--marine-pale);color:var(--marine)}
+.domaine[aria-pressed="true"]::after{content:"✓";position:absolute;top:7px;right:9px;
+         font-size:13px;font-weight:700;color:var(--marine)}
+.choix{display:flex;align-items:flex-start;gap:11px;padding:13px;border:1.5px solid var(--trait);
+       border-radius:9px;margin-bottom:7px;cursor:pointer;background:var(--blanc);font-size:15px}
+.choix input{margin:2px 0 0;width:20px;height:20px;flex:none;accent-color:var(--marine)}
+.choix:has(input:checked){border-color:var(--marine);background:var(--marine-pale)}
+.choix span small{display:block;font-size:13px;color:var(--encre-doux);margin-top:2px}
+.encart{border-radius:9px;padding:13px 15px;font-size:14.5px;margin:14px 0}
+.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.alerte{background:var(--attention-pale);color:var(--attention);border-left:4px solid var(--attention)}
+.encart.erreur{background:var(--urgent-pale);color:var(--urgent);border-left:4px solid var(--urgent)}
+.encart strong{display:block;margin-bottom:4px}
+.encart ul{margin:8px 0 0;padding-left:20px}
+.photos{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.vignette{position:relative;width:88px;height:88px;border-radius:9px;overflow:hidden;border:1.5px solid var(--trait)}
+.vignette img{width:100%;height:100%;object-fit:cover;display:block}
+.vignette button{position:absolute;top:3px;right:3px;width:26px;height:26px;border:0;border-radius:50%;
+       background:rgba(0,0,0,.62);color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0}
+.ajout-photo{width:88px;height:88px;border:1.5px dashed var(--trait);border-radius:9px;background:var(--blanc);
+       cursor:pointer;font-size:26px;color:var(--encre-pale);display:flex;align-items:center;justify-content:center}
+.envoi{position:fixed;left:0;right:0;bottom:0;background:var(--blanc);border-top:1px solid var(--trait);
+       padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:20}
+.envoi .dedans{max-width:660px;margin:0 auto;display:flex;gap:11px;align-items:center}
+button.principal{flex:1;min-height:52px;background:var(--marine);color:#fff;border:0;border-radius:10px;
+       font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
+button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
+button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:var(--marine);
+       border:1.5px solid var(--trait);border-radius:10px;font-size:15px;font-weight:600;
+       font-family:inherit;cursor:pointer}
+.recu{text-align:center;padding:28px 20px}
+.recu .numero{font-size:27px;font-weight:700;color:var(--marine);letter-spacing:.02em;
+       background:var(--marine-pale);padding:12px 20px;border-radius:10px;display:inline-block;margin:14px 0}
+.recu h2{margin:0;font-size:21px}
+.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Signaler une demande</h1>
+  <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+</header>
+<main>
+  <div id="erreur-globale" class="encart erreur" role="alert" hidden></div>
+  <form id="formulaire" novalidate>
+    <section class="bloc">
+      <h2><span class="num" aria-hidden="true">1</span> Votre école</h2>
+      <p class="aide">Choisissez le quartier, puis votre école.</p>
+      <div class="champ">
+        <label for="secteur">Quartier</label>
+        <select id="secteur" required><option value="">Choisir…</option></select>
+      </div>
+      <div class="champ">
+        <label for="ecole">École</label>
+        <select id="ecole" required disabled><option value="">Choisissez d'abord un quartier</option></select>
+      </div>
+      <div id="fiche-ecole" class="encart info" hidden></div>
+    </section>
+    <section class="bloc">
+      <h2><span class="num" aria-hidden="true">2</span> Vous</h2>
+      <p class="aide">Pour que le service puisse vous rappeler si besoin.</p>
+      <div class="champ"><label for="nom">Votre nom</label>
+        <input type="text" id="nom" required autocomplete="name" placeholder="Ex : Marie Dupont"></div>
+      <div class="champ"><label for="fonction">Votre fonction <span class="opt">— facultatif</span></label>
+        <input type="text" id="fonction" autocomplete="organization-title" placeholder="Ex : Directrice"></div>
+      <div class="champ"><label for="email">Votre adresse email</label>
+        <input type="email" id="email" required autocomplete="email" inputmode="email"
+               placeholder="pour recevoir le suivi de votre demande"></div>
+      <div class="champ"><label for="tel">Téléphone <span class="opt">— facultatif</span></label>
+        <input type="tel" id="tel" autocomplete="tel" inputmode="tel" placeholder="0692 …"></div>
+    </section>
+    <section class="bloc">
+      <h2><span class="num" aria-hidden="true">3</span> Que se passe-t-il&nbsp;?</h2>
+      <p class="aide">Choisissez ce qui correspond le mieux. Nous nous chargeons d'orienter votre demande vers le bon service.</p>
+      <div class="domaines" id="domaines" role="group" aria-label="Nature de la demande"></div>
+    </section>
+    <section class="bloc" id="bloc-type" hidden>
+      <h2><span class="num" aria-hidden="true">4</span> Plus précisément</h2>
+      <fieldset><legend class="masque">Type de demande</legend><div id="types"></div></fieldset>
+      <div id="doublons" class="encart alerte" role="status" hidden></div>
+    </section>
+    <section class="bloc" id="bloc-details" hidden>
+      <h2><span class="num" aria-hidden="true">5</span> Décrivez la situation</h2>
+      <div class="champ"><label for="localisation">Où exactement&nbsp;? <span class="opt">— facultatif</span></label>
+        <input type="text" id="localisation" placeholder="Ex : salle B3, cantine, cour côté rue"></div>
+      <div class="champ"><label for="description">Description</label>
+        <textarea id="description" required
+          placeholder="Ce que vous constatez, depuis quand, et ce que cela empêche de faire."></textarea></div>
+      <fieldset><legend>Degré d'urgence</legend>
+        <label class="choix"><input type="radio" name="priorite" value="normale" checked>
+          <span>Normale<small>À traiter dans les délais habituels</small></span></label>
+        <label class="choix"><input type="radio" name="priorite" value="haute">
+          <span>Importante<small>Gêne le fonctionnement de l'école</small></span></label>
+        <label class="choix"><input type="radio" name="priorite" value="urgente">
+          <span>Urgente<small>Danger, ou activité totalement empêchée</small></span></label>
+      </fieldset>
+      <fieldset><legend>Quand l'intervention peut-elle avoir lieu&nbsp;?</legend>
+        <label class="choix"><input type="radio" name="fenetre" value="des_que_possible" checked>
+          <span>Dès que possible</span></label>
+        <label class="choix"><input type="radio" name="fenetre" value="pendant_les_vacances">
+          <span>Pendant les vacances scolaires<small>Travaux impossibles en présence des élèves</small></span></label>
+        <label class="choix"><input type="radio" name="fenetre" value="avant_la_rentree">
+          <span>Avant la prochaine rentrée</span></label>
+      </fieldset>
+      <fieldset><legend>Photos <span class="opt">— facultatif, trois au maximum</span></legend>
+        <p style="margin:0;font-size:14px;color:var(--encre-doux)">
+          Une photo évite souvent une visite de constat.
+          <strong>Cadrez uniquement l'équipement concerné&nbsp;: aucune personne ne doit être visible.</strong></p>
+        <div class="photos" id="photos">
+          <button type="button" class="ajout-photo" id="ajout-photo" aria-label="Ajouter une photo">+</button>
+        </div>
+        <input type="file" id="fichier" accept="image/*" capture="environment" class="masque" multiple>
+        <p id="etat-photos" style="font-size:13px;color:var(--encre-pale);margin:8px 0 0" role="status"></p>
+      </fieldset>
+    </section>
+  </form>
+  <section class="bloc recu" id="confirmation" hidden>
+    <h2>Votre demande est enregistrée</h2>
+    <p>Conservez ce numéro&nbsp;: il vous servira si vous nous en reparlez.</p>
+    <div class="numero" id="numero-recu"></div>
+    <p id="qui-traite"></p>
+    <p style="color:var(--encre-doux);font-size:14.5px">Un accusé de réception vient de partir vers votre adresse.</p>
+    <button type="button" class="secondaire" onclick="location.reload()">Faire une autre demande</button>
+  </section>
+</main>
+<div class="envoi" id="pied"><div class="dedans">
+  <button type="submit" form="formulaire" class="principal" id="bouton-envoi" disabled>Envoyer ma demande</button>
+</div></div>
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Configuration.
+//  La clé « publiable » est faite pour partir dans le navigateur : Supabase la
+//  décrit lui-même comme sûre dès lors que la sécurité par ligne est activée,
+//  ce qui est notre cas. Elle ne donne accès qu'à ce que les politiques
+//  autorisent, et rien de plus. Ne jamais mettre ici une clé « sb_secret_ ».
+// ─────────────────────────────────────────────────────────────────────────
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'sb_publishable_nTCosqebGOjUK3jGwoxhfQ_BnnkRpNn';
+const BUCKET_PHOTOS = 'photos-demandes';
+const MAX_PHOTOS = 3;
+
+const entetes = { 'apikey': CLE, 'Authorization': 'Bearer ' + CLE, 'Content-Type': 'application/json' };
+const $ = s => document.querySelector(s);
+
+async function lire(chemin) {
+  const r = await fetch(`${API}/rest/v1/${chemin}`, { headers: entetes });
+  if (!r.ok) throw new Error('Lecture impossible (' + r.status + ')');
+  return r.json();
+}
+async function appeler(fonction, corps) {
+  const r = await fetch(`${API}/rest/v1/rpc/${fonction}`, {
+    method: 'POST', headers: entetes, body: JSON.stringify(corps) });
+  if (!r.ok) throw new Error('Envoi impossible (' + r.status + ')');
+  return r.json();
+}
+
+let ECOLES = [], DOMAINES = [], TYPES = [], photos = [];
+let domaineChoisi = null;
+
+(async function demarrer() {
+  try {
+    [ECOLES, DOMAINES, TYPES] = await Promise.all([
+      lire('v_ecoles_publiques?select=id,secteur,type_ecole,nom,adresse,telephone&order=secteur,nom'),
+      lire('v_domaines_publics?select=id,libelle,aide,ordre,photo_obligatoire&order=ordre'),
+      lire('v_types_publics?select=id,domaine_id,libelle,ordre&order=ordre')
+    ]);
+    remplirSecteurs();
+    afficherDomaines();
+  } catch (e) {
+    montrerErreur("Le formulaire n'a pas pu se charger. Vérifiez votre connexion, puis rechargez la page.");
+  }
+})();
+
+function montrerErreur(texte) {
+  const el = $('#erreur-globale'); el.textContent = texte; el.hidden = false;
+  el.scrollIntoView({ block: 'center' });
+}
+function remplirSecteurs() {
+  const secteurs = [...new Set(ECOLES.map(e => e.secteur))].sort((a, b) => a.localeCompare(b, 'fr'));
+  $('#secteur').insertAdjacentHTML('beforeend',
+    secteurs.map(s => '<option value="' + s + '">' + s + '</option>').join(''));
+}
+$('#secteur').addEventListener('change', e => {
+  const sel = $('#ecole');
+  const liste = ECOLES.filter(x => x.secteur === e.target.value);
+  sel.innerHTML = '<option value="">Choisir…</option>' +
+    liste.map(x => '<option value="' + x.id + '">' + x.type_ecole + ' ' + x.nom + '</option>').join('');
+  sel.disabled = liste.length === 0;
+  $('#fiche-ecole').hidden = true;
+  verifierComplet();
+});
+$('#ecole').addEventListener('change', e => {
+  const ec = ECOLES.find(x => String(x.id) === e.target.value);
+  const f = $('#fiche-ecole');
+  if (ec) {
+    f.innerHTML = '<strong>' + ec.type_ecole + ' ' + ec.nom + '</strong>' + (ec.adresse || '') +
+                  (ec.telephone ? ' · ' + ec.telephone : '');
+    f.hidden = false;
+  } else f.hidden = true;
+  chercherDoublons();
+  verifierComplet();
+});
+function afficherDomaines() {
+  $('#domaines').innerHTML = DOMAINES.map(d =>
+    '<button type="button" class="domaine" data-id="' + d.id + '" aria-pressed="false">' +
+    d.libelle + (d.aide ? '<small>' + d.aide + '</small>' : '') + '</button>').join('');
+  $('#domaines').addEventListener('click', ev => {
+    const b = ev.target.closest('.domaine'); if (!b) return;
+    document.querySelectorAll('.domaine').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    domaineChoisi = Number(b.dataset.id);
+    afficherTypes(domaineChoisi);
+    chercherDoublons();
+  });
+}
+function afficherTypes(domaineId) {
+  const liste = TYPES.filter(t => t.domaine_id === domaineId);
+  $('#types').innerHTML = liste.map(t =>
+    '<label class="choix"><input type="radio" name="type" value="' + t.id + '">' +
+    '<span>' + t.libelle + '</span></label>').join('');
+  $('#bloc-type').hidden = false;
+  $('#bloc-details').hidden = false;
+  $('#types').querySelectorAll('input').forEach(i => i.addEventListener('change', verifierComplet));
+  $('#bloc-type').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  verifierComplet();
+}
+async function chercherDoublons() {
+  const ecoleId = $('#ecole').value, boite = $('#doublons');
+  if (!ecoleId || !domaineChoisi) { boite.hidden = true; return; }
+  try {
+    const ouvertes = await appeler('demandes_ouvertes_pour',
+      { _ecole_id: Number(ecoleId), _domaine_id: domaineChoisi });
+    if (!ouvertes || ouvertes.length === 0) { boite.hidden = true; return; }
+    boite.innerHTML = '<strong>Une demande est déjà en cours sur ce sujet pour votre école</strong>' +
+      "Vérifiez qu'il ne s'agit pas de la même chose avant d'envoyer&nbsp;:<ul>" +
+      ouvertes.map(d => '<li><b>' + d.numero + '</b> — ' + d.type + ', déposée le ' + d.depose_le + '</li>').join('') +
+      '</ul>';
+    boite.hidden = false;
+  } catch (e) { boite.hidden = true; }
+}
+$('#ajout-photo').addEventListener('click', () => $('#fichier').click());
+$('#fichier').addEventListener('change', async e => {
+  for (const f of [...e.target.files]) {
+    if (photos.length >= MAX_PHOTOS) break;
+    $('#etat-photos').textContent = 'Compression en cours…';
+    try { photos.push(await compresser(f)); } catch (err) { /* image illisible : ignorée */ }
+  }
+  e.target.value = '';
+  dessinerPhotos();
+});
+// Redimensionne et recomprime dans le navigateur : une photo de téléphone passe
+// d'environ 4 Mo à 300 Ko, sans différence visible pour identifier une panne.
+function compresser(fichier, maxCote, qualite) {
+  maxCote = maxCote || 1600; qualite = qualite || 0.8;
+  return new Promise((resoudre, rejeter) => {
+    const img = new Image(), url = URL.createObjectURL(fichier);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let l = img.width, h = img.height;
+      if (Math.max(l, h) > maxCote) { const r = maxCote / Math.max(l, h); l = Math.round(l * r); h = Math.round(h * r); }
+      const c = document.createElement('canvas'); c.width = l; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, l, h);
+      c.toBlob(b => b ? resoudre({ blob: b, apercu: c.toDataURL('image/jpeg', 0.5) })
+                      : rejeter(new Error('compression')), 'image/jpeg', qualite);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rejeter(new Error('lecture')); };
+    img.src = url;
+  });
+}
+function dessinerPhotos() {
+  const zone = $('#photos');
+  zone.querySelectorAll('.vignette').forEach(v => v.remove());
+  photos.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'vignette';
+    d.innerHTML = '<img src="' + p.apercu + '" alt="Photo ' + (i + 1) + ' de la situation signalée">' +
+                  '<button type="button" aria-label="Retirer la photo ' + (i + 1) + '">×</button>';
+    d.querySelector('button').onclick = () => { photos.splice(i, 1); dessinerPhotos(); };
+    zone.insertBefore(d, $('#ajout-photo'));
+  });
+  $('#ajout-photo').style.display = photos.length >= MAX_PHOTOS ? 'none' : 'flex';
+  const poids = photos.reduce((s, p) => s + p.blob.size, 0);
+  $('#etat-photos').textContent = photos.length
+    ? photos.length + ' photo' + (photos.length > 1 ? 's' : '') + ' · ' + Math.round(poids / 1024) + ' Ko après compression'
+    : '';
+}
+function verifierComplet() {
+  const ok = $('#ecole').value && $('#nom').value.trim() && $('#email').value.trim()
+          && domaineChoisi && document.querySelector('input[name=type]:checked')
+          && $('#description').value.trim().length > 4;
+  $('#bouton-envoi').disabled = !ok;
+}
+['#nom', '#email', '#description'].forEach(s => $(s).addEventListener('input', verifierComplet));
+
+$('#formulaire').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const bouton = $('#bouton-envoi');
+  bouton.disabled = true; bouton.textContent = 'Envoi en cours…';
+  try {
+    const fenetre = document.querySelector('input[name=fenetre]:checked').value;
+    const reponse = await appeler('deposer_demande', {
+      _ecole_id: Number($('#ecole').value),
+      _domaine_id: domaineChoisi,
+      _type_demande_id: Number(document.querySelector('input[name=type]:checked').value),
+      _demandeur_nom: $('#nom').value.trim(),
+      _demandeur_email: $('#email').value.trim(),
+      _description: $('#description').value.trim(),
+      _demandeur_fonction: $('#fonction').value.trim() || null,
+      _demandeur_tel: $('#tel').value.trim() || null,
+      _localisation: $('#localisation').value.trim() || null,
+      _priorite: document.querySelector('input[name=priorite]:checked').value,
+      _hors_presence: fenetre === 'pendant_les_vacances',
+      _fenetre: fenetre
+    });
+    if (!reponse || reponse.ok !== true) throw new Error((reponse && reponse.motif) || 'Refus du serveur');
+
+    // Les photos ne doivent jamais bloquer un signalement : si le dépôt échoue,
+    // la demande reste enregistrée et on le dit simplement.
+    let photosOk = true;
+    for (let i = 0; i < photos.length; i++) {
+      try { await deposerPhoto(reponse.id, i, photos[i].blob); } catch (e) { photosOk = false; }
+    }
+    $('#formulaire').hidden = true; $('#pied').hidden = true;
+    $('#numero-recu').textContent = reponse.numero;
+    const qui = reponse.destinataires || [];
+    $('#qui-traite').textContent = qui.length ? "Elle vient d'être transmise à " + qui.join(', ') + '.' : '';
+    if (!photosOk) {
+      $('#qui-traite').textContent +=
+        " Vos photos n'ont pas pu être jointes ; vous pouvez les envoyer par email en citant ce numéro.";
+    }
+    $('#confirmation').hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    montrerErreur("Votre demande n'a pas pu être envoyée. Réessayez dans un instant ; si le problème persiste, appelez le Pôle Technique.");
+    bouton.disabled = false; bouton.textContent = 'Envoyer ma demande';
+  }
+});
+
+async function deposerPhoto(demandeId, index, blob) {
+  const chemin = demandeId + '/' + Date.now() + '-' + index + '.jpg';
+  const r = await fetch(API + '/storage/v1/object/' + BUCKET_PHOTOS + '/' + chemin, {
+    method: 'POST',
+    headers: { 'apikey': CLE, 'Authorization': 'Bearer ' + CLE, 'Content-Type': 'image/jpeg' },
+    body: blob });
+  if (!r.ok) throw new Error('dépôt photo');
+  await appeler('enregistrer_photo', { _demande_id: demandeId, _url: chemin, _taille: blob.size });
+}
+</script>
+</body>
+</html>

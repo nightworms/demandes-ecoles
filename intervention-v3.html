@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Signaler une intervention terminée — Demandes des écoles</title>
+<style>
+:root{
+  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
+  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
+  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
+  --agir:#8A5B00; --agir-pale:#FDF3E0;
+  --fait:#2E6B3E; --fait-pale:#E8F2EA;
+  --alerte:#B3261E; --alerte-pale:#FCECEA;
+  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
+     font-size:16px;line-height:1.55}
+header{background:var(--marine);color:#fff;padding:20px 18px;
+       padding-top:calc(20px + env(safe-area-inset-top))}
+header .dedans{max-width:660px;margin:0 auto}
+header h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
+header p{margin:5px 0 0;font-size:13.5px;opacity:.85}
+main{max-width:660px;margin:0 auto;padding:18px 14px 60px}
+.bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
+      padding:20px 18px;margin-bottom:14px}
+h2{margin:0 0 6px;font-size:17px;font-weight:650}
+p.aide{margin:0 0 18px;font-size:14.5px;color:var(--encre-doux)}
+label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;color:var(--encre)}
+label .opt{font-weight:400;color:var(--encre-pale)}
+textarea{width:100%;min-height:110px;padding:12px 13px;font-size:16px;font-family:inherit;
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);
+  border-radius:9px;resize:vertical;line-height:1.5;appearance:none}
+textarea:focus{border-color:var(--marine-clair)}
+textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
+fieldset{border:0;padding:0;margin:0 0 16px}
+button.principal{width:100%;min-height:54px;margin-top:16px;background:var(--marine);color:#fff;
+  border:0;border-radius:10px;font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
+button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
+.encart{border-radius:9px;padding:14px 16px;font-size:14.5px;margin:16px 0}
+.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.attente{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
+.encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
+.encart strong{display:block;margin-bottom:4px}
+.fiche{width:100%;border-collapse:collapse;margin:2px 0 4px}
+.fiche td{padding:9px 2px;font-size:14.5px;vertical-align:top;border-bottom:1px solid var(--trait)}
+.fiche tr:last-child td{border-bottom:0}
+.fiche td.cle{color:var(--encre-doux);width:40%;white-space:nowrap;padding-right:12px}
+.numero{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13.5px;
+        color:var(--encre-pale);letter-spacing:.02em;display:block;margin-bottom:3px}
+.desc{background:var(--fond);border-radius:9px;padding:13px 15px;margin-top:14px;
+      font-size:14.5px;white-space:pre-wrap}
+.desc strong{display:block;margin-bottom:5px;font-size:13.5px;color:var(--encre-doux);
+             font-weight:650;text-transform:uppercase;letter-spacing:.03em}
+.etat{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;
+      padding:4px 10px;border-radius:20px;background:var(--marine-pale);color:var(--marine)}
+.etat.agir{background:var(--agir);color:#fff}
+.etat.fait{background:var(--fait-pale);color:var(--fait)}
+.fini{text-align:center;padding:26px 20px}
+.fini .marque{width:62px;height:62px;border-radius:50%;background:var(--fait-pale);color:var(--fait);
+      display:flex;align-items:center;justify-content:center;font-size:31px;margin:0 auto 16px}
+.fini h2{font-size:20px;margin-bottom:8px}
+.chargement{text-align:center;padding:40px 20px;color:var(--encre-doux)}
+.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dedans">
+    <h1>Signaler une intervention terminée</h1>
+    <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+  </div>
+</header>
+
+<main>
+  <div id="erreur" class="encart erreur" role="alert" hidden></div>
+
+  <p class="chargement" id="chargement">Chargement de la demande…</p>
+
+  <!-- ─── La demande, et le formulaire ─────────────────────────────── -->
+  <section class="bloc" id="ecran-action" hidden>
+    <h2>La demande</h2>
+    <div id="fiche"></div>
+    <div id="description"></div>
+  </section>
+
+  <section class="bloc" id="ecran-formulaire" hidden>
+    <h2>Déclarer l'intervention terminée</h2>
+    <p class="aide">L'école recevra aussitôt un message lui demandant de confirmer
+       que le problème est réglé. La demande ne sera close qu'après sa réponse.</p>
+    <form id="formulaire" novalidate>
+      <label for="commentaire">Ce qui a été fait <span class="opt">— facultatif, mais utile à l'école</span></label>
+      <textarea id="commentaire" maxlength="1500"
+                placeholder="Ex : joint du siphon remplacé, robinet d'arrêt révisé."></textarea>
+      <button type="submit" class="principal" id="valider">Déclarer l'intervention terminée</button>
+    </form>
+  </section>
+
+  <!-- ─── Après coup ───────────────────────────────────────────────── -->
+  <section class="bloc fini" id="ecran-fait" hidden>
+    <div class="marque" aria-hidden="true">✓</div>
+    <h2 id="fait-titre">C'est enregistré</h2>
+    <p id="fait-texte"></p>
+  </section>
+</main>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Page atteinte par le lien reçu dans l'email « nouvelle demande ».
+//  Le jeton contenu dans l'adresse tient lieu d'autorisation : le connaître,
+//  c'est avoir reçu le message. Il n'y a donc ni compte ni mot de passe.
+//
+//  La clé publiable est faite pour partir dans le navigateur : c'est la
+//  sécurité par ligne qui protège, jamais son secret. Ne jamais placer ici
+//  une clé « sb_secret_ ».
+// ─────────────────────────────────────────────────────────────────────────
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'sb_publishable_nTCosqebGOjUK3jGwoxhfQ_BnnkRpNn';
+
+const entetes = { 'apikey': CLE, 'Authorization': 'Bearer ' + CLE, 'Content-Type': 'application/json' };
+const $ = s => document.querySelector(s);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Le vocabulaire interne n'a pas à sortir tel quel.
+const ETATS = {
+  nouveau:                     { texte: 'Reçue',                        classe: '' },
+  en_cours:                    { texte: 'En cours de traitement',       classe: '' },
+  en_attente_pieces:           { texte: 'En attente de pièces',         classe: '' },
+  en_attente_devis:            { texte: 'En attente de devis',          classe: '' },
+  planifie:                    { texte: 'Intervention planifiée',       classe: '' },
+  transmis_externe:            { texte: 'Transmise à un autre service', classe: '' },
+  en_attente_validation_ecole: { texte: 'En attente de l’école',   classe: 'agir' },
+  resolu:                      { texte: 'Résolue',                      classe: 'fait' },
+  cloture:                     { texte: 'Clôturée',                     classe: 'fait' },
+  rouvert:                     { texte: 'Rouverte',                     classe: '' },
+  annule:                      { texte: 'Annulée',                      classe: 'fait' },
+  archive:                     { texte: 'Archivée',                     classe: 'fait' }
+};
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(texte) {
+  $('#chargement').hidden = true;
+  const e = $('#erreur'); e.textContent = texte; e.hidden = false;
+}
+async function appeler(fonction, corps) {
+  const r = await fetch(API + '/rest/v1/rpc/' + fonction, {
+    method: 'POST', headers: entetes, body: JSON.stringify(corps) });
+  if (!r.ok) throw new Error('Appel impossible (' + r.status + ')');
+  return r.json();
+}
+
+// ─── Le jeton, lu dans l'adresse ─────────────────────────────────────────
+const jeton = new URLSearchParams(location.search).get('jeton') || '';
+
+// ─── Affichage de la demande ─────────────────────────────────────────────
+function afficherFiche(d) {
+  const etat = ETATS[d.statut] || { texte: d.statut, classe: '' };
+  const lignes = [
+    ['École',        d.ecole],
+    ['Nature',       [d.domaine, d.type].filter(Boolean).join(' — ')],
+    ['Localisation', d.localisation],
+    ['Déposée le',   d.depose_le],
+    ['État',         '<span class="etat ' + etat.classe + '">' + echapper(etat.texte) + '</span>', true]
+  ].filter(l => l[1]);
+
+  $('#fiche').innerHTML =
+    '<span class="numero">' + echapper(d.numero) + '</span><table class="fiche"><tbody>' +
+    lignes.map(([cle, val, brut]) =>
+      '<tr><td class="cle">' + cle + '</td><td>' + (brut ? val : echapper(val)) + '</td></tr>'
+    ).join('') + '</tbody></table>';
+
+  $('#description').innerHTML = d.description
+    ? '<div class="desc"><strong>Ce qui a été signalé</strong>' + echapper(d.description) + '</div>'
+    : '';
+  $('#ecran-action').hidden = false;
+}
+
+// Les états où déclarer une intervention n'a plus de sens. La base refuse
+// aussi ces cas — on les dit ici pour éviter un clic dans le vide.
+const CLOS = ['resolu', 'cloture', 'annule', 'archive', 'en_attente_validation_ecole'];
+
+function expliquerPourquoiRienAFaire(d) {
+  const sect = $('#ecran-fait');
+  $('#fait-titre').textContent = d.statut === 'en_attente_validation_ecole'
+    ? 'Déjà signalée' : 'Demande close';
+  $('#fait-texte').textContent = d.statut === 'en_attente_validation_ecole'
+    ? "L'intervention a déjà été déclarée terminée. L'école a été prévenue et "
+      + "doit maintenant confirmer que le problème est réglé — il n'y a rien à faire de plus."
+    : "Cette demande est close : il n'y a plus d'intervention à déclarer.";
+  sect.querySelector('.marque').textContent = 'i';
+  sect.hidden = false;
+}
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  if (!jeton) {
+    return erreur("Ce lien est incomplet. Ouvrez-le directement depuis le message "
+                + "que vous avez reçu, sans le recopier à la main.");
+  }
+  if (!UUID.test(jeton)) {
+    return erreur("Ce lien n'est pas valide. Ouvrez-le directement depuis le message "
+                + "que vous avez reçu.");
+  }
+
+  let d;
+  try {
+    d = await appeler('apercu_par_jeton', { _jeton: jeton });
+  } catch (e) {
+    return erreur("La demande n'a pas pu être chargée. Vérifiez votre connexion, "
+                + "puis rechargez la page.");
+  }
+
+  $('#chargement').hidden = true;
+
+  if (!d) {
+    return erreur("Ce lien ne correspond à aucune demande. Il a peut-être été tronqué "
+                + "par votre messagerie : réessayez en l'ouvrant depuis le message d'origine.");
+  }
+
+  // Un lien d'école ouvert ici : on n'échoue pas, on renvoie au bon endroit.
+  if (d.role !== 'service') {
+    $('#ecran-action').hidden = false;
+    afficherFiche(d);
+    $('#erreur').innerHTML = "Ce lien est celui de l'école, pas celui du service. "
+      + '<a href="cloture-v3.html?jeton=' + encodeURIComponent(jeton) + '">Ouvrir la bonne page</a>.';
+    $('#erreur').hidden = false;
+    return;
+  }
+
+  afficherFiche(d);
+
+  if (CLOS.includes(d.statut)) return expliquerPourquoiRienAFaire(d);
+
+  $('#ecran-formulaire').hidden = false;
+})();
+
+// ─── Envoi ───────────────────────────────────────────────────────────────
+$('#formulaire').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const bouton = $('#valider');
+  bouton.disabled = true;
+  bouton.textContent = 'Enregistrement…';
+
+  let r;
+  try {
+    r = await appeler('marquer_intervention_terminee', {
+      _jeton: jeton,
+      _commentaire: $('#commentaire').value.trim() || null
+    });
+  } catch (e) {
+    bouton.disabled = false;
+    bouton.textContent = 'Déclarer l’intervention terminée';
+    return erreur("L'enregistrement n'a pas abouti. Vérifiez votre connexion et réessayez.");
+  }
+
+  $('#ecran-formulaire').hidden = true;
+
+  if (!r || r.ok !== true) {
+    $('#erreur').textContent = (r && r.motif) || "L'enregistrement n'a pas abouti.";
+    $('#erreur').hidden = false;
+    return;
+  }
+
+  $('#fait-titre').textContent = 'Intervention enregistrée';
+  $('#fait-texte').textContent =
+    'La demande ' + r.numero + ' passe en attente de confirmation. '
+    + (r.ecole ? r.ecole + ' vient de recevoir' : "L'école vient de recevoir")
+    + " un message lui demandant si le problème est réglé. Vous serez prévenu de sa réponse.";
+  $('#ecran-fait').hidden = false;
+  $('#ecran-fait').scrollIntoView({ block: 'center' });
+});
+</script>
+</body>
+</html>

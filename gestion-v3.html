@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Demandes des écoles — Pôle Technique</title>
+<style>
+:root{
+  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
+  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
+  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
+  --agir:#8A5B00; --agir-pale:#FDF3E0;
+  --fait:#2E6B3E; --fait-pale:#E8F2EA;
+  --alerte:#B3261E; --alerte-pale:#FCECEA;
+  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
+     font-size:15px;line-height:1.5}
+
+/* ─── En-tête ─────────────────────────────────────────────── */
+header{background:var(--marine);color:#fff;padding:14px 18px;
+       padding-top:calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:30}
+header .dedans{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;
+               align-items:center;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:18px;font-weight:650;letter-spacing:-.01em}
+header .qui{font-size:13px;opacity:.85;margin-top:2px}
+header .actions{display:flex;gap:8px;align-items:center}
+header button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);
+              border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
+              cursor:pointer;white-space:nowrap;min-height:38px}
+header button:hover{background:rgba(255,255,255,.12)}
+
+main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
+
+/* ─── Indicateurs ─────────────────────────────────────────── */
+.compteurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.compteur{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;padding:13px 15px;
+          cursor:pointer;text-align:left;font-family:inherit;border-left:4px solid var(--trait)}
+.compteur:hover{border-color:var(--marine-clair)}
+.compteur[aria-pressed="true"]{border-color:var(--marine);background:var(--marine-pale);
+                               box-shadow:inset 0 0 0 1px var(--marine)}
+.compteur .n{display:block;font-size:26px;font-weight:700;line-height:1.1;color:var(--marine)}
+.compteur .l{display:block;font-size:13px;color:var(--encre-doux);margin-top:3px}
+.compteur.agir{border-left-color:var(--agir)} .compteur.agir .n{color:var(--agir)}
+.compteur.retard{border-left-color:var(--alerte)} .compteur.retard .n{color:var(--alerte)}
+.compteur.fait{border-left-color:var(--fait)} .compteur.fait .n{color:var(--fait)}
+
+/* ─── Filtres ─────────────────────────────────────────────── */
+.filtres{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;
+         padding:13px 15px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.filtres .champ{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 150px}
+.filtres .champ.large{flex:2 1 240px}
+.filtres label{font-size:12.5px;font-weight:650;color:var(--encre-doux)}
+.filtres select,.filtres input{min-height:40px;padding:8px 11px;font-size:14.5px;font-family:inherit;
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);border-radius:8px;
+  appearance:none;width:100%}
+.filtres select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+       background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible
+  {outline:3px solid var(--marine-clair);outline-offset:2px}
+.filtres button{min-height:40px;padding:0 15px;border-radius:8px;font-family:inherit;font-size:14px;
+  font-weight:600;cursor:pointer;background:var(--blanc);color:var(--marine);border:1.5px solid var(--trait)}
+.filtres button:hover{border-color:var(--marine-clair)}
+
+/* ─── Liste ───────────────────────────────────────────────── */
+.resume{font-size:13.5px;color:var(--encre-doux);margin:0 0 10px 2px}
+.demande{background:var(--blanc);border:1px solid var(--trait);border-left:4px solid var(--trait);
+         border-radius:10px;padding:13px 15px;margin-bottom:9px;cursor:pointer;
+         display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:start;
+         width:100%;text-align:left;font-family:inherit;font-size:15px;color:var(--encre)}
+.demande:hover{border-color:var(--marine-clair)}
+.demande.p-urgente{border-left-color:var(--alerte)}
+.demande.p-haute{border-left-color:var(--agir)}
+.demande.close{border-left-color:var(--fait);opacity:.72}
+.demande .num{font-family:var(--mono);font-size:12.5px;color:var(--encre-pale);letter-spacing:.02em}
+.demande h3{margin:2px 0 3px;font-size:15.5px;font-weight:650}
+.demande .meta{font-size:13.5px;color:var(--encre-doux)}
+.demande .droite{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.demande .age{font-size:12.5px;color:var(--encre-pale);white-space:nowrap}
+.demande .age.retard{color:var(--alerte);font-weight:650}
+.etat{display:inline-flex;align-items:center;font-size:12px;font-weight:650;padding:3px 9px;
+      border-radius:20px;white-space:nowrap;background:var(--marine-pale);color:var(--marine)}
+.etat.agir{background:var(--agir);color:#fff}
+.etat.fait{background:var(--fait-pale);color:var(--fait)}
+.etat.alerte{background:var(--alerte-pale);color:var(--alerte)}
+.puce{display:inline-block;font-size:11.5px;font-weight:650;padding:2px 8px;border-radius:20px;
+      background:var(--fond);color:var(--encre-doux);margin-left:6px}
+.puce.urgente{background:var(--alerte-pale);color:var(--alerte)}
+.puce.haute{background:var(--agir-pale);color:var(--agir)}
+.vide{text-align:center;padding:44px 20px;color:var(--encre-doux);background:var(--blanc);
+      border:1px solid var(--trait);border-radius:11px}
+
+/* ─── Fiche ───────────────────────────────────────────────── */
+.voile{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:40;display:flex;
+       justify-content:flex-end}
+.fiche{background:var(--fond);width:min(620px,100%);height:100%;overflow-y:auto;
+       box-shadow:-4px 0 24px rgba(0,0,0,.18)}
+.fiche .barre{position:sticky;top:0;background:var(--marine);color:#fff;padding:15px 18px;
+              display:flex;justify-content:space-between;align-items:center;gap:14px;z-index:2}
+.fiche .barre h2{margin:0;font-size:16.5px;font-weight:650}
+.fiche .barre .num{font-family:var(--mono);font-size:12.5px;opacity:.8;display:block}
+.fiche .barre button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);
+       border-radius:8px;width:38px;height:38px;font-size:19px;line-height:1;cursor:pointer;flex:none}
+.fiche .corps{padding:16px}
+.carte{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;
+       padding:15px 16px;margin-bottom:12px}
+.carte h3{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--encre-doux);
+          text-transform:uppercase;letter-spacing:.04em}
+.paires{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:14.5px}
+.paires dt{color:var(--encre-doux);white-space:nowrap}
+.paires dd{margin:0}
+.texte{background:var(--fond);border-radius:8px;padding:11px 13px;font-size:14.5px;
+       white-space:pre-wrap;margin-top:4px}
+.champ{margin-bottom:12px}
+.champ label{display:block;font-size:13px;font-weight:650;color:var(--encre-doux);margin-bottom:5px}
+.champ select,.champ input,.champ textarea{width:100%;min-height:42px;padding:9px 11px;font-size:15px;
+  font-family:inherit;color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);
+  border-radius:8px;appearance:none}
+.champ textarea{min-height:78px;resize:vertical}
+.champ select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+       background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.principal{width:100%;min-height:46px;background:var(--marine);color:#fff;border:0;
+  border-radius:9px;font-size:15.5px;font-weight:650;font-family:inherit;cursor:pointer}
+button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
+button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(--marine);
+  border:1.5px solid var(--trait);border-radius:9px;font-size:14.5px;font-weight:600;
+  font-family:inherit;cursor:pointer}
+.journal{font-size:13.5px}
+.journal li{list-style:none;padding:7px 0;border-bottom:1px solid var(--trait)}
+.journal li:last-child{border-bottom:0}
+.journal .quand{color:var(--encre-pale);font-size:12.5px}
+.note{padding:9px 0;border-bottom:1px solid var(--trait);font-size:14.5px;white-space:pre-wrap}
+.note:last-child{border-bottom:0}
+.note .qui{display:block;font-size:12.5px;color:var(--encre-pale);margin-bottom:2px;white-space:normal}
+
+/* ─── Encarts et connexion ────────────────────────────────── */
+.encart{border-radius:9px;padding:13px 15px;font-size:14.5px;margin:14px 0}
+.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.attention{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
+.encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
+.encart strong{display:block;margin-bottom:3px}
+.connexion{max-width:440px;margin:40px auto;background:var(--blanc);border:1px solid var(--trait);
+           border-radius:12px;padding:24px}
+.connexion h2{margin:0 0 6px;font-size:18px}
+.connexion p{margin:0 0 16px;font-size:14.5px;color:var(--encre-doux)}
+.connexion input{width:100%;min-height:48px;padding:12px;font-size:16px;font-family:inherit;
+  border:1.5px solid var(--trait);border-radius:9px}
+.connexion button{width:100%;min-height:50px;margin-top:12px;background:var(--marine);color:#fff;
+  border:0;border-radius:9px;font-size:16px;font-weight:650;font-family:inherit;cursor:pointer}
+.chargement{text-align:center;padding:44px 20px;color:var(--encre-doux)}
+.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:640px){
+  .demande{grid-template-columns:1fr}
+  .demande .droite{flex-direction:row;align-items:center;justify-content:flex-start}
+  .deux{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dedans">
+    <div>
+      <h1>Demandes des écoles</h1>
+      <div class="qui" id="qui">Pôle Technique — Direction de l'Éducation</div>
+    </div>
+    <div class="actions">
+      <button type="button" id="actualiser" hidden>Actualiser</button>
+      <button type="button" id="exporter" hidden>Exporter</button>
+      <button type="button" id="deconnexion" hidden>Se déconnecter</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="erreur" class="encart erreur" role="alert" hidden></div>
+  <p class="chargement" id="chargement">Chargement…</p>
+
+  <!-- ─── Connexion ─────────────────────────────────────────── -->
+  <section class="connexion" id="ecran-connexion" hidden>
+    <h2>Accès du Pôle Technique</h2>
+    <p>Saisissez votre adresse professionnelle. Vous recevrez un lien qui vous
+       connecte directement, sans mot de passe.</p>
+    <form id="form-connexion" novalidate>
+      <label for="email" class="masque">Adresse email</label>
+      <input type="email" id="email" required autocomplete="email" inputmode="email"
+             placeholder="prenom.nom@saintdenis.re">
+      <button type="submit" id="bouton-lien">Recevoir mon lien</button>
+    </form>
+    <div id="lien-envoye" class="encart info" role="status" hidden>
+      <strong>Regardez votre boîte mail</strong>
+      Ouvrez le lien <strong>depuis cet appareil</strong>. Il ne sert qu'une fois.
+    </div>
+  </section>
+
+  <!-- ─── Poste de travail ──────────────────────────────────── -->
+  <section id="ecran-travail" hidden>
+    <div class="compteurs" id="compteurs"></div>
+
+    <div class="filtres">
+      <div class="champ large">
+        <label for="f-texte">Rechercher</label>
+        <input type="search" id="f-texte" placeholder="numéro, école, description, localisation…">
+      </div>
+      <div class="champ"><label for="f-statut">État</label><select id="f-statut"></select></div>
+      <div class="champ"><label for="f-domaine">Domaine</label><select id="f-domaine"></select></div>
+      <div class="champ"><label for="f-secteur">Quartier</label><select id="f-secteur"></select></div>
+      <div class="champ"><label for="f-priorite">Priorité</label><select id="f-priorite"></select></div>
+      <button type="button" id="raz">Tout effacer</button>
+    </div>
+
+    <p class="resume" id="resume"></p>
+    <div id="liste"></div>
+  </section>
+</main>
+
+<div class="voile" id="voile" hidden>
+  <section class="fiche" id="fiche" role="dialog" aria-modal="true" aria-labelledby="fiche-titre"></section>
+</div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════════════
+//  Poste de travail du Pôle Technique.
+//
+//  Tout passe par PostgREST avec le jeton de la session : la page ne décide
+//  jamais de ce qu'elle a le droit de voir. C'est la sécurité par ligne qui
+//  tranche, à la ligne près — un référent ne reçoit que ses domaines, un chef
+//  de cellule les siens, la direction tout. La page se contente d'afficher
+//  ce qui lui revient, et les boutons qu'elle propose ne sont qu'un confort :
+//  une action interdite serait de toute façon refusée par la base.
+//
+//  La clé publiable est faite pour partir dans le navigateur. Ne jamais
+//  placer ici une clé « sb_secret_ ».
+// ═════════════════════════════════════════════════════════════════════════
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'sb_publishable_nTCosqebGOjUK3jGwoxhfQ_BnnkRpNn';
+const CLEF_SESSION = 'demandes-ecoles-pole';
+
+// Seuils repris de l'ancienne plateforme (config.js). ⚠️ À confirmer avec le
+// pôle : ce sont eux qui décident ce que « en retard » veut dire.
+const RETARD_JOURS = 7;
+const RETARD_URGENT_JOURS = 3;
+
+const $ = s => document.querySelector(s);
+
+const ETATS = {
+  nouveau:                     { texte: 'Nouvelle',              classe: 'alerte' },
+  en_cours:                    { texte: 'En cours',              classe: '' },
+  en_attente_pieces:           { texte: 'Attente de pièces',     classe: '' },
+  en_attente_devis:            { texte: 'Attente de devis',      classe: '' },
+  planifie:                    { texte: 'Planifiée',             classe: '' },
+  transmis_externe:            { texte: 'Transmise au dehors',   classe: '' },
+  en_attente_validation_ecole: { texte: 'Attente de l’école',    classe: 'agir' },
+  resolu:                      { texte: 'Résolue',               classe: 'fait' },
+  cloture:                     { texte: 'Clôturée',              classe: 'fait' },
+  rouvert:                     { texte: 'Rouverte',              classe: 'alerte' },
+  annule:                      { texte: 'Annulée',               classe: 'fait' },
+  archive:                     { texte: 'Archivée',              classe: 'fait' }
+};
+// Ceux que le pôle pose lui-même. Les deux autres — « attente de l'école » et
+// « résolue » — sont posés par le circuit de clôture : les proposer ici
+// laisserait croire qu'on peut clore une demande sans l'accord de l'école.
+const STATUTS_MANUELS = ['nouveau','en_cours','en_attente_pieces','en_attente_devis',
+                         'planifie','transmis_externe','rouvert','annule'];
+const CLOS = ['resolu','cloture','annule','archive'];
+const PRIORITES = { urgente:'Urgente', haute:'Haute', normale:'Normale', basse:'Basse' };
+const FENETRES = { des_que_possible:'Dès que possible', avant_la_rentree:'Avant la rentrée',
+                   pendant_les_vacances:'Pendant les vacances', date_precise:'À une date précise' };
+
+let session = null, moi = null;
+let REF = { ecoles:{}, domaines:{}, types:{}, cellules:{}, agents:{}, services:{}, secteurs:[] };
+let DEMANDES = [], DELAIS = {}, ouverte = null;
+const filtres = { texte:'', statut:'', domaine:'', secteur:'', priorite:'', compteur:'' };
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(texte) {
+  const e = $('#erreur'); e.textContent = texte; e.hidden = false;
+  window.scrollTo({ top: 0 });
+}
+function effacerErreur() { $('#erreur').hidden = true; }
+function jour(v) {
+  return v ? new Date(v).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+}
+function jourHeure(v) {
+  return v ? new Date(v).toLocaleString('fr-FR',
+    { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+}
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); } catch (e) { return null; }
+}
+function ecrireSession(s) { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); }
+function oublierSession() { localStorage.removeItem(CLEF_SESSION); }
+
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.length < 2) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) {
+    if (p.get('error_description')) erreur(decodeURIComponent(p.get('error_description')));
+    history.replaceState(null, '', location.pathname);
+    return null;
+  }
+  const s = { access_token: acces, refresh_token: p.get('refresh_token'),
+              expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000) };
+  ecrireSession(s);
+  history.replaceState(null, '', location.pathname);
+  return s;
+}
+
+async function rafraichir() {
+  if (!session?.refresh_token) return false;
+  const r = await fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+    method:'POST', headers:{ apikey: CLE, 'Content-Type':'application/json' },
+    body: JSON.stringify({ refresh_token: session.refresh_token }) });
+  if (!r.ok) return false;
+  const j = await r.json();
+  session = { access_token: j.access_token, refresh_token: j.refresh_token,
+              expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000) };
+  ecrireSession(session);
+  return true;
+}
+
+/** L'adresse vérifiée, lue dans le jeton. Sert à savoir qui l'on est ; la
+ *  base, elle, la relit de son côté — nous ne lui faisons rien croire. */
+function emailDuJeton() {
+  try {
+    const brut = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(brut + '==='.slice((brut.length + 3) % 4));
+    const charge = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+    return (charge.email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+
+// ─── Accès aux données ───────────────────────────────────────────────────
+async function api(chemin, options = {}) {
+  const lancer = () => fetch(API + '/rest/v1/' + chemin, {
+    ...options,
+    headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+               'Content-Type': 'application/json', ...(options.headers || {}) } });
+
+  let r = await lancer();
+  if (r.status === 401 && await rafraichir()) r = await lancer();
+  if (!r.ok) {
+    const detail = await r.text().catch(() => '');
+    throw new Error(r.status + ' ' + detail.slice(0, 200));
+  }
+  return r.status === 204 ? null : r.json();
+}
+
+function parId(liste) { return Object.fromEntries(liste.map(x => [x.id, x])); }
+
+async function chargerReferentiels() {
+  const [ecoles, domaines, types, cellules, agents, services, secteurs] = await Promise.all([
+    api('ecoles?select=id,nom,type_ecole,secteur,zone,adresse,telephone,email_directeur,email_secretariat&order=nom'),
+    api('domaines?select=id,libelle,traitement,cellule_id,service_externe_id&order=ordre'),
+    api('types_demande?select=id,domaine_id,libelle&order=ordre'),
+    api('cellules?select=id,libelle'),
+    api('agents?select=id,nom,fonction,cellule_id,zone,email,actif&order=nom'),
+    api('services_externes?select=id,libelle,contact_nom,contact_email'),
+    api('secteurs_intervention?select=code,libelle&order=code')
+  ]);
+  REF = { ecoles: parId(ecoles), domaines: parId(domaines), types: parId(types),
+          cellules: parId(cellules), agents: parId(agents), services: parId(services),
+          secteurs, listeAgents: agents, listeDomaines: domaines };
+}
+
+async function chargerDemandes() {
+  const [d, del] = await Promise.all([
+    api('demandes?select=*&order=created_at.desc'),
+    api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,a_planifier_pour,delai_hors_perimetre')
+  ]);
+  DEMANDES = d;
+  DELAIS = parId(del);
+}
+
+// ─── Lecture d'une demande ───────────────────────────────────────────────
+function ecoleDe(d)   { return REF.ecoles[d.ecole_id] || {}; }
+function domaineDe(d) { return REF.domaines[d.domaine_id] || {}; }
+function typeDe(d)    { return REF.types[d.type_demande_id] || {}; }
+function nomEcole(d)  { const e = ecoleDe(d); return [e.type_ecole, e.nom].filter(Boolean).join(' '); }
+
+/** En retard quand la réaction tarde et que personne n'a encore pris la main.
+ *  Une demande confiée à un service extérieur n'y entre pas : son délai n'est
+ *  pas opposable au pôle, et la compter serait s'accuser du retard d'autrui. */
+function enRetard(d) {
+  if (CLOS.includes(d.statut) || d.pris_en_charge_le) return false;
+  const del = DELAIS[d.id];
+  if (!del || del.delai_hors_perimetre) return false;
+  const seuil = d.priorite === 'urgente' ? RETARD_URGENT_JOURS : RETARD_JOURS;
+  return (del.delai_reaction_jours || 0) > seuil;
+}
+function aPlanifier(d) {
+  return !CLOS.includes(d.statut) && !!DELAIS[d.id]?.a_planifier_pour;
+}
+
+// ─── Compteurs ───────────────────────────────────────────────────────────
+const COMPTEURS = [
+  { cle:'',           libelle:'Toutes',            classe:'',       test: () => true },
+  { cle:'nouveau',    libelle:'Nouvelles',         classe:'',       test: d => d.statut === 'nouveau' },
+  { cle:'en_retard',  libelle:'En retard',         classe:'retard', test: enRetard },
+  { cle:'ecole',      libelle:'Attente de l’école',classe:'agir',   test: d => d.statut === 'en_attente_validation_ecole' },
+  { cle:'rouvert',    libelle:'Rouvertes',         classe:'retard', test: d => d.statut === 'rouvert' },
+  { cle:'planifier',  libelle:'À planifier',       classe:'agir',   test: aPlanifier },
+  { cle:'cout',       libelle:'Coût à saisir',     classe:'',       test: d => d.cout_statut === 'a_renseigner' && CLOS.includes(d.statut) },
+  { cle:'closes',     libelle:'Closes',            classe:'fait',   test: d => CLOS.includes(d.statut) }
+];
+
+function dessinerCompteurs() {
+  $('#compteurs').innerHTML = COMPTEURS.map(c => {
+    const n = DEMANDES.filter(c.test).length;
+    return `<button type="button" class="compteur ${c.classe}" data-cle="${c.cle}"
+              aria-pressed="${filtres.compteur === c.cle}">
+              <span class="n">${n}</span><span class="l">${echapper(c.libelle)}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.compteur').forEach(b => b.addEventListener('click', () => {
+    filtres.compteur = b.dataset.cle === filtres.compteur ? '' : b.dataset.cle;
+    dessinerCompteurs(); dessinerListe();
+  }));
+}
+
+// ─── Filtres ─────────────────────────────────────────────────────────────
+function remplirFiltres() {
+  const opt = (v, t) => `<option value="${echapper(v)}">${echapper(t)}</option>`;
+  $('#f-statut').innerHTML = opt('', 'Tous les états')
+    + Object.entries(ETATS).map(([k, v]) => opt(k, v.texte)).join('');
+  $('#f-domaine').innerHTML = opt('', 'Tous les domaines')
+    + REF.listeDomaines.map(d => opt(d.id, d.libelle)).join('');
+  const quartiers = [...new Set(Object.values(REF.ecoles).map(e => e.secteur).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'fr'));
+  $('#f-secteur').innerHTML = opt('', 'Tous les quartiers') + quartiers.map(s => opt(s, s)).join('');
+  $('#f-priorite').innerHTML = opt('', 'Toutes priorités')
+    + Object.entries(PRIORITES).map(([k, v]) => opt(k, v)).join('');
+}
+
+function retenues() {
+  const c = COMPTEURS.find(x => x.cle === filtres.compteur);
+  const mots = filtres.texte.trim().toLowerCase();
+  return DEMANDES.filter(d => {
+    if (c && !c.test(d)) return false;
+    if (filtres.statut   && d.statut !== filtres.statut) return false;
+    if (filtres.domaine  && String(d.domaine_id) !== filtres.domaine) return false;
+    if (filtres.priorite && d.priorite !== filtres.priorite) return false;
+    if (filtres.secteur  && ecoleDe(d).secteur !== filtres.secteur) return false;
+    if (mots) {
+      const paille = [d.numero, nomEcole(d), d.description, d.localisation,
+                      d.demandeur_nom, domaineDe(d).libelle, typeDe(d).libelle]
+                     .join(' ').toLowerCase();
+      if (!paille.includes(mots)) return false;
+    }
+    return true;
+  });
+}
+
+// ─── Liste ───────────────────────────────────────────────────────────────
+function dessinerListe() {
+  const liste = retenues();
+  $('#resume').textContent = liste.length === 0 ? ''
+    : `${liste.length} demande${liste.length > 1 ? 's' : ''} sur ${DEMANDES.length}`;
+
+  if (!liste.length) {
+    $('#liste').innerHTML = `<div class="vide"><strong>Aucune demande ne correspond</strong>
+      <p>Modifiez les filtres, ou effacez-les.</p></div>`;
+    return;
+  }
+
+  $('#liste').innerHTML = liste.map(d => {
+    const e = ETATS[d.statut] || { texte: d.statut, classe: '' };
+    const del = DELAIS[d.id] || {};
+    const retard = enRetard(d);
+    const tech = REF.agents[d.technicien_agent_id];
+    const classes = ['demande', 'p-' + d.priorite, CLOS.includes(d.statut) ? 'close' : ''].join(' ');
+    const age = CLOS.includes(d.statut)
+      ? 'close le ' + jour(d.cloture_le || d.updated_at)
+      : (d.pris_en_charge_le
+          ? (del.delai_realisation_jours != null ? del.delai_realisation_jours + ' j de travail' : 'à planifier')
+          : (del.delai_reaction_jours || 0) + ' j sans réponse');
+    return `<button type="button" class="${classes}" data-id="${d.id}">
+      <div>
+        <span class="num">${echapper(d.numero)}</span>
+        <h3>${echapper(typeDe(d).libelle || domaineDe(d).libelle || '—')}
+          ${d.priorite === 'urgente' || d.priorite === 'haute'
+            ? `<span class="puce ${d.priorite}">${PRIORITES[d.priorite]}</span>` : ''}
+          ${d.hors_presence_eleves ? '<span class="puce">Hors présence</span>' : ''}</h3>
+        <div class="meta">${echapper(nomEcole(d))}${d.localisation ? ' · ' + echapper(d.localisation) : ''}
+          <br>${echapper(domaineDe(d).libelle || '')}${tech ? ' · ' + echapper(tech.nom) : ''}</div>
+      </div>
+      <div class="droite">
+        <span class="etat ${e.classe}">${echapper(e.texte)}</span>
+        <span class="age${retard ? ' retard' : ''}">${echapper(age)}</span>
+      </div>
+    </button>`;
+  }).join('');
+
+  document.querySelectorAll('.demande').forEach(b =>
+    b.addEventListener('click', () => ouvrirFiche(b.dataset.id)));
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  LA FICHE — tout ce qu'on sait d'une demande, et tout ce qu'on peut y faire
+// ═════════════════════════════════════════════════════════════════════════
+
+async function ouvrirFiche(id) {
+  const d = DEMANDES.find(x => x.id === id);
+  if (!d) return;
+  ouverte = d;
+  $('#voile').hidden = false;
+  document.body.style.overflow = 'hidden';
+  $('#fiche').innerHTML = `<div class="barre">
+      <div><span class="num">${echapper(d.numero)}</span>
+        <h2 id="fiche-titre">${echapper(typeDe(d).libelle || '—')}</h2></div>
+      <button type="button" id="fermer" aria-label="Fermer">×</button>
+    </div>
+    <div class="corps"><p class="chargement">Chargement…</p></div>`;
+  $('#fermer').addEventListener('click', fermerFiche);
+
+  let notes = [], journal = [], photos = [];
+  try {
+    [notes, journal, photos] = await Promise.all([
+      api(`demande_notes?select=auteur,contenu,created_at&demande_id=eq.${d.id}&order=created_at.desc`),
+      api(`demande_historique?select=champ,avant,apres,auteur,changed_at&demande_id=eq.${d.id}&order=changed_at.desc`),
+      api(`demande_photos?select=id,url,created_at&demande_id=eq.${d.id}&order=created_at`)
+    ]);
+  } catch (e) { /* la fiche reste lisible sans ses pièces */ }
+
+  dessinerFiche(d, notes, journal, photos);
+}
+
+function fermerFiche() {
+  ouverte = null;
+  $('#voile').hidden = true;
+  document.body.style.overflow = '';
+}
+$('#voile').addEventListener('click', ev => { if (ev.target === $('#voile')) fermerFiche(); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && ouverte) fermerFiche(); });
+
+function dessinerFiche(d, notes, journal, photos) {
+  const e = ecoleDe(d), dom = domaineDe(d);
+  const del = DELAIS[d.id] || {};
+  const etat = ETATS[d.statut] || { texte: d.statut, classe: '' };
+  const clos = CLOS.includes(d.statut);
+  const attenteEcole = d.statut === 'en_attente_validation_ecole';
+  const service = REF.services[d.service_externe_id];
+
+  const paire = (t, v) => v ? `<dt>${t}</dt><dd>${v}</dd>` : '';
+  const opt = (v, t, sel) => `<option value="${echapper(v)}"${String(sel) === String(v) ? ' selected' : ''}>${echapper(t)}</option>`;
+
+  const techniciens = REF.listeAgents.filter(a => a.actif && a.fonction === 'technicien');
+  const referents   = REF.listeAgents.filter(a => a.actif && a.fonction !== 'technicien');
+
+  $('#fiche .corps').innerHTML = `
+    <div id="fiche-erreur" class="encart erreur" role="alert" hidden></div>
+    <div id="fiche-ok" class="encart info" role="status" hidden></div>
+
+    ${enRetard(d) ? `<div class="encart erreur"><strong>Sans réponse depuis
+      ${del.delai_reaction_jours} jours ouvrés</strong>
+      Personne n'a encore pris cette demande en charge.</div>` : ''}
+    ${aPlanifier(d) ? `<div class="encart attention"><strong>À faire hors présence des élèves</strong>
+      Prochaine fenêtre possible : ${echapper(jour(del.a_planifier_pour))}. L'horloge de
+      réalisation est en pause jusque-là.</div>` : ''}
+    ${attenteEcole ? `<div class="encart attention"><strong>En attente de l'école</strong>
+      L'intervention a été déclarée terminée le ${echapper(jour(d.intervention_finie_le))}.
+      La demande se refermera quand l'école aura confirmé.</div>` : ''}
+
+    <div class="carte">
+      <h3>La demande</h3>
+      <dl class="paires">
+        ${paire('État', `<span class="etat ${etat.classe}">${echapper(etat.texte)}</span>`)}
+        ${paire('École', echapper(nomEcole(d)))}
+        ${paire('Quartier', echapper(e.secteur))}
+        ${paire('Adresse', echapper(e.adresse))}
+        ${paire('Téléphone', echapper(e.telephone))}
+        ${paire('Domaine', echapper(dom.libelle))}
+        ${paire('Type', echapper(typeDe(d).libelle))}
+        ${paire('Localisation', echapper(d.localisation))}
+        ${paire('Priorité', echapper(PRIORITES[d.priorite] || d.priorite))}
+        ${paire('Fenêtre', echapper(FENETRES[d.fenetre_souhaitee] || ''))}
+        ${d.date_souhaitee ? paire('Date souhaitée', echapper(jour(d.date_souhaitee))) : ''}
+        ${d.hors_presence_eleves ? paire('Contrainte', 'Hors présence des élèves') : ''}
+        ${paire('Déposée le', echapper(jourHeure(d.created_at)))}
+        ${paire('Prise en charge', d.pris_en_charge_le ? echapper(jourHeure(d.pris_en_charge_le))
+                                                       : '<em>pas encore</em>')}
+        ${d.transmis_le ? paire('Transmise le', echapper(jourHeure(d.transmis_le))) : ''}
+        ${d.cloture_le ? paire('Close le', echapper(jourHeure(d.cloture_le))) : ''}
+        ${service ? paire('Service extérieur',
+            echapper(service.libelle) + (service.contact_nom ? ' — ' + echapper(service.contact_nom) : '')) : ''}
+      </dl>
+    </div>
+
+    <div class="carte">
+      <h3>Qui a signalé</h3>
+      <dl class="paires">
+        ${paire('Nom', echapper(d.demandeur_nom))}
+        ${paire('Fonction', echapper(d.demandeur_fonction))}
+        ${paire('Email', d.demandeur_email
+            ? `<a href="mailto:${echapper(d.demandeur_email)}">${echapper(d.demandeur_email)}</a>` : '')}
+        ${paire('Téléphone', d.demandeur_tel
+            ? `<a href="tel:${echapper(d.demandeur_tel)}">${echapper(d.demandeur_tel)}</a>` : '')}
+      </dl>
+      <div class="texte">${echapper(d.description)}</div>
+      ${d.observation_initiale ? `<div class="texte">${echapper(d.observation_initiale)}</div>` : ''}
+    </div>
+
+    ${photos.length ? `<div class="carte">
+      <h3>Photos (${photos.length})</h3>
+      <div id="photos">${photos.map(p =>
+        `<button type="button" class="discret" data-chemin="${echapper(p.url)}"
+                 style="margin:4px 6px 4px 0">Voir la photo du ${echapper(jour(p.created_at))}</button>`
+      ).join('')}</div>
+      <p style="font-size:13px;color:var(--encre-pale);margin:8px 0 0">
+        Le dépôt est privé : chaque ouverture crée un lien valable une heure.</p>
+    </div>` : ''}
+
+    ${clos ? '' : `<div class="carte">
+      <h3>Traiter</h3>
+      <div class="deux">
+        <div class="champ"><label for="a-statut">État</label>
+          <select id="a-statut">${STATUTS_MANUELS.map(s => opt(s, ETATS[s].texte, d.statut)).join('')}
+            ${STATUTS_MANUELS.includes(d.statut) ? '' : opt(d.statut, ETATS[d.statut]?.texte || d.statut, d.statut)}
+          </select></div>
+        <div class="champ"><label for="a-priorite">Priorité</label>
+          <select id="a-priorite">${Object.entries(PRIORITES).map(([k, v]) => opt(k, v, d.priorite)).join('')}</select></div>
+        <div class="champ"><label for="a-technicien">Technicien</label>
+          <select id="a-technicien">${opt('', '— aucun —', d.technicien_agent_id || '')
+            + techniciens.map(a => opt(a.id, a.nom + (a.zone ? ' (' + a.zone + ')' : ''), d.technicien_agent_id)).join('')}</select></div>
+        <div class="champ"><label for="a-referent">Référent qui suit</label>
+          <select id="a-referent">${opt('', '— aucun —', d.referent_agent_id || '')
+            + referents.map(a => opt(a.id, a.nom, d.referent_agent_id)).join('')}</select></div>
+      </div>
+      <div class="champ"><label for="a-domaine">Domaine — le changer réoriente la demande</label>
+        <select id="a-domaine">${REF.listeDomaines.map(x => opt(x.id, x.libelle, d.domaine_id)).join('')}</select></div>
+      <div class="champ"><label for="a-cout">Coût réel constaté, en euros
+          <span style="font-weight:400;color:var(--encre-pale)">— le prix payé, jamais une estimation</span></label>
+        <input type="number" id="a-cout" step="0.01" min="0"
+               value="${d.cout_reel != null ? d.cout_reel : ''}"
+               placeholder="${d.cout_statut === 'non_applicable' ? 'sans objet ici' : 'à renseigner'}"></div>
+      <button type="button" class="principal" id="enregistrer">Enregistrer</button>
+    </div>`}
+
+    ${clos || attenteEcole ? '' : `<div class="carte">
+      <h3>Clore la demande</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        L'école recevra un message lui demandant de confirmer. Rien ne se referme
+        sans sa réponse.</p>
+      <div class="champ"><label for="a-fait">Ce qui a été fait
+          <span style="font-weight:400;color:var(--encre-pale)">— facultatif, mais utile à l'école</span></label>
+        <textarea id="a-fait" maxlength="1500"
+                  placeholder="Ex : résistance changée, appareil remis en service."></textarea></div>
+      <button type="button" class="principal" id="terminer">Déclarer l'intervention terminée</button>
+    </div>`}
+
+    <div class="carte">
+      <h3>Notes de suivi</h3>
+      <div class="champ"><label for="a-note" class="masque">Nouvelle note</label>
+        <textarea id="a-note" maxlength="1500" placeholder="Ajouter une note…"></textarea></div>
+      <button type="button" class="discret" id="ajouter-note">Ajouter la note</button>
+      <div id="notes" style="margin-top:12px">${notes.length
+        ? notes.map(n => `<div class="note"><span class="qui">${echapper(n.auteur)} ·
+            ${echapper(jourHeure(n.created_at))}</span>${echapper(n.contenu)}</div>`).join('')
+        : '<p style="color:var(--encre-pale);font-size:14px;margin:0">Aucune note.</p>'}</div>
+    </div>
+
+    <div class="carte">
+      <h3>Journal</h3>
+      <ul class="journal" style="margin:0;padding:0">
+        ${journal.length ? journal.map(h => `<li>
+            <strong>${echapper(h.champ)}</strong> :
+            ${echapper(h.avant || '—')} → ${echapper(h.apres || '—')}
+            <span class="quand">${echapper(h.auteur || '')} · ${echapper(jourHeure(h.changed_at))}</span>
+          </li>`).join('')
+        : '<li style="color:var(--encre-pale)">Rien depuis le dépôt.</li>'}
+        <li><strong>dépôt</strong> par ${echapper(d.demandeur_nom || '—')}
+          <span class="quand">${echapper(jourHeure(d.created_at))}</span></li>
+      </ul>
+    </div>`;
+
+  brancherActionsFiche(d);
+}
+
+// ─── Les actions de la fiche ─────────────────────────────────────────────
+function messageFiche(texte, mauvais) {
+  const bon = $('#fiche-ok'), mal = $('#fiche-erreur');
+  bon.hidden = true; mal.hidden = true;
+  const cible = mauvais ? mal : bon;
+  cible.textContent = texte; cible.hidden = false;
+  $('#fiche').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function brancherActionsFiche(d) {
+  document.querySelectorAll('#photos button').forEach(b =>
+    b.addEventListener('click', () => voirPhoto(b.dataset.chemin, b)));
+
+  $('#enregistrer')?.addEventListener('click', async () => {
+    const b = $('#enregistrer'); b.disabled = true; b.textContent = 'Enregistrement…';
+    const modif = {};
+    const statut = $('#a-statut').value;
+    const cout = $('#a-cout').value.trim();
+
+    if (statut !== d.statut)                              modif.statut = statut;
+    if ($('#a-priorite').value !== d.priorite)            modif.priorite = $('#a-priorite').value;
+    const tech = $('#a-technicien').value || null;
+    if (String(tech) !== String(d.technicien_agent_id ?? '')) modif.technicien_agent_id = tech ? Number(tech) : null;
+    const ref = $('#a-referent').value || null;
+    if (String(ref) !== String(d.referent_agent_id ?? ''))    modif.referent_agent_id = ref ? Number(ref) : null;
+    const domaine = Number($('#a-domaine').value);
+    if (domaine !== d.domaine_id)                          modif.domaine_id = domaine;
+
+    // Un coût nul et un coût inconnu ne sont pas la même chose : c'est ce que
+    // cout_statut distingue, et c'est ce qui empêche des totaux faux.
+    if (cout !== '' && Number(cout) !== Number(d.cout_reel)) {
+      modif.cout_reel = Number(cout);
+      modif.cout_statut = 'renseigne';
+    }
+
+    if (!Object.keys(modif).length) {
+      b.disabled = false; b.textContent = 'Enregistrer';
+      return messageFiche('Rien n’a changé.', false);
+    }
+    try {
+      await api(`demandes?id=eq.${d.id}`, { method: 'PATCH', body: JSON.stringify(modif) });
+      await rafraichirTout();
+      // Le message vient APRÈS le redessin : posé avant, la fiche l'effacerait
+      // en se reconstruisant, et l'agent ne saurait pas si son geste a pris.
+      await ouvrirFiche(d.id);
+      messageFiche('Enregistré.', false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Enregistrer';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#terminer')?.addEventListener('click', async () => {
+    const b = $('#terminer'); b.disabled = true; b.textContent = 'Envoi…';
+    try {
+      // La demande porte son jeton, et la sécurité par ligne ne nous l'a
+      // montrée que parce que nous avions le droit de la voir. Passer par la
+      // même fonction que le lien de l'email évite d'avoir deux chemins pour
+      // un seul geste — donc deux occasions de diverger.
+      const r = await api('rpc/marquer_intervention_terminee', {
+        method: 'POST',
+        body: JSON.stringify({ _jeton: d.token_intervention, _commentaire: $('#a-fait').value.trim() || null })
+      });
+      if (!r || r.ok !== true) throw new Error(r?.motif || 'refus');
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche(`L'école a été prévenue. La demande se refermera quand elle aura confirmé.`, false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Déclarer l’intervention terminée';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#ajouter-note')?.addEventListener('click', async () => {
+    const contenu = $('#a-note').value.trim();
+    if (contenu.length < 2) return messageFiche('La note est vide.', true);
+    const b = $('#ajouter-note'); b.disabled = true; b.textContent = 'Ajout…';
+    try {
+      await api('demande_notes', { method: 'POST',
+        body: JSON.stringify({ demande_id: d.id, auteur: moi?.nom || emailDuJeton(), contenu }) });
+      await ouvrirFiche(d.id);
+      messageFiche('Note ajoutée.', false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Ajouter la note';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+}
+
+/** Le message d'un refus, en français. Un « 403 » n'apprend rien à personne. */
+function lireRefus(err) {
+  const t = String(err.message || err);
+  if (t.startsWith('403') || t.includes('row-level security')) {
+    return "Cette demande ne relève pas de vos domaines : la modification a été refusée.";
+  }
+  if (t.startsWith('401')) return "Votre session a expiré. Rechargez la page pour vous reconnecter.";
+  if (t.includes('cout_coherent')) return "Un coût renseigné doit porter un montant.";
+  return "L'enregistrement n'a pas abouti. " + t;
+}
+
+/** Le dépôt de photos est privé : on demande un lien signé, valable une heure. */
+async function voirPhoto(chemin, bouton) {
+  const libelle = bouton.textContent;
+  bouton.disabled = true; bouton.textContent = 'Ouverture…';
+  try {
+    const r = await fetch(API + '/storage/v1/object/sign/photos-demandes/' + chemin, {
+      method: 'POST',
+      headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+                 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expiresIn: 3600 }) });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    window.open(API + '/storage/v1' + j.signedURL, '_blank', 'noopener');
+  } catch (e) {
+    messageFiche("La photo n'a pas pu être ouverte.", true);
+  }
+  bouton.disabled = false; bouton.textContent = libelle;
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  EXPORT
+// ═════════════════════════════════════════════════════════════════════════
+$('#exporter').addEventListener('click', () => {
+  const liste = retenues();
+  if (!liste.length) return erreur("Rien à exporter avec ces filtres.");
+
+  const colonnes = ['Numéro','École','Quartier','Domaine','Type','Localisation','Priorité',
+                    'État','Déposée le','Prise en charge le','Close le','Technicien',
+                    'Service extérieur','Coût réel','Coût','Hors présence','Déclarant','Description'];
+  const ligne = d => [
+    d.numero, nomEcole(d), ecoleDe(d).secteur, domaineDe(d).libelle, typeDe(d).libelle,
+    d.localisation, PRIORITES[d.priorite] || d.priorite, ETATS[d.statut]?.texte || d.statut,
+    jour(d.created_at), d.pris_en_charge_le ? jour(d.pris_en_charge_le) : '',
+    d.cloture_le ? jour(d.cloture_le) : '',
+    REF.agents[d.technicien_agent_id]?.nom || '', REF.services[d.service_externe_id]?.libelle || '',
+    d.cout_reel != null ? String(d.cout_reel).replace('.', ',') : '',
+    { non_applicable:'sans objet', a_renseigner:'à renseigner', renseigne:'renseigné' }[d.cout_statut] || '',
+    d.hors_presence_eleves ? 'oui' : 'non', d.demandeur_nom, d.description
+  ];
+  const cellule = v => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+  // Point-virgule et BOM : c'est ce qu'attend Excel en français. Sans le BOM,
+  // les accents arrivent en charabia, et le fichier est jugé inutilisable.
+  const csv = '\uFEFF' + [colonnes, ...liste.map(ligne)]
+    .map(l => l.map(cellule).join(';')).join('\r\n');
+
+  const lien = document.createElement('a');
+  lien.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  lien.download = 'demandes-' + new Date().toISOString().slice(0, 10) + '.csv';
+  lien.click();
+  URL.revokeObjectURL(lien.href);
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+//  DÉMARRAGE
+// ═════════════════════════════════════════════════════════════════════════
+async function rafraichirTout() {
+  await chargerDemandes();
+  dessinerCompteurs();
+  dessinerListe();
+}
+
+function brancherFiltres() {
+  const lier = (sel, cle) => $(sel).addEventListener('input', () => {
+    filtres[cle] = $(sel).value; dessinerListe();
+  });
+  lier('#f-texte', 'texte'); lier('#f-statut', 'statut'); lier('#f-domaine', 'domaine');
+  lier('#f-secteur', 'secteur'); lier('#f-priorite', 'priorite');
+  $('#raz').addEventListener('click', () => {
+    Object.keys(filtres).forEach(k => filtres[k] = '');
+    ['#f-texte','#f-statut','#f-domaine','#f-secteur','#f-priorite'].forEach(s => $(s).value = '');
+    dessinerCompteurs(); dessinerListe();
+  });
+}
+
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('#bouton-lien'); b.disabled = true; b.textContent = 'Envoi en cours…';
+  effacerErreur();
+  try {
+    const retour = location.origin + location.pathname;
+    const r = await fetch(API + '/auth/v1/otp?redirect_to=' + encodeURIComponent(retour), {
+      method: 'POST', headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('#email').value.trim(), create_user: true }) });
+    if (r.status === 429) erreur("Trop de demandes en peu de temps. Patientez quelques minutes.");
+    else if (!r.ok)       erreur("L'envoi a échoué. Vérifiez l'adresse saisie, puis réessayez.");
+    else { $('#form-connexion').hidden = true; $('#lien-envoye').hidden = false; }
+  } catch (e) { erreur("L'envoi a échoué. Vérifiez votre connexion."); }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
+});
+
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });
+$('#actualiser').addEventListener('click', async () => {
+  const b = $('#actualiser'); b.disabled = true; b.textContent = 'Actualisation…';
+  try { await rafraichirTout(); effacerErreur(); }
+  catch (e) { erreur("Les demandes n'ont pas pu être rechargées."); }
+  b.disabled = false; b.textContent = 'Actualiser';
+});
+
+function montrerConnexion(message) {
+  oublierSession();
+  $('#chargement').hidden = true;
+  $('#ecran-travail').hidden = true;
+  $('#ecran-connexion').hidden = false;
+  if (message) erreur(message);
+}
+
+(async function demarrer() {
+  session = recupererJetonsDuLien() || lireSession();
+  if (session?.expire_le && session.expire_le < Date.now() + 60000) {
+    if (!await rafraichir()) session = null;
+  }
+  if (!session) return montrerConnexion();
+
+  try {
+    await chargerReferentiels();
+  } catch (e) {
+    // Un agent qui n'est pas à l'annuaire n'a droit à rien : les politiques
+    // ne lui rendent aucune ligne. Le dire franchement vaut mieux qu'une
+    // page vide dont il ne comprendrait pas le silence.
+    if (String(e.message).startsWith('401')) return montrerConnexion("Votre session a expiré.");
+    return montrerConnexion("Cette adresse n'est pas celle d'un agent du Pôle Technique. "
+      + "Si vous devez y accéder, demandez à être inscrit à l'annuaire du pôle.");
+  }
+
+  const mail = emailDuJeton();
+  moi = REF.listeAgents.find(a => (a.email || '').toLowerCase() === mail) || null;
+  $('#qui').textContent = moi
+    ? `${moi.nom} — ${moi.fonction.replace('_', ' ')}${REF.cellules[moi.cellule_id]
+        ? ' · ' + REF.cellules[moi.cellule_id].libelle : ''}`
+    : mail;
+
+  try {
+    await chargerDemandes();
+  } catch (e) {
+    return montrerConnexion("Les demandes n'ont pas pu être chargées.");
+  }
+
+  $('#chargement').hidden = true;
+  $('#ecran-travail').hidden = false;
+  ['#actualiser', '#exporter', '#deconnexion'].forEach(s => $(s).hidden = false);
+  remplirFiltres();
+  brancherFiltres();
+  dessinerCompteurs();
+  dessinerListe();
+})();
+</script>
+</body>
+</html>
