@@ -16,6 +16,11 @@
   --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
 }
 *{box-sizing:border-box}
+/* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
+   navigateur : sans ceci, tout élément marqué hidden dont la classe impose un
+   display reste visible. C'est ce qui laissait le voile de la fiche affiché en
+   permanence, grisant la page entière. */
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
      font-size:16px;line-height:1.55}
