@@ -7,12 +7,15 @@
 <title>Le problème est-il réglé ? — Demandes des écoles</title>
 <style>
 :root{
-  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
-  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
-  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
-  --agir:#8A5B00; --agir-pale:#FDF3E0;
-  --fait:#2E6B3E; --fait-pale:#E8F2EA;
-  --alerte:#B3261E; --alerte-pale:#FCECEA;
+  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026.
+     Une seule couleur saturée, réservée à ce sur quoi on clique.
+     Contrastes vérifiés : 4,5:1 pour le texte, 3:1 pour les contrôles. */
+  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
+  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
+  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
+  --agir:#8A5B00; --agir-pale:#FEF3C7;
+  --fait:#065F46; --fait-pale:#D1FAE5;
+  --alerte:#B3261E; --alerte-pale:#FEE2E2;
   --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
 }
 *{box-sizing:border-box}
@@ -24,11 +27,11 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
      font-size:16px;line-height:1.55}
-header{background:var(--marine);color:#fff;padding:20px 18px;
+header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:20px 18px;
        padding-top:calc(20px + env(safe-area-inset-top))}
 header .dedans{max-width:660px;margin:0 auto}
-header h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
-header p{margin:5px 0 0;font-size:13.5px;opacity:.85}
+header h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
+header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
 main{max-width:660px;margin:0 auto;padding:18px 14px 60px}
 .bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
       padding:20px 18px;margin-bottom:14px}
@@ -37,7 +40,7 @@ p.aide{margin:0 0 18px;font-size:14.5px;color:var(--encre-doux)}
 label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;color:var(--encre)}
 label .opt{font-weight:400;color:var(--encre-pale)}
 textarea{width:100%;min-height:104px;padding:12px 13px;font-size:16px;font-family:inherit;
-  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);
   border-radius:9px;resize:vertical;line-height:1.5;appearance:none}
 textarea:focus{border-color:var(--marine-clair)}
 textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
@@ -45,17 +48,17 @@ textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid va
 fieldset{border:0;padding:0;margin:0 0 18px}
 legend{margin-bottom:10px}
 .choix{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:14px 15px;
-       border:1.5px solid var(--trait);border-radius:10px;margin-bottom:9px;cursor:pointer;
+       border:1.5px solid var(--trait-champ);border-radius:10px;margin-bottom:9px;cursor:pointer;
        background:var(--blanc);font-size:15.5px;font-weight:600}
 .choix input{margin:2px 0 0;width:22px;height:22px;flex:none;accent-color:var(--marine)}
 .choix small{display:block;font-size:13.5px;font-weight:400;color:var(--encre-doux);margin-top:3px}
-.choix:has(input:checked){border-color:var(--marine);background:var(--marine-pale)}
+.choix:has(input:checked){border-color:var(--marine-encre);background:var(--marine-pale)}
 .choix.refus:has(input:checked){border-color:var(--alerte);background:var(--alerte-pale)}
 button.principal{width:100%;min-height:54px;margin-top:4px;background:var(--marine);color:#fff;
   border:0;border-radius:10px;font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
 button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 .encart{border-radius:9px;padding:14px 16px;font-size:14.5px;margin:16px 0}
-.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
 .encart strong{display:block;margin-bottom:4px}
 .fiche{width:100%;border-collapse:collapse;margin:2px 0 4px}

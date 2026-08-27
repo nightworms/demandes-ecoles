@@ -6,12 +6,15 @@
 <title>Mes demandes — Écoles de Saint-Denis</title>
 <style>
 :root{
-  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
-  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
-  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
-  --agir:#8A5B00; --agir-pale:#FDF3E0;
-  --fait:#2E6B3E; --fait-pale:#E8F2EA;
-  --alerte:#B3261E; --alerte-pale:#FCECEA;
+  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026.
+     Une seule couleur saturée, réservée à ce sur quoi on clique.
+     Contrastes vérifiés : 4,5:1 pour le texte, 3:1 pour les contrôles. */
+  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
+  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
+  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
+  --agir:#8A5B00; --agir-pale:#FEF3C7;
+  --fait:#065F46; --fait-pale:#D1FAE5;
+  --alerte:#B3261E; --alerte-pale:#FEE2E2;
   --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
 }
 *{box-sizing:border-box}
@@ -23,13 +26,13 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
      font-size:16px;line-height:1.55}
-header{background:var(--marine);color:#fff;padding:20px 18px;
+header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:20px 18px;
        padding-top:calc(20px + env(safe-area-inset-top))}
 header .dedans{max-width:680px;margin:0 auto;display:flex;justify-content:space-between;
                align-items:flex-start;gap:14px}
-header h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
-header p{margin:5px 0 0;font-size:13.5px;opacity:.85}
-header button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);
+header h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
+header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
+header button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
               border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
               cursor:pointer;white-space:nowrap;min-height:40px}
 main{max-width:680px;margin:0 auto;padding:18px 14px 60px}
@@ -39,14 +42,14 @@ h2{margin:0 0 6px;font-size:17px;font-weight:650}
 p.aide{margin:0 0 18px;font-size:14.5px;color:var(--encre-doux)}
 label{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px}
 input[type=email]{width:100%;min-height:50px;padding:13px;font-size:16px;font-family:inherit;
-  border:1.5px solid var(--trait);border-radius:9px;background:var(--blanc);color:var(--encre)}
+  border:1.5px solid var(--trait-champ);border-radius:9px;background:var(--blanc);color:var(--encre)}
 input:focus{border-color:var(--marine-clair)}
 input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
 button.principal{width:100%;min-height:52px;margin-top:14px;background:var(--marine);color:#fff;
   border:0;border-radius:10px;font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
 button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 .encart{border-radius:9px;padding:14px 16px;font-size:14.5px;margin-top:16px}
-.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
 .encart strong{display:block;margin-bottom:4px}
 .demande{background:var(--blanc);border:1px solid var(--trait);border-left:4px solid var(--trait);
@@ -60,10 +63,10 @@ button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 .demande .meta{font-size:13.5px;color:var(--encre-doux);margin-top:3px}
 .demande .desc{font-size:14.5px;color:var(--encre-doux);margin-top:9px;
                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.etat{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;
+.etat{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:650;
       padding:4px 10px;border-radius:20px;white-space:nowrap;
-      background:var(--marine-pale);color:var(--marine)}
-.etat.agir{background:var(--agir);color:#fff}
+      background:var(--marine-pale);color:var(--marine-encre)}
+.etat.agir{background:var(--agir-pale);color:var(--agir)}
 .etat.fait{background:var(--fait-pale);color:var(--fait)}
 .vide{text-align:center;padding:34px 20px;color:var(--encre-doux)}
 .lien-bas{display:block;text-align:center;margin-top:22px;color:var(--marine);font-weight:600}

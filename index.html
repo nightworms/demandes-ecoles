@@ -7,20 +7,23 @@
 <meta name="description" content="Signaler une demande de maintenance pour votre école, et suivre son traitement.">
 <style>
 :root{
-  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
-  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
-  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
+  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026.
+     Une seule couleur saturée, réservée à ce sur quoi on clique.
+     Contrastes vérifiés : 4,5:1 pour le texte, 3:1 pour les contrôles. */
+  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
+  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
+  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
   --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
      font-size:16px;line-height:1.6}
-header{background:var(--marine);color:#fff;padding:34px 20px;
+header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:34px 20px;
        padding-top:calc(34px + env(safe-area-inset-top))}
 header .dedans{max-width:640px;margin:0 auto}
-header h1{margin:0;font-size:26px;font-weight:650;letter-spacing:-.02em}
-header p{margin:8px 0 0;font-size:15px;opacity:.85}
+header h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
+header p{margin:8px 0 0;font-size:15px;color:var(--encre-doux)}
 main{max-width:640px;margin:0 auto;padding:26px 16px 60px}
 .porte{display:block;background:var(--blanc);border:1px solid var(--trait);
        border-left:4px solid var(--marine);border-radius:12px;padding:20px 22px;
@@ -30,7 +33,7 @@ main{max-width:640px;margin:0 auto;padding:26px 16px 60px}
 .porte h2{margin:0 0 5px;font-size:18px;font-weight:650;color:var(--marine)}
 .porte p{margin:0;font-size:15px;color:var(--encre-doux)}
 .encart{background:var(--marine-pale);border-radius:10px;padding:16px 18px;
-        margin:22px 0 0;font-size:14.5px;color:var(--marine)}
+        margin:22px 0 0;font-size:14.5px;color:var(--marine-encre)}
 .encart strong{display:block;margin-bottom:4px}
 footer{max-width:640px;margin:0 auto;padding:0 16px 40px;font-size:13.5px;
        color:var(--encre-pale);border-top:1px solid var(--trait);padding-top:18px}

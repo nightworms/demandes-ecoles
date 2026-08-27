@@ -7,12 +7,15 @@
 <title>Demandes des écoles — Pôle Technique</title>
 <style>
 :root{
-  --marine:#1B3F6E; --marine-clair:#2C5A94; --marine-pale:#EEF3F9;
-  --encre:#1E293B; --encre-doux:#5A6B80; --encre-pale:#8496A8;
-  --fond:#F0F4F8; --blanc:#fff; --trait:#D8E1EA;
-  --agir:#8A5B00; --agir-pale:#FDF3E0;
-  --fait:#2E6B3E; --fait-pale:#E8F2EA;
-  --alerte:#B3261E; --alerte-pale:#FCECEA;
+  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026.
+     Une seule couleur saturée, réservée à ce sur quoi on clique.
+     Contrastes vérifiés : 4,5:1 pour le texte, 3:1 pour les contrôles. */
+  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
+  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
+  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
+  --agir:#8A5B00; --agir-pale:#FEF3C7;
+  --fait:#065F46; --fait-pale:#D1FAE5;
+  --alerte:#B3261E; --alerte-pale:#FEE2E2;
   --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
   --mono:ui-monospace,'SF Mono',Menlo,monospace;
 }
@@ -27,17 +30,17 @@ body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police
      font-size:15px;line-height:1.5}
 
 /* ─── En-tête ─────────────────────────────────────────────── */
-header{background:var(--marine);color:#fff;padding:14px 18px;
+header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:14px 18px;
        padding-top:calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:30}
 header .dedans{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;
                align-items:center;gap:16px;flex-wrap:wrap}
-header h1{margin:0;font-size:18px;font-weight:650;letter-spacing:-.01em}
-header .qui{font-size:13px;opacity:.85;margin-top:2px}
+header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
+header .qui{font-size:13px;color:var(--encre-doux);margin-top:2px}
 header .actions{display:flex;gap:8px;align-items:center}
-header button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);
+header button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
               border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
               cursor:pointer;white-space:nowrap;min-height:38px}
-header button:hover{background:rgba(255,255,255,.12)}
+header button:hover{background:var(--fond);border-color:var(--marine-clair)}
 
 main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
 
@@ -46,9 +49,9 @@ main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
 .compteur{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;padding:13px 15px;
           cursor:pointer;text-align:left;font-family:inherit;border-left:4px solid var(--trait)}
 .compteur:hover{border-color:var(--marine-clair)}
-.compteur[aria-pressed="true"]{border-color:var(--marine);background:var(--marine-pale);
+.compteur[aria-pressed="true"]{border-color:var(--marine-encre);background:var(--marine-pale);
                                box-shadow:inset 0 0 0 1px var(--marine)}
-.compteur .n{display:block;font-size:26px;font-weight:700;line-height:1.1;color:var(--marine)}
+.compteur .n{display:block;font-size:26px;font-weight:700;line-height:1.1;color:var(--marine-encre)}
 .compteur .l{display:block;font-size:13px;color:var(--encre-doux);margin-top:3px}
 .compteur.agir{border-left-color:var(--agir)} .compteur.agir .n{color:var(--agir)}
 .compteur.retard{border-left-color:var(--alerte)} .compteur.retard .n{color:var(--alerte)}
@@ -59,9 +62,9 @@ main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
          padding:13px 15px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .filtres .champ{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 150px}
 .filtres .champ.large{flex:2 1 240px}
-.filtres label{font-size:12.5px;font-weight:650;color:var(--encre-doux)}
+.filtres label{font-size:13px;font-weight:650;color:var(--encre-doux)}
 .filtres select,.filtres input{min-height:40px;padding:8px 11px;font-size:14.5px;font-family:inherit;
-  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);border-radius:8px;
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:8px;
   appearance:none;width:100%}
 .filtres select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
        background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
@@ -69,7 +72,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible
   {outline:3px solid var(--marine-clair);outline-offset:2px}
 .filtres button{min-height:40px;padding:0 15px;border-radius:8px;font-family:inherit;font-size:14px;
-  font-weight:600;cursor:pointer;background:var(--blanc);color:var(--marine);border:1.5px solid var(--trait)}
+  font-weight:600;cursor:pointer;background:var(--blanc);color:var(--marine);border:1.5px solid var(--trait-champ)}
 .filtres button:hover{border-color:var(--marine-clair)}
 
 /* ─── Liste ───────────────────────────────────────────────── */
@@ -82,18 +85,18 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .demande.p-urgente{border-left-color:var(--alerte)}
 .demande.p-haute{border-left-color:var(--agir)}
 .demande.close{border-left-color:var(--fait);opacity:.72}
-.demande .num{font-family:var(--mono);font-size:12.5px;color:var(--encre-pale);letter-spacing:.02em}
+.demande .num{font-family:var(--mono);font-size:13px;color:var(--encre-pale);letter-spacing:.02em}
 .demande h3{margin:2px 0 3px;font-size:15.5px;font-weight:650}
 .demande .meta{font-size:13.5px;color:var(--encre-doux)}
 .demande .droite{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
-.demande .age{font-size:12.5px;color:var(--encre-pale);white-space:nowrap}
+.demande .age{font-size:13px;color:var(--encre-pale);white-space:nowrap}
 .demande .age.retard{color:var(--alerte);font-weight:650}
-.etat{display:inline-flex;align-items:center;font-size:12px;font-weight:650;padding:3px 9px;
-      border-radius:20px;white-space:nowrap;background:var(--marine-pale);color:var(--marine)}
-.etat.agir{background:var(--agir);color:#fff}
+.etat{display:inline-flex;align-items:center;font-size:13px;font-weight:650;padding:3px 9px;
+      border-radius:20px;white-space:nowrap;background:var(--marine-pale);color:var(--marine-encre)}
+.etat.agir{background:var(--agir-pale);color:var(--agir)}
 .etat.fait{background:var(--fait-pale);color:var(--fait)}
 .etat.alerte{background:var(--alerte-pale);color:var(--alerte)}
-.puce{display:inline-block;font-size:11.5px;font-weight:650;padding:2px 8px;border-radius:20px;
+.puce{display:inline-block;font-size:13px;font-weight:650;padding:2px 8px;border-radius:20px;
       background:var(--fond);color:var(--encre-doux);margin-left:6px}
 .puce.urgente{background:var(--alerte-pale);color:var(--alerte)}
 .puce.haute{background:var(--agir-pale);color:var(--agir)}
@@ -105,11 +108,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
        justify-content:flex-end}
 .fiche{background:var(--fond);width:min(620px,100%);height:100%;overflow-y:auto;
        box-shadow:-4px 0 24px rgba(0,0,0,.18)}
-.fiche .barre{position:sticky;top:0;background:var(--marine);color:#fff;padding:15px 18px;
+.fiche .barre{position:sticky;top:0;background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:15px 18px;
               display:flex;justify-content:space-between;align-items:center;gap:14px;z-index:2}
-.fiche .barre h2{margin:0;font-size:16.5px;font-weight:650}
-.fiche .barre .num{font-family:var(--mono);font-size:12.5px;opacity:.8;display:block}
-.fiche .barre button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);
+.fiche .barre h2{margin:0;font-size:18px;font-weight:700}
+.fiche .barre .num{font-family:var(--mono);font-size:13px;color:var(--encre-doux);display:block}
+.fiche .barre button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
        border-radius:8px;width:38px;height:38px;font-size:19px;line-height:1;cursor:pointer;flex:none}
 .fiche .corps{padding:16px}
 .carte{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;
@@ -124,7 +127,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .champ{margin-bottom:12px}
 .champ label{display:block;font-size:13px;font-weight:650;color:var(--encre-doux);margin-bottom:5px}
 .champ select,.champ input,.champ textarea{width:100%;min-height:42px;padding:9px 11px;font-size:15px;
-  font-family:inherit;color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait);
+  font-family:inherit;color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);
   border-radius:8px;appearance:none}
 .champ textarea{min-height:78px;resize:vertical}
 .champ select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
@@ -134,19 +137,19 @@ button.principal{width:100%;min-height:46px;background:var(--marine);color:#fff;
   border-radius:9px;font-size:15.5px;font-weight:650;font-family:inherit;cursor:pointer}
 button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(--marine);
-  border:1.5px solid var(--trait);border-radius:9px;font-size:14.5px;font-weight:600;
+  border:1.5px solid var(--trait-champ);border-radius:9px;font-size:14.5px;font-weight:600;
   font-family:inherit;cursor:pointer}
 .journal{font-size:13.5px}
 .journal li{list-style:none;padding:7px 0;border-bottom:1px solid var(--trait)}
 .journal li:last-child{border-bottom:0}
-.journal .quand{color:var(--encre-pale);font-size:12.5px}
+.journal .quand{color:var(--encre-pale);font-size:13px}
 .note{padding:9px 0;border-bottom:1px solid var(--trait);font-size:14.5px;white-space:pre-wrap}
 .note:last-child{border-bottom:0}
-.note .qui{display:block;font-size:12.5px;color:var(--encre-pale);margin-bottom:2px;white-space:normal}
+.note .qui{display:block;font-size:13px;color:var(--encre-pale);margin-bottom:2px;white-space:normal}
 
 /* ─── Encarts et connexion ────────────────────────────────── */
 .encart{border-radius:9px;padding:13px 15px;font-size:14.5px;margin:14px 0}
-.encart.info{background:var(--marine-pale);color:var(--marine)}
+.encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.attention{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
 .encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
 .encart strong{display:block;margin-bottom:3px}
@@ -155,7 +158,7 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 .connexion h2{margin:0 0 6px;font-size:18px}
 .connexion p{margin:0 0 16px;font-size:14.5px;color:var(--encre-doux)}
 .connexion input{width:100%;min-height:48px;padding:12px;font-size:16px;font-family:inherit;
-  border:1.5px solid var(--trait);border-radius:9px}
+  border:1.5px solid var(--trait-champ);border-radius:9px}
 .connexion button{width:100%;min-height:50px;margin-top:12px;background:var(--marine);color:#fff;
   border:0;border-radius:9px;font-size:16px;font-weight:650;font-family:inherit;cursor:pointer}
 .chargement{text-align:center;padding:44px 20px;color:var(--encre-doux)}
