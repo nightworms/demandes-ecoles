@@ -43,6 +43,11 @@ header .logo{height:56px;width:auto;flex:none;display:block}
 main{max-width:680px;margin:0 auto;padding:18px 14px 60px}
 .bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
       padding:20px 18px;margin-bottom:14px}
+/* Bannière de l'écran de connexion : elle déborde jusqu'aux bords de la
+   carte (padding 20/18) et n'arrondit que ses deux coins hauts.
+   Décorative — alt vide — et masquée avec l'écran une fois connecté. */
+.banniere{display:block;width:calc(100% + 36px);height:auto;
+          margin:-20px -18px 18px;border-radius:11px 11px 0 0}
 h2{margin:0 0 6px;font-size:17px;font-weight:650}
 p.aide{margin:0 0 18px;font-size:14.5px;color:var(--encre-doux)}
 label{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px}
@@ -102,6 +107,8 @@ button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 
   <!-- ─── Demande du lien ─────────────────────────────────────────── -->
   <section class="bloc" id="ecran-connexion" hidden>
+    <img class="banniere" src="banniere-connexion.webp" alt=""
+         width="1400" height="350" decoding="async">
     <h2>Accéder à l'espace de votre école</h2>
     <p class="aide">Saisissez l'adresse de votre école. Vous recevrez un lien qui
        vous connectera directement, sans mot de passe à retenir.</p>

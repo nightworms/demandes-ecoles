@@ -101,6 +101,28 @@ button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:v
 .recu h2{margin:0;font-size:21px}
 .masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ─── Ajouts pour l'accès identifié ─────────────────────────────────────── */
+header .dedans{display:flex;align-items:center;justify-content:space-between;gap:12px}
+button.deconnexion{background:none;border:0;padding:6px 2px;font-family:inherit;font-size:13.5px;
+       font-weight:600;color:var(--marine-encre);cursor:pointer;text-decoration:underline;flex:none}
+/* Sur téléphone, garder le bouton sur la même ligne écrase le titre sur deux
+   lignes et le sous-titre sur trois. Il passe donc dessous, aligné à droite. */
+@media (max-width:520px){
+  header .dedans{flex-wrap:wrap}
+  header .marque{flex:1 1 100%}
+  button.deconnexion{margin-left:auto;padding-top:2px}
+}
+.compte{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 15px;
+        padding:11px 13px;background:var(--fond);border:1px solid var(--trait);border-radius:9px;
+        font-size:14.5px}
+.compte .quoi{font-weight:600;color:var(--encre-doux);font-size:13px}
+.compte .valeur{color:var(--encre);word-break:break-word}
+.mon-ecole{margin:0;padding:13px 15px;background:var(--marine-pale);color:var(--marine-encre);
+           border-radius:9px;font-size:15px}
+.mon-ecole strong{display:block;font-size:16px;margin-bottom:3px}
+.mon-ecole span{display:block;font-size:13.5px;opacity:.85;margin-top:2px}
+#ecran-connexion p.aide,#ecran-inconnu p.aide{margin-left:0}
+.attente{text-align:center;color:var(--encre-pale);padding:34px 16px;font-size:15px}
 </style>
 </head>
 <body>
@@ -110,37 +132,72 @@ button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:v
       <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
       <div>
         <h1>Signaler une demande</h1>
-          <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+        <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
       </div>
     </div>
+    <button type="button" class="deconnexion" id="deconnexion" hidden>Se déconnecter</button>
   </div>
 </header>
 <main>
   <div id="erreur-globale" class="encart erreur" role="alert" hidden></div>
-  <form id="formulaire" novalidate>
+
+  <p class="attente" id="chargement">Chargement…</p>
+
+  <!-- ─── Connexion ──────────────────────────────────────────────────────
+       Le formulaire n'est plus ouvert à tout venant : c'est le compte qui
+       dit de quelle école on parle, et la base le revérifie de son côté. -->
+  <section class="bloc" id="ecran-connexion" hidden>
+    <h2>Accéder au formulaire</h2>
+    <p class="aide">Saisissez l'adresse email de votre école. Vous recevrez un lien
+       qui vous connectera directement, sans mot de passe à retenir.</p>
+    <form id="form-connexion" novalidate>
+      <div class="champ">
+        <label for="email-connexion">Adresse email de votre école</label>
+        <input type="email" id="email-connexion" required autocomplete="email"
+               inputmode="email" placeholder="ecole@saintdenis.re">
+      </div>
+      <button type="submit" class="principal" id="bouton-lien">Recevoir mon lien</button>
+    </form>
+    <div id="lien-envoye" class="encart info" role="status" hidden>
+      <strong>Regardez votre boîte mail</strong>
+      Un lien de connexion vient d'être envoyé. Ouvrez-le <strong>depuis cet appareil</strong>.
+      Il est valable une heure et ne sert qu'une fois.
+    </div>
+  </section>
+
+  <!-- ─── Adresse connectée, mais rattachée à aucune école ─────────────── -->
+  <section class="bloc" id="ecran-inconnu" hidden>
+    <h2>Cette adresse n'est rattachée à aucune école</h2>
+    <p class="aide">Vous êtes bien connecté, mais nous ne savons pas quelle école
+       vous représentez. Il s'agit sans doute d'une adresse que nous ne connaissons
+       pas encore.</p>
+    <div class="encart alerte">
+      <strong>Que faire&nbsp;?</strong>
+      Appelez le Pôle Technique au <b>0262 40 45 11</b> en indiquant l'adresse
+      utilisée&nbsp;: <b id="adresse-inconnue"></b>. Nous la rattacherons à votre école.
+    </div>
+  </section>
+
+  <form id="formulaire" novalidate hidden>
     <section class="bloc">
       <h2><span class="num" aria-hidden="true">1</span> Votre école</h2>
-      <p class="aide">Choisissez le quartier, puis votre école.</p>
-      <div class="champ">
-        <label for="secteur">Quartier</label>
-        <select id="secteur" required><option value="">Choisir…</option></select>
-      </div>
-      <div class="champ">
-        <label for="ecole">École</label>
-        <select id="ecole" required disabled><option value="">Choisissez d'abord un quartier</option></select>
-      </div>
-      <div id="fiche-ecole" class="encart info" hidden></div>
+      <div id="ecole-unique" class="mon-ecole" hidden></div>
+      <fieldset id="ecole-choix" hidden style="margin-bottom:0">
+        <legend>Votre adresse dessert plusieurs écoles&nbsp;: laquelle est concernée&nbsp;?</legend>
+        <div id="ecoles-liste"></div>
+      </fieldset>
     </section>
     <section class="bloc">
       <h2><span class="num" aria-hidden="true">2</span> Vous</h2>
       <p class="aide">Pour que le service puisse vous rappeler si besoin.</p>
+      <div class="compte">
+        <span class="quoi">Connecté avec</span>
+        <span class="valeur" id="adresse-compte"></span>
+      </div>
       <div class="champ"><label for="nom">Votre nom</label>
         <input type="text" id="nom" required autocomplete="name" placeholder="Ex : Marie Dupont"></div>
       <div class="champ"><label for="fonction">Votre fonction <span class="opt">— facultatif</span></label>
         <input type="text" id="fonction" autocomplete="organization-title" placeholder="Ex : Directrice"></div>
-      <div class="champ"><label for="email">Votre adresse email</label>
-        <input type="email" id="email" required autocomplete="email" inputmode="email"
-               placeholder="pour recevoir le suivi de votre demande"></div>
       <div class="champ"><label for="tel">Téléphone <span class="opt">— facultatif</span></label>
         <input type="tel" id="tel" autocomplete="tel" inputmode="tel" placeholder="0692 …"></div>
     </section>
@@ -198,7 +255,7 @@ button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:v
     <button type="button" class="secondaire" onclick="location.reload()">Faire une autre demande</button>
   </section>
 </main>
-<div class="envoi" id="pied"><div class="dedans">
+<div class="envoi" id="pied" hidden><div class="dedans">
   <button type="submit" form="formulaire" class="principal" id="bouton-envoi" disabled>Envoyer ma demande</button>
 </div></div>
 <script>
@@ -214,68 +271,247 @@ const CLE = 'sb_publishable_nTCosqebGOjUK3jGwoxhfQ_BnnkRpNn';
 const BUCKET_PHOTOS = 'photos-demandes';
 const MAX_PHOTOS = 3;
 
-const entetes = { 'apikey': CLE, 'Authorization': 'Bearer ' + CLE, 'Content-Type': 'application/json' };
+//  Même clé que connexion.html : qui s'est connecté là-bas arrive ici déjà
+//  identifié, et inversement. Une seule connexion pour les deux pages.
+const CLEF_SESSION = 'demandes-ecoles-session';
+//  Le nom et la fonction ne sont pas dans la base : l'école les saisit une
+//  fois, ce navigateur s'en souvient. Rien de sensible, rien qui sorte d'ici.
+const CLEF_IDENTITE = 'demandes-ecoles-identite';
+
 const $ = s => document.querySelector(s);
 
-async function lire(chemin) {
-  const r = await fetch(`${API}/rest/v1/${chemin}`, { headers: entetes });
-  if (!r.ok) throw new Error('Lecture impossible (' + r.status + ')');
-  return r.json();
-}
-async function appeler(fonction, corps) {
-  const r = await fetch(`${API}/rest/v1/rpc/${fonction}`, {
-    method: 'POST', headers: entetes, body: JSON.stringify(corps) });
-  if (!r.ok) throw new Error('Envoi impossible (' + r.status + ')');
-  return r.json();
-}
-
+let SESSION = null, ADRESSE = '';
 let ECOLES = [], DOMAINES = [], TYPES = [], photos = [];
-let domaineChoisi = null;
-
-(async function demarrer() {
-  try {
-    [ECOLES, DOMAINES, TYPES] = await Promise.all([
-      lire('v_ecoles_publiques?select=id,secteur,type_ecole,nom,adresse,telephone&order=secteur,nom'),
-      lire('v_domaines_publics?select=id,code,libelle,aide,ordre,photo_obligatoire&order=ordre'),
-      lire('v_types_publics?select=id,domaine_id,libelle,ordre&order=ordre')
-    ]);
-    remplirSecteurs();
-    afficherDomaines();
-  } catch (e) {
-    montrerErreur("Le formulaire n'a pas pu se charger. Vérifiez votre connexion, puis rechargez la page.");
-  }
-})();
+let ecoleChoisie = null, domaineChoisi = null;
 
 function montrerErreur(texte) {
   const el = $('#erreur-globale'); el.textContent = texte; el.hidden = false;
   el.scrollIntoView({ block: 'center' });
 }
-function remplirSecteurs() {
-  const secteurs = [...new Set(ECOLES.map(e => e.secteur))].sort((a, b) => a.localeCompare(b, 'fr'));
-  $('#secteur').insertAdjacentHTML('beforeend',
-    secteurs.map(s => '<option value="' + s + '">' + s + '</option>').join(''));
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); }
+  catch (e) { return null; }
 }
-$('#secteur').addEventListener('change', e => {
-  const sel = $('#ecole');
-  const liste = ECOLES.filter(x => x.secteur === e.target.value);
-  sel.innerHTML = '<option value="">Choisir…</option>' +
-    liste.map(x => '<option value="' + x.id + '">' + x.type_ecole + ' ' + x.nom + '</option>').join('');
-  sel.disabled = liste.length === 0;
-  $('#fiche-ecole').hidden = true;
-  verifierComplet();
-});
-$('#ecole').addEventListener('change', e => {
-  const ec = ECOLES.find(x => String(x.id) === e.target.value);
-  const f = $('#fiche-ecole');
-  if (ec) {
-    f.innerHTML = '<strong>' + ec.type_ecole + ' ' + ec.nom + '</strong>' + (ec.adresse || '') +
-                  (ec.telephone ? ' · ' + ec.telephone : '');
-    f.hidden = false;
-  } else f.hidden = true;
-  chercherDoublons();
-  verifierComplet();
+function ecrireSession(s) {
+  try { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); } catch (e) { /* navigation privée */ }
+}
+function oublierSession() {
+  try { localStorage.removeItem(CLEF_SESSION); } catch (e) { /* idem */ }
+}
+function memoire() {
+  try { return JSON.parse(localStorage.getItem(CLEF_IDENTITE) || '{}'); }
+  catch (e) { return {}; }
+}
+function retenir(identite) {
+  try { localStorage.setItem(CLEF_IDENTITE, JSON.stringify(identite)); } catch (e) { /* idem */ }
+}
+
+// Le lien de connexion renvoie les jetons dans le fragment de l'adresse.
+// On les range, puis on nettoie la barre d'adresse : inutile de laisser
+// traîner un jeton dans l'historique du navigateur.
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.length < 2) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) {
+    if (p.get('error_description')) montrerErreur(decodeURIComponent(p.get('error_description')));
+    history.replaceState(null, '', location.pathname);
+    return null;
+  }
+  const session = {
+    access_token: acces,
+    refresh_token: p.get('refresh_token'),
+    expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000)
+  };
+  ecrireSession(session);
+  history.replaceState(null, '', location.pathname);
+  return session;
+}
+
+async function rafraichir(session) {
+  try {
+    const r = await fetch(`${API}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const neuve = {
+      access_token: j.access_token, refresh_token: j.refresh_token,
+      expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000)
+    };
+    ecrireSession(neuve);
+    return neuve;
+  } catch (e) { return null; }
+}
+
+// L'adresse du compte est inscrite dans le jeton. On la lit ici pour
+// l'AFFICHER, rien de plus : la base ne croit jamais ce que le navigateur
+// lui envoie, elle relit cette même adresse dans le jeton qu'elle a signé.
+function emailDuJeton(jeton) {
+  try {
+    let c = jeton.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (c.length % 4) c += '=';
+    const brut = atob(c);
+    const octets = Uint8Array.from(brut, x => x.charCodeAt(0));
+    return String(JSON.parse(new TextDecoder().decode(octets)).email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+
+// ─── Appels à la base ────────────────────────────────────────────────────
+function entetes() {
+  return {
+    apikey: CLE,
+    Authorization: 'Bearer ' + (SESSION ? SESSION.access_token : CLE),
+    'Content-Type': 'application/json'
+  };
+}
+// Un jeton vaut une heure. Plutôt que de laisser l'école découvrir la panne
+// au moment d'envoyer sa demande, on renouvelle et on retente une fois.
+async function requete(faire) {
+  let r = await faire();
+  if (r.status === 401 && SESSION && SESSION.refresh_token) {
+    const neuve = await rafraichir(SESSION);
+    if (neuve) { SESSION = neuve; r = await faire(); }
+  }
+  return r;
+}
+async function lire(chemin) {
+  const r = await requete(() => fetch(`${API}/rest/v1/${chemin}`, { headers: entetes() }));
+  if (!r.ok) throw new Error('Lecture impossible (' + r.status + ')');
+  return r.json();
+}
+async function appeler(fonction, corps) {
+  const r = await requete(() => fetch(`${API}/rest/v1/rpc/${fonction}`, {
+    method: 'POST', headers: entetes(), body: JSON.stringify(corps) }));
+  if (!r.ok) throw new Error('Envoi impossible (' + r.status + ')');
+  return r.json();
+}
+
+// ─── Écrans ──────────────────────────────────────────────────────────────
+function montrerConnexion() {
+  $('#chargement').hidden = true;
+  $('#formulaire').hidden = true;
+  $('#pied').hidden = true;
+  $('#deconnexion').hidden = true;
+  $('#ecran-connexion').hidden = false;
+}
+
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('#bouton-lien');
+  b.disabled = true; b.textContent = 'Envoi en cours…';
+  try {
+    // On revient sur CETTE page : l'école voulait déposer une demande,
+    // pas consulter une liste.
+    const retour = location.origin + location.pathname;
+    const r = await fetch(`${API}/auth/v1/otp?redirect_to=${encodeURIComponent(retour)}`, {
+      method: 'POST',
+      headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('#email-connexion').value.trim(), create_user: true })
+    });
+    if (r.status === 429) {
+      montrerErreur("Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.");
+    } else if (!r.ok) {
+      montrerErreur("L'envoi a échoué. Vérifiez l'adresse saisie, puis réessayez.");
+    } else {
+      $('#form-connexion').hidden = true;
+      $('#lien-envoye').hidden = false;
+    }
+  } catch (e) {
+    montrerErreur("L'envoi a échoué. Vérifiez votre connexion, puis réessayez.");
+  }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
 });
 
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  SESSION = recupererJetonsDuLien() || lireSession();
+  if (SESSION && SESSION.expire_le && SESSION.expire_le < Date.now() + 60000) {
+    SESSION = SESSION.refresh_token ? await rafraichir(SESSION) : null;
+  }
+  if (!SESSION) { oublierSession(); montrerConnexion(); return; }
+
+  ADRESSE = emailDuJeton(SESSION.access_token);
+
+  let mesEcoles;
+  try {
+    [mesEcoles, DOMAINES, TYPES] = await Promise.all([
+      lire('v_mes_ecoles?select=id,nom,type_ecole,adresse,telephone'),
+      lire('v_domaines_publics?select=id,code,libelle,aide,ordre,photo_obligatoire&order=ordre'),
+      lire('v_types_publics?select=id,domaine_id,libelle,ordre&order=ordre')
+    ]);
+  } catch (e) {
+    oublierSession();
+    montrerConnexion();
+    montrerErreur("Votre session a expiré. Demandez un nouveau lien pour continuer.");
+    return;
+  }
+
+  $('#chargement').hidden = true;
+  $('#deconnexion').hidden = false;
+
+  if (!mesEcoles.length) {
+    $('#adresse-inconnue').textContent = ADRESSE || '(adresse inconnue)';
+    $('#ecran-inconnu').hidden = false;
+    return;
+  }
+
+  ECOLES = mesEcoles;
+  $('#formulaire').hidden = false;
+  $('#pied').hidden = false;
+  $('#adresse-compte').textContent = ADRESSE || '—';
+  installerEcoles();
+  rappelerIdentite();
+  afficherDomaines();
+  verifierComplet();
+})();
+
+// ─── L'école : déduite du compte, jamais choisie librement ───────────────
+function libelle(e) { return (e.type_ecole ? e.type_ecole + ' ' : '') + e.nom; }
+
+function installerEcoles() {
+  if (ECOLES.length === 1) {
+    ecoleChoisie = ECOLES[0];
+    $('#ecole-unique').innerHTML =
+      '<strong>' + echapper(libelle(ecoleChoisie)) + '</strong>' +
+      (ecoleChoisie.adresse ? '<span>' + echapper(ecoleChoisie.adresse) + '</span>' : '') +
+      (ecoleChoisie.telephone ? '<span>' + echapper(ecoleChoisie.telephone) + '</span>' : '');
+    $('#ecole-unique').hidden = false;
+    return;
+  }
+  // Quinze noms d'école sont portés par deux établissements : c'est le type
+  // qui les distingue. « Bouvet » seul ne veut rien dire.
+  $('#ecoles-liste').innerHTML = ECOLES.map(e =>
+    '<label class="choix"><input type="radio" name="ecole" value="' + e.id + '">' +
+    '<span>' + echapper(libelle(e)) +
+    (e.adresse ? '<small>' + echapper(e.adresse) + '</small>' : '') + '</span></label>').join('');
+  $('#ecole-choix').hidden = false;
+  $('#ecoles-liste').querySelectorAll('input').forEach(i => i.addEventListener('change', ev => {
+    ecoleChoisie = ECOLES.find(x => String(x.id) === ev.target.value) || null;
+    if (ecoleChoisie && !$('#tel').value.trim()) $('#tel').value = ecoleChoisie.telephone || '';
+    chercherDoublons();
+    verifierComplet();
+  }));
+}
+
+function rappelerIdentite() {
+  const m = memoire();
+  if (m.nom) $('#nom').value = m.nom;
+  if (m.fonction) $('#fonction').value = m.fonction;
+  // À défaut d'un numéro déjà saisi, celui de l'école vaut mieux que rien.
+  $('#tel').value = m.tel || (ecoleChoisie ? (ecoleChoisie.telephone || '') : '');
+}
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 // Une icône par domaine, dessinée au trait — décision 4 de la charte.
 // Décoratives : aria-hidden, c'est le libellé qui porte le sens.
 // Un code inconnu ne rend aucune icône, la carte reste celle d'avant.
@@ -323,16 +559,18 @@ function afficherTypes(domaineId) {
   $('#bloc-type').scrollIntoView({ behavior: 'smooth', block: 'start' });
   verifierComplet();
 }
+
 async function chercherDoublons() {
-  const ecoleId = $('#ecole').value, boite = $('#doublons');
-  if (!ecoleId || !domaineChoisi) { boite.hidden = true; return; }
+  const boite = $('#doublons');
+  if (!ecoleChoisie || !domaineChoisi) { boite.hidden = true; return; }
   try {
     const ouvertes = await appeler('demandes_ouvertes_pour',
-      { _ecole_id: Number(ecoleId), _domaine_id: domaineChoisi });
+      { _ecole_id: ecoleChoisie.id, _domaine_id: domaineChoisi });
     if (!ouvertes || ouvertes.length === 0) { boite.hidden = true; return; }
     boite.innerHTML = '<strong>Une demande est déjà en cours sur ce sujet pour votre école</strong>' +
       "Vérifiez qu'il ne s'agit pas de la même chose avant d'envoyer&nbsp;:<ul>" +
-      ouvertes.map(d => '<li><b>' + d.numero + '</b> — ' + d.type + ', déposée le ' + d.depose_le + '</li>').join('') +
+      ouvertes.map(d => '<li><b>' + echapper(d.numero) + '</b> — ' + echapper(d.type) +
+                        ', déposée le ' + echapper(d.depose_le) + '</li>').join('') +
       '</ul>';
     boite.hidden = false;
   } catch (e) { boite.hidden = true; }
@@ -383,13 +621,15 @@ function dessinerPhotos() {
     ? photos.length + ' photo' + (photos.length > 1 ? 's' : '') + ' · ' + Math.round(poids / 1024) + ' Ko après compression'
     : '';
 }
+
 function verifierComplet() {
-  const ok = $('#ecole').value && $('#nom').value.trim() && $('#email').value.trim()
+  //  L'adresse ne fait plus partie des conditions : elle vient du compte.
+  const ok = ecoleChoisie && $('#nom').value.trim()
           && domaineChoisi && document.querySelector('input[name=type]:checked')
           && $('#description').value.trim().length > 4;
   $('#bouton-envoi').disabled = !ok;
 }
-['#nom', '#email', '#description'].forEach(s => $(s).addEventListener('input', verifierComplet));
+['#nom', '#description'].forEach(s => $(s).addEventListener('input', verifierComplet));
 
 $('#formulaire').addEventListener('submit', async ev => {
   ev.preventDefault();
@@ -398,11 +638,13 @@ $('#formulaire').addEventListener('submit', async ev => {
   try {
     const fenetre = document.querySelector('input[name=fenetre]:checked').value;
     const reponse = await appeler('deposer_demande', {
-      _ecole_id: Number($('#ecole').value),
+      _ecole_id: ecoleChoisie.id,
       _domaine_id: domaineChoisi,
       _type_demande_id: Number(document.querySelector('input[name=type]:checked').value),
       _demandeur_nom: $('#nom').value.trim(),
-      _demandeur_email: $('#email').value.trim(),
+      //  Transmise pour la forme : la base ignore cette valeur et relit
+      //  l'adresse dans le jeton qu'elle a elle-même signé.
+      _demandeur_email: ADRESSE,
       _description: $('#description').value.trim(),
       _demandeur_fonction: $('#fonction').value.trim() || null,
       _demandeur_tel: $('#tel').value.trim() || null,
@@ -411,7 +653,17 @@ $('#formulaire').addEventListener('submit', async ev => {
       _hors_presence: fenetre === 'pendant_les_vacances',
       _fenetre: fenetre
     });
-    if (!reponse || reponse.ok !== true) throw new Error((reponse && reponse.motif) || 'Refus du serveur');
+    //  La base peut refuser pour une raison qu'elle sait formuler : école qui
+    //  n'est pas la vôtre, session perdue. On la cite plutôt que d'inventer.
+    if (!reponse || reponse.ok !== true) {
+      montrerErreur((reponse && reponse.motif) ||
+        "Votre demande n'a pas pu être envoyée. Réessayez dans un instant.");
+      bouton.disabled = false; bouton.textContent = 'Envoyer ma demande';
+      return;
+    }
+
+    retenir({ nom: $('#nom').value.trim(), fonction: $('#fonction').value.trim(),
+              tel: $('#tel').value.trim() });
 
     // Les photos ne doivent jamais bloquer un signalement : si le dépôt échoue,
     // la demande reste enregistrée et on le dit simplement.
@@ -437,10 +689,10 @@ $('#formulaire').addEventListener('submit', async ev => {
 
 async function deposerPhoto(demandeId, index, blob) {
   const chemin = demandeId + '/' + Date.now() + '-' + index + '.jpg';
-  const r = await fetch(API + '/storage/v1/object/' + BUCKET_PHOTOS + '/' + chemin, {
+  const r = await requete(() => fetch(API + '/storage/v1/object/' + BUCKET_PHOTOS + '/' + chemin, {
     method: 'POST',
-    headers: { 'apikey': CLE, 'Authorization': 'Bearer ' + CLE, 'Content-Type': 'image/jpeg' },
-    body: blob });
+    headers: { apikey: CLE, Authorization: 'Bearer ' + SESSION.access_token, 'Content-Type': 'image/jpeg' },
+    body: blob }));
   if (!r.ok) throw new Error('dépôt photo');
   await appeler('enregistrer_photo', { _demande_id: demandeId, _url: chemin, _taille: blob.size });
 }
