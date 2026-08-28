@@ -42,6 +42,11 @@ header button{background:var(--blanc);color:var(--encre-doux);border:1px solid v
               cursor:pointer;white-space:nowrap;min-height:38px}
 header button:hover{background:var(--fond);border-color:var(--marine-clair)}
 
+/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
+   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
+header .marque{display:flex;align-items:center;gap:14px;min-width:0}
+header .logo{height:56px;width:auto;flex:none;display:block}
+@media (max-width:480px){header .logo{height:44px}}
 main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
 
 /* ─── Indicateurs ─────────────────────────────────────────── */
@@ -176,8 +181,13 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 <header>
   <div class="dedans">
     <div>
-      <h1>Demandes des écoles</h1>
-      <div class="qui" id="qui">Pôle Technique — Direction de l'Éducation</div>
+      <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="39" height="56" decoding="async">
+      <div>
+        <h1>Demandes des écoles</h1>
+              <div class="qui" id="qui">Pôle Technique — Direction de l'Éducation</div>
+      </div>
+    </div>
     </div>
     <div class="actions">
       <button type="button" id="actualiser" hidden>Actualiser</button>

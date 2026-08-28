@@ -32,6 +32,11 @@ header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--
 header .dedans{max-width:660px;margin:0 auto}
 header h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
 header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
+/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
+   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
+header .marque{display:flex;align-items:center;gap:14px;min-width:0}
+header .logo{height:56px;width:auto;flex:none;display:block}
+@media (max-width:480px){header .logo{height:44px}}
 main{max-width:660px;margin:0 auto;padding:18px 14px 60px}
 .bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
       padding:20px 18px;margin-bottom:14px}
@@ -80,8 +85,13 @@ button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 
 <header>
   <div class="dedans">
-    <h1>Signaler une intervention terminée</h1>
-    <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+    <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
+      <div>
+        <h1>Signaler une intervention terminée</h1>
+            <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+      </div>
+    </div>
   </div>
 </header>
 

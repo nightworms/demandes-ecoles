@@ -24,6 +24,11 @@ header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--
 header .dedans{max-width:640px;margin:0 auto}
 header h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
 header p{margin:8px 0 0;font-size:15px;color:var(--encre-doux)}
+/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
+   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
+header .marque{display:flex;align-items:center;gap:14px;min-width:0}
+header .logo{height:56px;width:auto;flex:none;display:block}
+@media (max-width:480px){header .logo{height:44px}}
 main{max-width:640px;margin:0 auto;padding:26px 16px 60px}
 .porte{display:block;background:var(--blanc);border:1px solid var(--trait);
        border-left:4px solid var(--marine);border-radius:12px;padding:20px 22px;
@@ -45,8 +50,13 @@ footer a{color:var(--encre-doux)}
 
 <header>
   <div class="dedans">
-    <h1>Demandes des écoles</h1>
-    <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+    <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
+      <div>
+        <h1>Demandes des écoles</h1>
+            <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+      </div>
+    </div>
   </div>
 </header>
 

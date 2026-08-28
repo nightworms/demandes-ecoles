@@ -30,6 +30,12 @@ header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--
        padding-top:calc(20px + env(safe-area-inset-top))}
 header h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
 header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
+/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
+   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
+header .marque{display:flex;align-items:center;gap:14px;min-width:0}
+header .logo{height:56px;width:auto;flex:none;display:block}
+@media (max-width:480px){header .logo{height:44px}}
+header .dedans{max-width:660px;margin:0 auto}
 main{max-width:660px;margin:0 auto;padding:16px 14px}
 .bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:var(--rayon);
       padding:18px 16px;margin-bottom:14px}
@@ -52,13 +58,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
 fieldset{border:0;padding:0;margin:0 0 15px}
 .domaines{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
 .domaine{position:relative;display:flex;flex-direction:column;justify-content:center;
-         min-height:78px;padding:12px 13px;background:var(--blanc);border:1.5px solid var(--trait-champ);
+         min-height:96px;padding:12px 13px;background:var(--blanc);border:1.5px solid var(--trait-champ);
          border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px;
          font-weight:600;color:var(--encre);line-height:1.3}
 .domaine small{display:block;font-weight:400;font-size:13px;color:var(--encre-pale);margin-top:3px}
 .domaine[aria-pressed="true"]{border-color:var(--marine-encre);background:var(--marine-pale);color:var(--marine-encre)}
 .domaine[aria-pressed="true"]::after{content:"✓";position:absolute;top:7px;right:9px;
          font-size:13px;font-weight:700;color:var(--marine-encre)}
+.domaine .ico{width:24px;height:24px;flex:none;align-self:flex-start;margin-bottom:7px;
+              color:var(--encre-pale)}
+.domaine[aria-pressed="true"] .ico{color:var(--marine-encre)}
 .choix{display:flex;align-items:flex-start;gap:11px;padding:13px;border:1.5px solid var(--trait-champ);
        border-radius:9px;margin-bottom:7px;cursor:pointer;background:var(--blanc);font-size:15px}
 .choix input{margin:2px 0 0;width:20px;height:20px;flex:none;accent-color:var(--marine)}
@@ -96,8 +105,15 @@ button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:v
 </head>
 <body>
 <header>
-  <h1>Signaler une demande</h1>
-  <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+  <div class="dedans">
+    <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
+      <div>
+        <h1>Signaler une demande</h1>
+          <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+      </div>
+    </div>
+  </div>
 </header>
 <main>
   <div id="erreur-globale" class="encart erreur" role="alert" hidden></div>
@@ -220,7 +236,7 @@ let domaineChoisi = null;
   try {
     [ECOLES, DOMAINES, TYPES] = await Promise.all([
       lire('v_ecoles_publiques?select=id,secteur,type_ecole,nom,adresse,telephone&order=secteur,nom'),
-      lire('v_domaines_publics?select=id,libelle,aide,ordre,photo_obligatoire&order=ordre'),
+      lire('v_domaines_publics?select=id,code,libelle,aide,ordre,photo_obligatoire&order=ordre'),
       lire('v_types_publics?select=id,domaine_id,libelle,ordre&order=ordre')
     ]);
     remplirSecteurs();
@@ -259,9 +275,33 @@ $('#ecole').addEventListener('change', e => {
   chercherDoublons();
   verifierComplet();
 });
+
+// Une icône par domaine, dessinée au trait — décision 4 de la charte.
+// Décoratives : aria-hidden, c'est le libellé qui porte le sens.
+// Un code inconnu ne rend aucune icône, la carte reste celle d'avant.
+const ICONES = (() => {
+  const svg = p => '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+    + ' stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"'
+    + ' aria-hidden="true" focusable="false">' + p + '</svg>';
+  return {
+    RESTAURATION:      svg('<path d="M3.5 18.5h17"/><path d="M5 18.5a7 7 0 0 1 14 0"/><path d="M12 11.5v-2"/>'),
+    INFORMATIQUE:      svg('<rect x="3" y="4.5" width="18" height="12" rx="1.6"/><path d="M9 20.5h6M12 16.5v4"/>'),
+    MOBILIER:          svg('<rect x="7" y="3.5" width="10" height="6" rx="1"/><path d="M8.5 9.5v3M15.5 9.5v3"/><path d="M5.5 12.5h13"/><path d="M7.5 12.5v7M16.5 12.5v7"/>'),
+    VENTILATION:       svg('<path d="M3 8h10a2.8 2.8 0 1 0-2.8-2.8"/><path d="M3 12h13.5a2.8 2.8 0 1 1-2.8 2.8"/><path d="M3 16h8.5a2.4 2.4 0 1 1-2.4 2.4"/>'),
+    RIDEAUX:           svg('<rect x="3.5" y="3.5" width="17" height="17" rx="1.6"/><path d="M8.5 3.5c1.2 5.7-1.2 11.3 0 17M15.5 3.5c-1.2 5.7 1.2 11.3 0 17"/>'),
+    CLES_BIP:          svg('<circle cx="8" cy="8" r="4.2"/><path d="M11 11l8.5 8.5"/><path d="M16.5 16.5l2-2M18.5 18.5l2-2"/>'),
+    SECURITE_INCENDIE: svg('<path d="M12 21a5.5 5.5 0 0 0 5.5-5.5C17.5 11 12 6.5 12 6.5S6.5 11 6.5 15.5A5.5 5.5 0 0 0 12 21z"/><path d="M12 21a2.5 2.5 0 0 0 2.5-2.5c0-2-2.5-4-2.5-4s-2.5 2-2.5 4A2.5 2.5 0 0 0 12 21z"/>'),
+    TRAVAUX:           svg('<path d="M3.5 18h17"/><path d="M6 18v-3.5a6 6 0 0 1 12 0V18"/><path d="M10 9.2V5.6a1.1 1.1 0 0 1 1.1-1.1h1.8a1.1 1.1 0 0 1 1.1 1.1v3.6"/>'),
+    BATIMENT:          svg('<path d="M4 20.5V8l8-4.5 8 4.5v12.5"/><path d="M3 20.5h18"/><rect x="9.5" y="13" width="5" height="7.5"/>'),
+    ESPACES_VERTS:     svg('<circle cx="12" cy="9" r="6.5"/><path d="M12 15.5v5.5"/>'),
+    TRAITEMENT_3D:     svg('<rect x="7.5" y="8.5" width="7.5" height="12" rx="1.8"/><path d="M9.5 8.5v-2h3.5v2"/><path d="M17 5.5h2.5M19 4v3"/>'),
+    TRI:               svg('<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17.6h.01"/>')
+  };
+})();
 function afficherDomaines() {
   $('#domaines').innerHTML = DOMAINES.map(d =>
     '<button type="button" class="domaine" data-id="' + d.id + '" aria-pressed="false">' +
+    (ICONES[d.code] || '') +
     d.libelle + (d.aide ? '<small>' + d.aide + '</small>' : '') + '</button>').join('');
   $('#domaines').addEventListener('click', ev => {
     const b = ev.target.closest('.domaine'); if (!b) return;
