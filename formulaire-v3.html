@@ -407,11 +407,27 @@ $('#form-connexion').addEventListener('submit', async ev => {
   try {
     // On revient sur CETTE page : l'école voulait déposer une demande,
     // pas consulter une liste.
+    const adresse = $('#email-connexion').value.trim();
+    //  L'académie rejette nos messages depuis le 25 août (« poor reputation
+    //  of a domain used in message transfer »). Supabase accepterait l'envoi
+    //  sans broncher, et l'école attendrait un lien qui ne viendrait jamais,
+    //  sans le moindre message d'erreur : le rejet a lieu chez eux, après coup.
+    //  On le dit AVANT d'envoyer.
+    //  ⚠️ À retirer le jour où l'académie débloquera relais-ecoles.fr.
+    if (/@ac-reunion\.fr$/i.test(adresse)) {
+      montrerErreur("Les adresses en @ac-reunion.fr refusent aujourd'hui nos messages : "
+        + "le lien ne vous parviendrait pas. Utilisez l'adresse de votre école "
+        + "en @saintdenis.re. En cas de doute, appelez le Pôle Technique "
+        + "au 0262 40 45 11.");
+      b.disabled = false; b.textContent = 'Recevoir mon lien';
+      return;
+    }
+
     const retour = location.origin + location.pathname;
     const r = await fetch(`${API}/auth/v1/otp?redirect_to=${encodeURIComponent(retour)}`, {
       method: 'POST',
       headers: { apikey: CLE, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: $('#email-connexion').value.trim(), create_user: true })
+      body: JSON.stringify({ email: adresse, create_user: true })
     });
     if (r.status === 429) {
       montrerErreur("Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.");
