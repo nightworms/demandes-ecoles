@@ -57,7 +57,10 @@ button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 .encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.attente{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
 .encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
-.encart strong{display:block;margin-bottom:4px}
+/* Seul le PREMIER strong d'un encart fait office de titre. Sans « first-child »,
+   tout mot mis en gras au fil du texte partait sur sa propre ligne et coupait
+   la phrase en deux. */
+.encart > strong:first-child{display:block;margin-bottom:4px}
 .fiche{width:100%;border-collapse:collapse;margin:2px 0 4px}
 .fiche td{padding:9px 2px;font-size:14.5px;vertical-align:top;border-bottom:1px solid var(--trait)}
 .fiche tr:last-child td{border-bottom:0}

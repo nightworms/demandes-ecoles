@@ -157,7 +157,9 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 .encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.attention{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
 .encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
-.encart strong{display:block;margin-bottom:3px}
+/* Seul le PREMIER strong d'un encart fait office de titre — sinon tout mot
+   mis en gras au fil du texte part sur sa propre ligne. */
+.encart > strong:first-child{display:block;margin-bottom:3px}
 .connexion{max-width:440px;margin:40px auto;background:var(--blanc);border:1px solid var(--trait);
            border-radius:12px;padding:24px}
 .connexion h2{margin:0 0 6px;font-size:18px}

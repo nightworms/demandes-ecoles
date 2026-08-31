@@ -77,7 +77,10 @@ fieldset{border:0;padding:0;margin:0 0 15px}
 .encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.alerte{background:var(--attention-pale);color:var(--attention);border-left:4px solid var(--attention)}
 .encart.erreur{background:var(--urgent-pale);color:var(--urgent);border-left:4px solid var(--urgent)}
-.encart strong{display:block;margin-bottom:4px}
+/* Seul le PREMIER strong d'un encart fait office de titre. Sans « first-child »,
+   tout mot mis en gras au fil du texte partait sur sa propre ligne et coupait
+   la phrase en deux. */
+.encart > strong:first-child{display:block;margin-bottom:4px}
 .encart ul{margin:8px 0 0;padding-left:20px}
 .photos{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
 .vignette{position:relative;width:88px;height:88px;border-radius:9px;overflow:hidden;border:1.5px solid var(--trait-champ)}
@@ -408,21 +411,6 @@ $('#form-connexion').addEventListener('submit', async ev => {
     // On revient sur CETTE page : l'école voulait déposer une demande,
     // pas consulter une liste.
     const adresse = $('#email-connexion').value.trim();
-    //  L'académie rejette nos messages depuis le 25 août (« poor reputation
-    //  of a domain used in message transfer »). Supabase accepterait l'envoi
-    //  sans broncher, et l'école attendrait un lien qui ne viendrait jamais,
-    //  sans le moindre message d'erreur : le rejet a lieu chez eux, après coup.
-    //  On le dit AVANT d'envoyer.
-    //  ⚠️ À retirer le jour où l'académie débloquera relais-ecoles.fr.
-    if (/@ac-reunion\.fr$/i.test(adresse)) {
-      montrerErreur("Les adresses en @ac-reunion.fr refusent aujourd'hui nos messages : "
-        + "le lien ne vous parviendrait pas. Utilisez l'adresse de votre école "
-        + "en @saintdenis.re. En cas de doute, appelez le Pôle Technique "
-        + "au 0262 40 45 11.");
-      b.disabled = false; b.textContent = 'Recevoir mon lien';
-      return;
-    }
-
     const retour = location.origin + location.pathname;
     const r = await fetch(`${API}/auth/v1/otp?redirect_to=${encodeURIComponent(retour)}`, {
       method: 'POST',
@@ -436,6 +424,17 @@ $('#form-connexion').addEventListener('submit', async ev => {
     } else {
       $('#form-connexion').hidden = true;
       $('#lien-envoye').hidden = false;
+      //  L'académie a rejeté nos messages le 25 août, puis les a délivrés le
+      //  31 : la livraison chez eux n'est pas sûre. On ne bloque donc pas —
+      //  une directrice a déposé depuis son adresse académique — mais on donne
+      //  la porte de secours si rien n'arrive.
+      if (/@ac-reunion\.fr$/i.test(adresse)) {
+        $('#lien-envoye').insertAdjacentHTML('beforeend',
+          "<br><br>Si rien ne vous parvient d'ici quelques minutes, réessayez "
+          + "avec l'adresse de votre école en <strong>@saintdenis.re</strong> : "
+          + "les messages vers l'académie sont parfois refusés. "
+          + "En cas de doute, appelez le Pôle Technique au 0262 40 45 11.");
+      }
     }
   } catch (e) {
     montrerErreur("L'envoi a échoué. Vérifiez votre connexion, puis réessayez.");
