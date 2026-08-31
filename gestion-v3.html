@@ -5,19 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Demandes des écoles — Pôle Technique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
 :root{
-  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026.
-     Une seule couleur saturée, réservée à ce sur quoi on clique.
-     Contrastes vérifiés : 4,5:1 pour le texte, 3:1 pour les contrôles. */
-  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
-  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
-  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
-  --agir:#8A5B00; --agir-pale:#FEF3C7;
-  --fait:#065F46; --fait-pale:#D1FAE5;
-  --alerte:#B3261E; --alerte-pale:#FEE2E2;
-  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  /* ── Charte « basalte & lagon » — arrêtée par Anthony le 31/08/2026 ───────
+     Elle remplace la palette précédente, qui était celle de Tailwind par
+     défaut : treize couleurs sur seize reprises telles quelles, et aucune
+     police choisie. C'est ce qui donnait à la plateforme son air de logiciel
+     générique.
+
+     Ici : le basalte de l'île plutôt qu'un gris bleuté, un bleu-vert de lagon
+     plutôt qu'un bleu de framework, et pour les trois signaux la canne, le
+     vétiver et le flamboyant.
+
+     Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible
+     est le bord des champs, à 3,82:1.
+
+     ⚠️ Ce bloc est le même sur les six pages. La source est
+     systeme-design/jetons.css — modifier là-bas, puis reporter. */
+
+  --marine:#0B6E75; --marine-clair:#0A5D63; --marine-pale:#D6EEF0; --marine-encre:#084B50;
+  --encre:#1C1A19; --encre-doux:#4A4644; --encre-pale:#6E6864;
+  --fond:#FAF8F5; --blanc:#fff; --trait:#E4DED7; --trait-champ:#8A817A;
+  --agir:#8A5B00; --agir-pale:#FBF0D5;
+  --fait:#3F6212; --fait-pale:#ECF5DC;
+  --alerte:#A32014; --alerte-pale:#FCE8E4;
+
+  /*  Alias : le formulaire nommait « urgent » et « attention » ce que les
+      autres pages nomment « alerte » et « agir ». Deux noms pour une chose.
+      On garde les anciens le temps d'unifier, sans dupliquer les valeurs. */
+  --urgent:var(--alerte); --urgent-pale:var(--alerte-pale);
+  --attention:var(--agir); --attention-pale:var(--agir-pale);
+
+  /*  Deux vraies polices, enfin. La serif des titres est ce qui fait basculer
+      la lecture de « tableau de bord » vers « document de la collectivité ». */
+  --police:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --police-titre:'Spectral',Georgia,'Times New Roman',serif;
   --mono:ui-monospace,'SF Mono',Menlo,monospace;
+
+  --rayon:7px;
 }
 *{box-sizing:border-box}
 /* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
@@ -34,18 +62,18 @@ header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--
        padding-top:calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:30}
 header .dedans{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;
                align-items:center;gap:16px;flex-wrap:wrap}
-header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
+header h1{margin:0;font-size:20px;font-weight:600;font-family:var(--police-titre);}
 header .qui{font-size:13px;color:var(--encre-doux);margin-top:2px}
 header .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 /* Le lien vers le tableau de bord porte l'allure des boutons voisins : c'est
    une destination de plus dans la même barre, pas un lien de texte perdu. */
 header .actions a{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
-              border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
+              border-radius:5px;padding:8px 13px;font-size:13.5px;font-family:inherit;
               cursor:pointer;white-space:nowrap;min-height:38px;text-decoration:none;
               display:inline-flex;align-items:center}
 header .actions a:hover{background:var(--fond);border-color:var(--marine-clair)}
 header button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
-              border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
+              border-radius:5px;padding:8px 13px;font-size:13.5px;font-family:inherit;
               cursor:pointer;white-space:nowrap;min-height:38px}
 header button:hover{background:var(--fond);border-color:var(--marine-clair)}
 
@@ -58,7 +86,7 @@ main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
 
 /* ─── Indicateurs ─────────────────────────────────────────── */
 .compteurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
-.compteur{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;padding:13px 15px;
+.compteur{background:var(--blanc);border:1px solid var(--trait);border-radius:7px;padding:13px 15px;
           cursor:pointer;text-align:left;font-family:inherit;border-left:4px solid var(--trait)}
 .compteur:hover{border-color:var(--marine-clair)}
 .compteur[aria-pressed="true"]{border-color:var(--marine-encre);background:var(--marine-pale);
@@ -70,27 +98,27 @@ main{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
 .compteur.fait{border-left-color:var(--fait)} .compteur.fait .n{color:var(--fait)}
 
 /* ─── Filtres ─────────────────────────────────────────────── */
-.filtres{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;
+.filtres{background:var(--blanc);border:1px solid var(--trait);border-radius:7px;
          padding:13px 15px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .filtres .champ{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 150px}
 .filtres .champ.large{flex:2 1 240px}
 .filtres label{font-size:13px;font-weight:650;color:var(--encre-doux)}
 .filtres select,.filtres input{min-height:40px;padding:8px 11px;font-size:14.5px;font-family:inherit;
-  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:8px;
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:5px;
   appearance:none;width:100%}
 .filtres select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
        background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
 input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible
   {outline:3px solid var(--marine-clair);outline-offset:2px}
-.filtres button{min-height:40px;padding:0 15px;border-radius:8px;font-family:inherit;font-size:14px;
+.filtres button{min-height:40px;padding:0 15px;border-radius:5px;font-family:inherit;font-size:14px;
   font-weight:600;cursor:pointer;background:var(--blanc);color:var(--marine);border:1.5px solid var(--trait-champ)}
 .filtres button:hover{border-color:var(--marine-clair)}
 
 /* ─── Liste ───────────────────────────────────────────────── */
 .resume{font-size:13.5px;color:var(--encre-doux);margin:0 0 10px 2px}
 .demande{background:var(--blanc);border:1px solid var(--trait);border-left:4px solid var(--trait);
-         border-radius:10px;padding:13px 15px;margin-bottom:9px;cursor:pointer;
+         border-radius:6px;padding:13px 15px;margin-bottom:9px;cursor:pointer;
          display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:start;
          width:100%;text-align:left;font-family:inherit;font-size:15px;color:var(--encre)}
 .demande:hover{border-color:var(--marine-clair)}
@@ -113,7 +141,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .puce.urgente{background:var(--alerte-pale);color:var(--alerte)}
 .puce.haute{background:var(--agir-pale);color:var(--agir)}
 .vide{text-align:center;padding:44px 20px;color:var(--encre-doux);background:var(--blanc);
-      border:1px solid var(--trait);border-radius:11px}
+      border:1px solid var(--trait);border-radius:7px}
 
 /* ─── Fiche ───────────────────────────────────────────────── */
 .voile{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:40;display:flex;
@@ -125,31 +153,31 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .fiche .barre h2{margin:0;font-size:18px;font-weight:700}
 .fiche .barre .num{font-family:var(--mono);font-size:13px;color:var(--encre-doux);display:block}
 .fiche .barre button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
-       border-radius:8px;width:38px;height:38px;font-size:19px;line-height:1;cursor:pointer;flex:none}
+       border-radius:5px;width:38px;height:38px;font-size:19px;line-height:1;cursor:pointer;flex:none}
 .fiche .corps{padding:16px}
-.carte{background:var(--blanc);border:1px solid var(--trait);border-radius:11px;
+.carte{background:var(--blanc);border:1px solid var(--trait);border-radius:7px;
        padding:15px 16px;margin-bottom:12px}
 .carte h3{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--encre-doux);
           text-transform:uppercase;letter-spacing:.04em}
 .paires{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:14.5px}
 .paires dt{color:var(--encre-doux);white-space:nowrap}
 .paires dd{margin:0}
-.texte{background:var(--fond);border-radius:8px;padding:11px 13px;font-size:14.5px;
+.texte{background:var(--fond);border-radius:5px;padding:11px 13px;font-size:14.5px;
        white-space:pre-wrap;margin-top:4px}
 .champ{margin-bottom:12px}
 .champ label{display:block;font-size:13px;font-weight:650;color:var(--encre-doux);margin-bottom:5px}
 .champ select,.champ input,.champ textarea{width:100%;min-height:42px;padding:9px 11px;font-size:15px;
   font-family:inherit;color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);
-  border-radius:8px;appearance:none}
+  border-radius:5px;appearance:none}
 .champ textarea{min-height:78px;resize:vertical}
 .champ select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
        background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 button.principal{width:100%;min-height:46px;background:var(--marine);color:#fff;border:0;
-  border-radius:9px;font-size:15.5px;font-weight:650;font-family:inherit;cursor:pointer}
+  border-radius:5px;font-size:15.5px;font-weight:650;font-family:inherit;cursor:pointer}
 button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(--marine);
-  border:1.5px solid var(--trait-champ);border-radius:9px;font-size:14.5px;font-weight:600;
+  border:1.5px solid var(--trait-champ);border-radius:5px;font-size:14.5px;font-weight:600;
   font-family:inherit;cursor:pointer}
 .journal{font-size:13.5px}
 .journal li{list-style:none;padding:7px 0;border-bottom:1px solid var(--trait)}
@@ -160,7 +188,7 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 .note .qui{display:block;font-size:13px;color:var(--encre-pale);margin-bottom:2px;white-space:normal}
 
 /* ─── Encarts et connexion ────────────────────────────────── */
-.encart{border-radius:9px;padding:13px 15px;font-size:14.5px;margin:14px 0}
+.encart{border-radius:5px;padding:13px 15px;font-size:14.5px;margin:14px 0}
 .encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.attention{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
 .encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
@@ -170,13 +198,13 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 /* Le périmètre de l'agent, sous son nom : discret, mais toujours là. */
 .portee{font-size:12.5px;color:var(--encre-pale);margin-top:2px}
 .connexion{max-width:440px;margin:40px auto;background:var(--blanc);border:1px solid var(--trait);
-           border-radius:12px;padding:24px}
+           border-radius:7px;padding:24px}
 .connexion h2{margin:0 0 6px;font-size:18px}
 .connexion p{margin:0 0 16px;font-size:14.5px;color:var(--encre-doux)}
 .connexion input{width:100%;min-height:48px;padding:12px;font-size:16px;font-family:inherit;
-  border:1.5px solid var(--trait-champ);border-radius:9px}
+  border:1.5px solid var(--trait-champ);border-radius:5px}
 .connexion button{width:100%;min-height:50px;margin-top:12px;background:var(--marine);color:#fff;
-  border:0;border-radius:9px;font-size:16px;font-weight:650;font-family:inherit;cursor:pointer}
+  border:0;border-radius:5px;font-size:16px;font-weight:650;font-family:inherit;cursor:pointer}
 .chargement{text-align:center;padding:44px 20px;color:var(--encre-doux)}
 .masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:640px){
@@ -185,6 +213,23 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
   .deux{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ─── Lambrequin ──────────────────────────────────────────────────────────
+   La dentelle de bois des varangues créoles, en frise sous l'en-tête.
+   Dessinée en CSS : nette à toutes les tailles, imprimable, et pas un octet
+   d'image à charger. Elle remplace le filet gris qui séparait l'en-tête.
+
+   30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
+   il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
+   en-tête blanc — si le fond de l'en-tête change, ce blanc doit suivre. */
+header{position:relative;padding-bottom:34px;border-bottom:0}
+header::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:30px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-repeat:repeat-x;background-size:48px 30px;
+  pointer-events:none;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
 </style>
 </head>
 <body>

@@ -4,18 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Signaler une demande — Écoles de Saint-Denis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
 :root{
-  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026.
-     Une seule couleur saturée, réservée à ce sur quoi on clique.
-     Contrastes vérifiés : 4,5:1 pour le texte, 3:1 pour les contrôles. */
-  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
-  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
-  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
-  --urgent:#B3261E; --urgent-pale:#FEE2E2;
-  --attention:#8A5B00; --attention-pale:#FEF3C7;
-  --rayon:12px;
-  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  /* ── Charte « basalte & lagon » — arrêtée par Anthony le 31/08/2026 ───────
+     Elle remplace la palette précédente, qui était celle de Tailwind par
+     défaut : treize couleurs sur seize reprises telles quelles, et aucune
+     police choisie. C'est ce qui donnait à la plateforme son air de logiciel
+     générique.
+
+     Ici : le basalte de l'île plutôt qu'un gris bleuté, un bleu-vert de lagon
+     plutôt qu'un bleu de framework, et pour les trois signaux la canne, le
+     vétiver et le flamboyant.
+
+     Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible
+     est le bord des champs, à 3,82:1.
+
+     ⚠️ Ce bloc est le même sur les six pages. La source est
+     systeme-design/jetons.css — modifier là-bas, puis reporter. */
+
+  --marine:#0B6E75; --marine-clair:#0A5D63; --marine-pale:#D6EEF0; --marine-encre:#084B50;
+  --encre:#1C1A19; --encre-doux:#4A4644; --encre-pale:#6E6864;
+  --fond:#FAF8F5; --blanc:#fff; --trait:#E4DED7; --trait-champ:#8A817A;
+  --agir:#8A5B00; --agir-pale:#FBF0D5;
+  --fait:#3F6212; --fait-pale:#ECF5DC;
+  --alerte:#A32014; --alerte-pale:#FCE8E4;
+
+  /*  Alias : le formulaire nommait « urgent » et « attention » ce que les
+      autres pages nomment « alerte » et « agir ». Deux noms pour une chose.
+      On garde les anciens le temps d'unifier, sans dupliquer les valeurs. */
+  --urgent:var(--alerte); --urgent-pale:var(--alerte-pale);
+  --attention:var(--agir); --attention-pale:var(--agir-pale);
+
+  /*  Deux vraies polices, enfin. La serif des titres est ce qui fait basculer
+      la lecture de « tableau de bord » vers « document de la collectivité ». */
+  --police:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --police-titre:'Spectral',Georgia,'Times New Roman',serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+
+  --rayon:7px;
 }
 *{box-sizing:border-box}
 /* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
@@ -28,7 +57,7 @@ body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police
      font-size:16px;line-height:1.55;padding-bottom:96px}
 header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:20px 18px;
        padding-top:calc(20px + env(safe-area-inset-top))}
-header h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
+header h1{margin:0;font-size:24px;font-weight:600;font-family:var(--police-titre);}
 header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
 /* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
    nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
@@ -48,7 +77,7 @@ label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;co
 label .opt{font-weight:400;color:var(--encre-pale)}
 input[type=text],input[type=email],input[type=tel],select,textarea{
   width:100%;min-height:48px;padding:12px 13px;font-size:16px;font-family:inherit;color:var(--encre);
-  background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:9px;appearance:none}
+  background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:5px;appearance:none}
 textarea{min-height:110px;resize:vertical;line-height:1.5}
 select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
        background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
@@ -59,7 +88,7 @@ fieldset{border:0;padding:0;margin:0 0 15px}
 .domaines{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
 .domaine{position:relative;display:flex;flex-direction:column;justify-content:center;
          min-height:96px;padding:12px 13px;background:var(--blanc);border:1.5px solid var(--trait-champ);
-         border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px;
+         border-radius:6px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px;
          font-weight:600;color:var(--encre);line-height:1.3}
 .domaine small{display:block;font-weight:400;font-size:13px;color:var(--encre-pale);margin-top:3px}
 .domaine[aria-pressed="true"]{border-color:var(--marine-encre);background:var(--marine-pale);color:var(--marine-encre)}
@@ -69,11 +98,11 @@ fieldset{border:0;padding:0;margin:0 0 15px}
               color:var(--encre-pale)}
 .domaine[aria-pressed="true"] .ico{color:var(--marine-encre)}
 .choix{display:flex;align-items:flex-start;gap:11px;padding:13px;border:1.5px solid var(--trait-champ);
-       border-radius:9px;margin-bottom:7px;cursor:pointer;background:var(--blanc);font-size:15px}
+       border-radius:5px;margin-bottom:7px;cursor:pointer;background:var(--blanc);font-size:15px}
 .choix input{margin:2px 0 0;width:20px;height:20px;flex:none;accent-color:var(--marine)}
 .choix:has(input:checked){border-color:var(--marine-encre);background:var(--marine-pale)}
 .choix span small{display:block;font-size:13px;color:var(--encre-doux);margin-top:2px}
-.encart{border-radius:9px;padding:13px 15px;font-size:14.5px;margin:14px 0}
+.encart{border-radius:5px;padding:13px 15px;font-size:14.5px;margin:14px 0}
 .encart.info{background:var(--marine-pale);color:var(--marine-encre)}
 .encart.alerte{background:var(--attention-pale);color:var(--attention);border-left:4px solid var(--attention)}
 .encart.erreur{background:var(--urgent-pale);color:var(--urgent);border-left:4px solid var(--urgent)}
@@ -83,24 +112,24 @@ fieldset{border:0;padding:0;margin:0 0 15px}
 .encart > strong:first-child{display:block;margin-bottom:4px}
 .encart ul{margin:8px 0 0;padding-left:20px}
 .photos{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
-.vignette{position:relative;width:88px;height:88px;border-radius:9px;overflow:hidden;border:1.5px solid var(--trait-champ)}
+.vignette{position:relative;width:88px;height:88px;border-radius:5px;overflow:hidden;border:1.5px solid var(--trait-champ)}
 .vignette img{width:100%;height:100%;object-fit:cover;display:block}
 .vignette button{position:absolute;top:3px;right:3px;width:26px;height:26px;border:0;border-radius:50%;
        background:rgba(0,0,0,.62);color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0}
-.ajout-photo{width:88px;height:88px;border:1.5px dashed var(--trait);border-radius:9px;background:var(--blanc);
+.ajout-photo{width:88px;height:88px;border:1.5px dashed var(--trait);border-radius:5px;background:var(--blanc);
        cursor:pointer;font-size:26px;color:var(--encre-pale);display:flex;align-items:center;justify-content:center}
 .envoi{position:fixed;left:0;right:0;bottom:0;background:var(--blanc);border-top:1px solid var(--trait);
        padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:20}
 .envoi .dedans{max-width:660px;margin:0 auto;display:flex;gap:11px;align-items:center}
-button.principal{flex:1;min-height:52px;background:var(--marine);color:#fff;border:0;border-radius:10px;
+button.principal{flex:1;min-height:52px;background:var(--marine);color:#fff;border:0;border-radius:6px;
        font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
 button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
 button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:var(--marine);
-       border:1.5px solid var(--trait-champ);border-radius:10px;font-size:15px;font-weight:600;
+       border:1.5px solid var(--trait-champ);border-radius:6px;font-size:15px;font-weight:600;
        font-family:inherit;cursor:pointer}
 .recu{text-align:center;padding:28px 20px}
 .recu .numero{font-size:27px;font-weight:700;color:var(--marine-encre);letter-spacing:.02em;
-       background:var(--marine-pale);padding:12px 20px;border-radius:10px;display:inline-block;margin:14px 0}
+       background:var(--marine-pale);padding:12px 20px;border-radius:6px;display:inline-block;margin:14px 0}
 .recu h2{margin:0;font-size:21px}
 .masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -116,16 +145,33 @@ button.deconnexion{background:none;border:0;padding:6px 2px;font-family:inherit;
   button.deconnexion{margin-left:auto;padding-top:2px}
 }
 .compte{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 15px;
-        padding:11px 13px;background:var(--fond);border:1px solid var(--trait);border-radius:9px;
+        padding:11px 13px;background:var(--fond);border:1px solid var(--trait);border-radius:5px;
         font-size:14.5px}
 .compte .quoi{font-weight:600;color:var(--encre-doux);font-size:13px}
 .compte .valeur{color:var(--encre);word-break:break-word}
 .mon-ecole{margin:0;padding:13px 15px;background:var(--marine-pale);color:var(--marine-encre);
-           border-radius:9px;font-size:15px}
+           border-radius:5px;font-size:15px}
 .mon-ecole strong{display:block;font-size:16px;margin-bottom:3px}
 .mon-ecole span{display:block;font-size:13.5px;opacity:.85;margin-top:2px}
 #ecran-connexion p.aide,#ecran-inconnu p.aide{margin-left:0}
 .attente{text-align:center;color:var(--encre-pale);padding:34px 16px;font-size:15px}
+
+/* ─── Lambrequin ──────────────────────────────────────────────────────────
+   La dentelle de bois des varangues créoles, en frise sous l'en-tête.
+   Dessinée en CSS : nette à toutes les tailles, imprimable, et pas un octet
+   d'image à charger. Elle remplace le filet gris qui séparait l'en-tête.
+
+   30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
+   il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
+   en-tête blanc — si le fond de l'en-tête change, ce blanc doit suivre. */
+header{position:relative;padding-bottom:34px;border-bottom:0}
+header::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:30px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-repeat:repeat-x;background-size:48px 30px;
+  pointer-events:none;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
 </style>
 </head>
 <body>
