@@ -36,7 +36,14 @@ header .dedans{max-width:1280px;margin:0 auto;display:flex;justify-content:space
                align-items:center;gap:16px;flex-wrap:wrap}
 header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
 header .qui{font-size:13px;color:var(--encre-doux);margin-top:2px}
-header .actions{display:flex;gap:8px;align-items:center}
+header .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* Le lien vers le tableau de bord porte l'allure des boutons voisins : c'est
+   une destination de plus dans la même barre, pas un lien de texte perdu. */
+header .actions a{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
+              border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
+              cursor:pointer;white-space:nowrap;min-height:38px;text-decoration:none;
+              display:inline-flex;align-items:center}
+header .actions a:hover{background:var(--fond);border-color:var(--marine-clair)}
 header button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
               border-radius:8px;padding:8px 13px;font-size:13.5px;font-family:inherit;
               cursor:pointer;white-space:nowrap;min-height:38px}
@@ -195,6 +202,7 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
     </div>
     </div>
     <div class="actions">
+      <a id="vers-tableau" href="tableau-de-bord.html" hidden>Tableau de bord</a>
       <button type="button" id="actualiser" hidden>Actualiser</button>
       <button type="button" id="exporter" hidden>Exporter</button>
       <button type="button" id="deconnexion" hidden>Se déconnecter</button>
@@ -298,7 +306,10 @@ const ETATS = {
 // laisserait croire qu'on peut clore une demande sans l'accord de l'école.
 const STATUTS_MANUELS = ['nouveau','en_cours','en_attente_pieces','en_attente_devis',
                          'planifie','transmis_externe','rouvert','annule'];
-const CLOS = ['resolu','cloture','annule','archive'];
+//  « cloture » n'est PAS dans cette liste : ce statut n'existe pas. La
+//  contrainte de la table ne l'admet pas, et cloturer_demande() pose
+//  'resolu' ou 'rouvert'. L'y laisser laissait croire à un état réel.
+const CLOS = ['resolu','annule','archive'];
 const PRIORITES = { urgente:'Urgente', haute:'Haute', normale:'Normale', basse:'Basse' };
 const FENETRES = { des_que_possible:'Dès que possible', avant_la_rentree:'Avant la rentrée',
                    pendant_les_vacances:'Pendant les vacances', date_precise:'À une date précise' };
@@ -1070,6 +1081,9 @@ function montrerConnexion(message) {
   $('#chargement').hidden = true;
   $('#ecran-travail').hidden = false;
   ['#actualiser', '#exporter', '#deconnexion'].forEach(s => $(s).hidden = false);
+  //  Le tableau de bord n'a d'usage que pour qui voit plus d'une poignée de
+  //  demandes : un technicien n'y lirait que ses propres chiffres.
+  $('#vers-tableau').hidden = moi?.fonction === 'technicien';
   remplirFiltres();
   brancherFiltres();
   dessinerCompteurs();

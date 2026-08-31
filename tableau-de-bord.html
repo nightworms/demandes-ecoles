@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tableau de bord — Pôle Technique</title>
+<style>
+:root{
+  /* Charte « encre & bleu » — option C, arrêtée le 27/08/2026. */
+  --marine:#2563EB; --marine-clair:#1D4ED8; --marine-pale:#DBEAFE; --marine-encre:#1E40AF;
+  --encre:#0F172A; --encre-doux:#475569; --encre-pale:#64748B;
+  --fond:#F8FAFC; --blanc:#fff; --trait:#E2E8F0; --trait-champ:#7C8CA0;
+  --agir:#8A5B00; --agir-pale:#FEF3C7;
+  --fait:#065F46; --fait-pale:#D1FAE5;
+  --alerte:#B3261E; --alerte-pale:#FEE2E2;
+  --police:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box}
+/* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden. */
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
+     font-size:16px;line-height:1.55}
+header{background:var(--blanc);border-bottom:1px solid var(--trait);padding:18px 20px}
+header .dedans{max-width:1080px;margin:0 auto;display:flex;align-items:center;
+     justify-content:space-between;gap:14px;flex-wrap:wrap}
+header .marque{display:flex;align-items:center;gap:14px;min-width:0}
+header .logo{height:52px;width:auto;flex:none;display:block}
+h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+.qui{font-size:13.5px;color:var(--encre-doux);margin-top:2px}
+.portee{font-size:12.5px;color:var(--encre-pale);margin-top:1px}
+main{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
+
+.reglages{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;
+     background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
+     padding:14px 16px;margin-bottom:18px}
+.champ{display:flex;flex-direction:column;gap:5px}
+label{font-size:13px;font-weight:600;color:var(--encre-doux)}
+select,input[type=date]{min-height:42px;padding:8px 11px;font-size:15px;font-family:inherit;
+     color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);
+     border-radius:8px;appearance:none}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
+button.principal{min-height:42px;padding:0 16px;background:var(--marine);color:#fff;border:0;
+     border-radius:8px;font-size:14.5px;font-weight:650;font-family:inherit;cursor:pointer}
+button.discret{min-height:42px;padding:0 14px;background:var(--blanc);color:var(--marine-encre);
+     border:1.5px solid var(--trait-champ);border-radius:8px;font-size:14.5px;font-weight:600;
+     font-family:inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.pousse{margin-left:auto;display:flex;gap:9px;align-items:flex-end}
+
+section.bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:12px;
+     padding:18px 18px 20px;margin-bottom:16px;break-inside:avoid}
+section.bloc > h2{margin:0 0 3px;font-size:16px;font-weight:650}
+section.bloc > p.aide{margin:0 0 16px;font-size:13.5px;color:var(--encre-pale)}
+
+.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px}
+.chiffre{border:1px solid var(--trait);border-left:4px solid var(--marine);border-radius:10px;
+     padding:13px 15px;background:var(--blanc)}
+.chiffre.agir{border-left-color:var(--agir)}
+.chiffre.alerte{border-left-color:var(--alerte)}
+.chiffre.fait{border-left-color:var(--fait)}
+.chiffre .n{display:block;font-size:27px;font-weight:700;line-height:1.1;letter-spacing:-.02em}
+.chiffre .l{display:block;font-size:13px;color:var(--encre-doux);margin-top:3px}
+.chiffre .p{display:block;font-size:12px;color:var(--encre-pale);margin-top:2px}
+
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:12.5px;font-weight:650;color:var(--encre-pale);
+   text-transform:uppercase;letter-spacing:.03em;padding:0 10px 7px 0;border-bottom:1px solid var(--trait)}
+th.n,td.n{text-align:right;font-variant-numeric:tabular-nums}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--fond);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.barre{display:block;height:9px;border-radius:5px;background:var(--marine-pale);min-width:2px;position:relative}
+.barre i{position:absolute;inset:0;width:var(--part,0%);background:var(--marine);border-radius:5px}
+.barre.chaud i{background:var(--agir)}
+td.mesure{width:42%;min-width:120px}
+.rien{color:var(--encre-pale);font-size:14.5px;margin:0}
+
+.encart{border-radius:9px;padding:13px 15px;font-size:14.5px;margin:14px 0}
+.encart.attention{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
+.encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
+.encart.info{background:var(--marine-pale);color:var(--marine-encre)}
+.encart > strong:first-child{display:block;margin-bottom:3px}
+.attente{text-align:center;color:var(--encre-pale);padding:40px 16px}
+.pied{max-width:1080px;margin:0 auto;padding:0 16px 40px;font-size:12.5px;color:var(--encre-pale)}
+
+/* ─── Impression ─────────────────────────────────────────────────────────
+   Le PDF se fabrique avec « Enregistrer au format PDF » du navigateur :
+   pas de bibliothèque à embarquer, et un vrai document paginé plutôt
+   qu'une capture d'écran étirée. */
+@media print{
+  @page{size:A4 portrait;margin:14mm 12mm}
+  body{background:#fff;font-size:11.5pt;line-height:1.4}
+  header{border-bottom:2px solid var(--encre);padding:0 0 10px;margin-bottom:14px}
+  .reglages,.pousse,.nonimprimable{display:none!important}
+  main{max-width:none;padding:0}
+  section.bloc{border:0;border-top:1px solid var(--trait);border-radius:0;
+       padding:12px 0 6px;margin:0 0 6px;break-inside:avoid}
+  section.bloc:first-of-type{border-top:0}
+  section.bloc > h2{font-size:12.5pt}
+  .chiffre{border:1px solid #ccc;border-left-width:3px}
+  .chiffre .n{font-size:17pt}
+  /* Les fonds de couleur ne s'impriment pas par défaut : on les force,
+     sinon les barres disparaissent et le tableau perd son sens. */
+  .barre,.barre i,.chiffre,.encart{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  a[href]:after{content:''}
+  .pied{padding:8px 0 0;border-top:1px solid var(--trait);margin-top:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="dedans">
+    <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="36" height="52" decoding="async">
+      <div>
+        <h1>Tableau de bord — demandes des écoles</h1>
+        <div class="qui" id="qui">Pôle Technique — Direction de l'Éducation</div>
+        <div class="portee" id="portee" hidden></div>
+      </div>
+    </div>
+    <div class="pousse nonimprimable">
+      <a class="discret" href="gestion-v3.html">← Les demandes</a>
+      <button type="button" class="discret" id="deconnexion" hidden>Se déconnecter</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="erreur" class="encart erreur" role="alert" hidden></div>
+  <p class="attente" id="chargement">Chargement…</p>
+
+  <div id="tout" hidden>
+    <div class="reglages nonimprimable">
+      <div class="champ"><label for="periode">Période</label>
+        <select id="periode">
+          <option value="30">Les 30 derniers jours</option>
+          <option value="90">Les 3 derniers mois</option>
+          <option value="annee" selected>Année scolaire en cours</option>
+          <option value="tout">Depuis le début</option>
+          <option value="perso">Dates choisies…</option>
+        </select></div>
+      <div class="champ" id="champ-du" hidden><label for="du">Du</label>
+        <input type="date" id="du"></div>
+      <div class="champ" id="champ-au" hidden><label for="au">Au</label>
+        <input type="date" id="au"></div>
+      <div class="pousse">
+        <button type="button" class="principal" id="imprimer">Enregistrer en PDF</button>
+      </div>
+    </div>
+    <div id="corps"></div>
+  </div>
+</main>
+<div class="pied" id="pied" hidden></div>
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Tableau de bord du Pôle Technique.
+//
+//  Aucune donnée n'est agrégée en base : tout est calculé ici, à partir de
+//  ce que la sécurité par ligne rend à l'agent connecté. Conséquence utile —
+//  la même page sert à la direction (tout), à un chef de cellule (la sienne)
+//  et à un référent (ses domaines), sans une ligne de code de plus.
+//
+//  La clé « publiable » est faite pour partir dans le navigateur : elle ne
+//  donne accès qu'à ce que les politiques autorisent. Jamais de « sb_secret_ ».
+// ─────────────────────────────────────────────────────────────────────────
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'sb_publishable_nTCosqebGOjUK3jGwoxhfQ_BnnkRpNn';
+const CLEF_SESSION = 'demandes-ecoles-pole';
+
+//  Mêmes seuils que le poste de travail. Arrêtés par Anthony le 31/08/2026.
+//  S'ils changent là-bas, ils doivent changer ici : deux pages qui compteraient
+//  les retards différemment se contrediraient sous les yeux de la direction.
+const RETARD_JOURS = 7, RETARD_URGENT_JOURS = 3;
+const EXTERNE_JOURS = 15, EXTERNE_URGENT_JOURS = 5;
+
+//  « cloture » n'est PAS dans cette liste : ce statut n'existe pas. La
+//  contrainte de la table ne l'admet pas, et cloturer_demande() pose
+//  'resolu' ou 'rouvert'. L'y laisser laissait croire à un état réel.
+const CLOS = ['resolu', 'annule', 'archive'];
+const $ = s => document.querySelector(s);
+
+let session = null, moi = null;
+let REF = {}, DEMANDES = [], DELAIS = {};
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(t) { const e = $('#erreur'); e.textContent = t; e.hidden = false; }
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); } catch (e) { return null; }
+}
+function ecrireSession(s) { try { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); } catch (e) {} }
+function oublierSession() { try { localStorage.removeItem(CLEF_SESSION); } catch (e) {} }
+
+function emailDuJeton() {
+  try {
+    const brut = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(brut + '==='.slice((brut.length + 3) % 4));
+    const charge = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+    return (charge.email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+async function rafraichir() {
+  if (!session?.refresh_token) return false;
+  const r = await fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+    method:'POST', headers:{ apikey: CLE, 'Content-Type':'application/json' },
+    body: JSON.stringify({ refresh_token: session.refresh_token }) });
+  if (!r.ok) return false;
+  const j = await r.json();
+  session = { access_token: j.access_token, refresh_token: j.refresh_token,
+              expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000) };
+  ecrireSession(session);
+  return true;
+}
+async function api(chemin) {
+  const lancer = () => fetch(API + '/rest/v1/' + chemin, {
+    headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+               'Content-Type': 'application/json' } });
+  let r = await lancer();
+  if (r.status === 401 && await rafraichir()) r = await lancer();
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text().catch(() => '')).slice(0, 160));
+  return r.json();
+}
+
+// ─── Périmètre, en écho au poste de travail ──────────────────────────────
+function portee() {
+  switch (moi?.fonction) {
+    case 'technicien':   return 'Ces chiffres ne portent que sur les demandes qui vous sont affectées.';
+    case 'referent':     return 'Ces chiffres ne portent que sur vos domaines.';
+    case 'chef_cellule': return 'Ces chiffres ne portent que sur votre cellule.';
+    case 'direction':
+    case 'assistante':
+    case 'secretariat':  return 'Ces chiffres portent sur toutes les demandes.';
+    default:             return '';
+  }
+}
+
+// ─── La période ──────────────────────────────────────────────────────────
+//
+//  L'année scolaire à La Réunion court de janvier à décembre : les grandes
+//  vacances sont australes. On la prend donc du 1er janvier, et non de
+//  septembre comme en métropole.
+function bornes() {
+  const choix = $('#periode').value;
+  const fin = new Date(); fin.setHours(23, 59, 59, 999);
+  if (choix === 'perso') {
+    const d = $('#du').value ? new Date($('#du').value + 'T00:00:00') : null;
+    const a = $('#au').value ? new Date($('#au').value + 'T23:59:59') : fin;
+    return { debut: d, fin: a, libelle: (d ? 'du ' + jour(d) : 'depuis le début') + ' au ' + jour(a) };
+  }
+  if (choix === 'tout')  return { debut: null, fin, libelle: 'depuis le début' };
+  if (choix === 'annee') {
+    const d = new Date(fin.getFullYear(), 0, 1);
+    return { debut: d, fin, libelle: 'année ' + fin.getFullYear() };
+  }
+  const n = Number(choix);
+  const d = new Date(fin); d.setDate(d.getDate() - n); d.setHours(0, 0, 0, 0);
+  return { debut: d, fin, libelle: 'du ' + jour(d) + ' au ' + jour(fin) };
+}
+function jour(d) {
+  return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+}
+function dansLaPeriode(d, b) {
+  const t = new Date(d.created_at);
+  return (!b.debut || t >= b.debut) && t <= b.fin;
+}
+
+// ─── Les mêmes règles de retard que le poste de travail ──────────────────
+function enRetard(d) {
+  if (CLOS.includes(d.statut) || d.pris_en_charge_le) return false;
+  const del = DELAIS[d.id];
+  if (!del || del.delai_hors_perimetre) return false;
+  return (del.delai_reaction_jours || 0) > (d.priorite === 'urgente' ? RETARD_URGENT_JOURS : RETARD_JOURS);
+}
+function sansNouvelles(d) {
+  const j = DELAIS[d.id]?.jours_chez_service;
+  if (j == null) return false;
+  return j > (d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS);
+}
+
+// ─── Petits calculs ──────────────────────────────────────────────────────
+//  Un document qui part à la direction ne mélange pas « 3.5 » et « 3,3 % ».
+function nombre(x) {
+  return x == null ? '—' : Number(x).toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+}
+function moyenne(liste) {
+  const v = liste.filter(x => x != null && !Number.isNaN(x));
+  return v.length ? Math.round((v.reduce((s, x) => s + x, 0) / v.length) * 10) / 10 : null;
+}
+//  La médiane dit mieux que la moyenne ce que vit une demande ordinaire :
+//  un dossier oublié six mois tire la moyenne et ne déplace pas la médiane.
+function mediane(liste) {
+  const v = liste.filter(x => x != null && !Number.isNaN(x)).sort((a, b) => a - b);
+  if (!v.length) return null;
+  const m = Math.floor(v.length / 2);
+  return v.length % 2 ? v[m] : Math.round(((v[m - 1] + v[m]) / 2) * 10) / 10;
+}
+function grouper(liste, cle) {
+  const m = new Map();
+  liste.forEach(d => { const k = cle(d) || '—'; m.set(k, (m.get(k) || 0) + 1); });
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+function barres(paires, total, chaud) {
+  if (!paires.length) return '<p class="rien">Rien sur cette période.</p>';
+  return `<table><thead><tr><th>Libellé</th><th class="n">Nombre</th>
+    <th class="n">Part</th><th class="mesure"></th></tr></thead><tbody>`
+    + paires.map(([k, n]) => {
+        const part = total ? Math.round((n / total) * 1000) / 10 : 0;
+        return `<tr><td>${echapper(k)}</td><td class="n">${n}</td>
+          <td class="n">${part.toLocaleString('fr-FR')} %</td>
+          <td class="mesure"><span class="barre${chaud ? ' chaud' : ''}"
+            style="--part:${part}%"><i style="width:${part}%"></i></span></td></tr>`;
+      }).join('')
+    + '</tbody></table>';
+}
+function nomEcole(d) {
+  const e = REF.ecoles[d.ecole_id] || {};
+  return [e.type_ecole, e.nom].filter(Boolean).join(' ');
+}
+
+// ─── Le tableau de bord ──────────────────────────────────────────────────
+function dessiner() {
+  const b = bornes();
+  const dans = DEMANDES.filter(d => dansLaPeriode(d, b));
+  const total = dans.length;
+
+  //  « Closes sur la période » compte celles CLOSES pendant la période, même
+  //  déposées avant : c'est l'activité du service, pas le sort d'une cohorte.
+  const closes = DEMANDES.filter(d => {
+    const q = d.cloture_le || (CLOS.includes(d.statut) ? d.updated_at : null);
+    return q && (!b.debut || new Date(q) >= b.debut) && new Date(q) <= b.fin;
+  });
+  const ouvertes  = dans.filter(d => !CLOS.includes(d.statut));
+  const retards   = DEMANDES.filter(enRetard);
+  const dehors    = DEMANDES.filter(d => DELAIS[d.id]?.jours_chez_service != null);
+  const muettes   = dehors.filter(sansNouvelles);
+  const injoign   = DEMANDES.filter(d => DELAIS[d.id]?.service_injoignable
+                                      && !CLOS.includes(d.statut));
+
+  const reaction  = dans.map(d => DELAIS[d.id]?.delai_reaction_jours);
+  const urgentes  = dans.filter(d => d.priorite === 'urgente');
+
+  const chiffre = (n, l, p, classe) => `<div class="chiffre ${classe || ''}">
+      <span class="n">${n}</span><span class="l">${l}</span>
+      ${p ? `<span class="p">${p}</span>` : ''}</div>`;
+
+  const coutsRenseignes = dans.filter(d => d.cout_reel != null);
+  const totalCout = coutsRenseignes.reduce((s, d) => s + Number(d.cout_reel), 0);
+  const aChiffrer = DEMANDES.filter(d => d.cout_statut === 'a_renseigner' && CLOS.includes(d.statut));
+
+  $('#corps').innerHTML = `
+    <section class="bloc">
+      <h2>Vue d'ensemble</h2>
+      <p class="aide">Demandes déposées ${echapper(b.libelle)}.</p>
+      <div class="chiffres">
+        ${chiffre(nombre(total), 'Demandes déposées', b.libelle)}
+        ${chiffre(closes.length, 'Demandes closes', 'sur la même période', 'fait')}
+        ${chiffre(ouvertes.length, 'Encore ouvertes', 'parmi les déposées')}
+        ${chiffre(urgentes.length, 'Urgentes', total ? Math.round(urgentes.length / total * 100) + ' % du total' : '')}
+        ${chiffre(nombre(mediane(reaction)), 'Délai de réaction', 'jours ouvrés, médiane')}
+        ${chiffre(nombre(moyenne(reaction)), 'Délai de réaction', 'jours ouvrés, moyenne')}
+      </div>
+    </section>
+
+    <section class="bloc">
+      <h2>Ce qui demande une action aujourd'hui</h2>
+      <p class="aide">Ces chiffres ne dépendent pas de la période : ils décrivent l'instant présent.</p>
+      <div class="chiffres">
+        ${chiffre(retards.length, 'En retard',
+                  `plus de ${RETARD_JOURS} j ouvrés sans réponse (${RETARD_URGENT_JOURS} si urgente)`,
+                  retards.length ? 'alerte' : '')}
+        ${chiffre(dehors.length, 'Chez un autre service', 'en attente de leur réponse')}
+        ${chiffre(muettes.length, 'Sans nouvelles',
+                  `plus de ${EXTERNE_JOURS} j ouvrés dehors (${EXTERNE_URGENT_JOURS} si urgente)`,
+                  muettes.length ? 'agir' : '')}
+        ${chiffre(injoign.length, 'Service sans adresse',
+                  'aucun message n’a pu partir', injoign.length ? 'alerte' : '')}
+      </div>
+      ${injoign.length ? `<div class="encart erreur">
+        <strong>${injoign.length} demande${injoign.length > 1 ? 's ont' : ' a'} été attribuée${injoign.length > 1 ? 's' : ''} à un service sans adresse</strong>
+        Elle${injoign.length > 1 ? 's sont parties' : ' est partie'} sur le papier et nulle part en réalité.
+        Ajoutez un contact à ce service, puis prévenez-le.</div>` : ''}
+    </section>
+
+    <section class="bloc">
+      <h2>Par domaine</h2>
+      <p class="aide">Ce qui occupe le pôle, ${echapper(b.libelle)}.</p>
+      ${barres(grouper(dans, d => REF.domaines[d.domaine_id]?.libelle), total)}
+    </section>
+
+    <section class="bloc">
+      <h2>Par quartier</h2>
+      ${barres(grouper(dans, d => REF.ecoles[d.ecole_id]?.secteur), total)}
+    </section>
+
+    <section class="bloc">
+      <h2>Les écoles qui sollicitent le plus</h2>
+      <p class="aide">Les dix premières. Un volume élevé n'est pas un reproche&nbsp;:
+         il signale souvent un bâtiment vieillissant.</p>
+      ${barres(grouper(dans, nomEcole).slice(0, 10), total)}
+    </section>
+
+    <section class="bloc">
+      <h2>Les services extérieurs</h2>
+      <p class="aide">Ce qui leur a été confié et n'est pas revenu. Leur retard n'est
+         pas le vôtre&nbsp;; la relance l'est.</p>
+      ${(() => {
+        const parService = new Map();
+        dehors.forEach(d => {
+          const s = DELAIS[d.id].service_externe || 'Service non identifié';
+          const e = parService.get(s) || { n: 0, jours: [], muettes: 0 };
+          e.n++; e.jours.push(DELAIS[d.id].jours_chez_service);
+          if (sansNouvelles(d)) e.muettes++;
+          parService.set(s, e);
+        });
+        if (!parService.size) return '<p class="rien">Aucune demande en attente chez un service extérieur.</p>';
+        return `<table><thead><tr><th>Service</th><th class="n">En attente</th>
+          <th class="n">Attente médiane</th><th class="n">Sans nouvelles</th></tr></thead><tbody>`
+          + [...parService.entries()].sort((a, b2) => b2[1].n - a[1].n).map(([s, e]) =>
+              `<tr><td>${echapper(s)}</td><td class="n">${e.n}</td>
+               <td class="n">${nombre(mediane(e.jours))} j</td>
+               <td class="n">${e.muettes || '—'}</td></tr>`).join('')
+          + '</tbody></table>';
+      })()}
+    </section>
+
+    <section class="bloc">
+      <h2>Coûts</h2>
+      <p class="aide">Seuls les coûts réellement saisis sont comptés&nbsp;: aucune estimation.</p>
+      <div class="chiffres">
+        ${chiffre(totalCout.toLocaleString('fr-FR', { style:'currency', currency:'EUR', maximumFractionDigits:0 }),
+                  'Dépense constatée', `sur ${coutsRenseignes.length} demande${coutsRenseignes.length > 1 ? 's' : ''} chiffrée${coutsRenseignes.length > 1 ? 's' : ''}`)}
+        ${chiffre(aChiffrer.length, 'Restent à chiffrer', 'demandes closes sans coût saisi',
+                  aChiffrer.length ? 'agir' : '')}
+      </div>
+    </section>`;
+
+  $('#pied').innerHTML = `Tableau de bord édité le ${jour(new Date())}
+    ${moi ? '— ' + echapper(moi.nom) + ', ' + echapper(moi.fonction.replace('_', ' ')) : ''}
+    · Pôle Technique, Direction de l'Éducation, Ville de Saint-Denis
+    · ${echapper(portee())}`;
+  $('#pied').hidden = false;
+}
+
+// ─── Commandes ───────────────────────────────────────────────────────────
+$('#periode').addEventListener('change', () => {
+  const perso = $('#periode').value === 'perso';
+  $('#champ-du').hidden = !perso;
+  $('#champ-au').hidden = !perso;
+  dessiner();
+});
+['#du', '#au'].forEach(s => $(s).addEventListener('change', dessiner));
+$('#imprimer').addEventListener('click', () => window.print());
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.href = 'gestion-v3.html'; });
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  session = lireSession();
+  if (session && session.expire_le && session.expire_le < Date.now() + 60000) {
+    if (!await rafraichir()) session = null;
+  }
+  if (!session) {
+    //  Le tableau de bord n'a pas d'écran de connexion à lui : le poste de
+    //  travail en a déjà un, et deux portes pour la même serrure se
+    //  désynchronisent tôt ou tard.
+    location.href = 'gestion-v3.html';
+    return;
+  }
+
+  try {
+    const [ecoles, domaines, agents, d, del] = await Promise.all([
+      api('ecoles?select=id,nom,type_ecole,secteur,zone&order=nom'),
+      api('domaines?select=id,libelle,traitement,cellule_id&order=ordre'),
+      api('agents?select=id,nom,fonction,cellule_id,email,actif&order=nom'),
+      api('demandes?select=id,created_at,updated_at,statut,priorite,domaine_id,ecole_id,'
+        + 'pris_en_charge_le,cloture_le,cout_reel,cout_statut&order=created_at.desc'),
+      api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,'
+        + 'delai_hors_perimetre,jours_chez_service,service_externe,service_injoignable')
+    ]);
+    const parId = l => Object.fromEntries(l.map(x => [x.id, x]));
+    REF = { ecoles: parId(ecoles), domaines: parId(domaines) };
+    DEMANDES = d;
+    DELAIS = parId(del);
+    moi = agents.find(a => (a.email || '').toLowerCase() === emailDuJeton()) || null;
+  } catch (e) {
+    if (String(e.message).startsWith('401')) { oublierSession(); location.href = 'gestion-v3.html'; return; }
+    $('#chargement').hidden = true;
+    erreur("Les données n'ont pas pu être chargées. Réessayez dans un instant ; "
+         + "si le problème persiste, c'est peut-être que cette adresse n'est pas "
+         + "celle d'un agent du Pôle Technique.");
+    return;
+  }
+
+  $('#qui').textContent = moi
+    ? `${moi.nom} — ${moi.fonction.replace('_', ' ')}`
+    : emailDuJeton();
+  $('#portee').textContent = portee();
+  $('#portee').hidden = !portee();
+  $('#chargement').hidden = true;
+  $('#tout').hidden = false;
+  $('#deconnexion').hidden = false;
+  dessiner();
+})();
+</script>
+</body>
+</html>
