@@ -1,0 +1,176 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SOCLE — ce qui vaut pour toute page, avant tout composant
+   Dépend de jetons.css, et de rien d'autre.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*{ box-sizing: border-box }
+
+/*  Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
+    navigateur. Sans ceci, tout élément marqué hidden dont la classe impose un
+    display reste visible — c'est ce qui a laissé le voile d'une fiche affiché
+    en permanence, grisant une page entière, en août 2026. Cette ligne est un
+    garde-fou, pas une élégance : ne pas la retirer. */
+[hidden]{ display: none !important }
+
+html{ -webkit-text-size-adjust: 100% }
+
+body{
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: var(--corps);
+  line-height: 1.55;
+}
+
+/*  Un seul anneau de focus pour toute la plateforme. Visible, épais, décollé :
+    il doit se voir sur un fond blanc comme sur un bouton bleu. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible{
+  outline: 3px solid var(--marine-clair);
+  outline-offset: 2px;
+}
+
+/* ── En-tête ─────────────────────────────────────────────────────────────
+   Présent sur les six pages, dans la même forme : le logo de la Ville, un
+   titre, un sous-titre, et à droite les actions s'il y en a. */
+/*  L'en-tête ne se distingue plus du reste : ni fond, ni filet. C'est le
+    deuxième levier de l'épuré, après la suppression des cartes — une page où
+    chaque zone est délimitée est une page où rien ne ressort. */
+header{ padding: 26px 24px }
+
+/*  Sauf sur les pages de travail, où le repère vaut mieux que le silence :
+    le poste de travail et le tableau de bord gardent leur bandeau. */
+body.travail header{ background: var(--blanc); border-bottom: 1px solid var(--trait) }
+header .dedans{
+  max-width: 1080px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--pas-3); flex-wrap: wrap;
+}
+/*  L'en-tête suit la largeur de la page qu'il coiffe. Sans cette règle, une
+    page en colonne étroite se retrouvait avec un en-tête large de 1080 px et
+    un titre décollé de son contenu. */
+header.colonne .dedans{ max-width: 660px; display: block }
+header.large   .dedans{ max-width: 1280px }
+header .marque{ display: flex; align-items: center; gap: 14px; min-width: 0 }
+
+/*  Lambrequin — la dentelle de bois des varangues créoles, en frise sous
+    l'en-tête. Dessinée en CSS : nette à toutes les tailles, imprimable, et pas
+    un octet d'image à charger. Elle remplace le filet gris qui séparait
+    l'en-tête, d'où le border-bottom à zéro.
+
+    30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
+    il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
+    en-tête blanc — si ce fond change, ce blanc doit suivre. */
+/*  Le lambrequin n'apparaît QUE sur les pages de travail, où il tient lieu
+    de séparation. Sur une page publique épurée, il ferait exactement ce qu'on
+    cherche à éviter : une ligne de plus qui découpe. */
+body.travail header{ position: relative; padding-bottom: 34px; border-bottom: 0 }
+body.travail header::after{
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 30px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-repeat: repeat-x; background-size: 48px 30px;
+  pointer-events: none;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+/*  56 px sur six pages, 52 sur la septième. Aucune raison à l'écart. */
+header .logo{ height: 56px; width: auto; flex: none; display: block }
+@media (max-width: 480px){ header .logo{ height: 44px } }
+header h1{ margin: 0; font-size: var(--titre-m); font-weight: 700;
+           letter-spacing: -.02em }
+
+/*  Sur une page publique, l'en-tête n'est plus le titre : ce n'est qu'une
+    signature discrète en haut de page. Le titre, c'est celui de la section. */
+body.publique header h1{ font-size: 15px; font-weight: 600; letter-spacing: .01em }
+body.publique header p, body.publique header .qui{ font-size: 13px }
+
+/*  L'en-tête d'une page publique s'aligne sur SA colonne de contenu, pas sur
+    une largeur à elle : un titre décalé de trois centimètres par rapport au
+    texte qu'il coiffe se voit immédiatement. */
+body.publique header .dedans{ max-width: 960px; display: flex;
+                              align-items: center; justify-content: space-between;
+                              gap: var(--pas-3); flex-wrap: wrap }
+/*  Le sous-titre de l'en-tête s'écrit « <p> » sur quatre pages et
+    « .qui » sur les trois autres. Les deux doivent rendre pareil : ne styler
+    que .qui faisait retomber le <p> au corps de texte, en noir. */
+header p, header .qui{ margin: 5px 0 0; font-size: var(--corps-s); color: var(--encre-doux) }
+header .qui{ margin-top: 2px }
+
+/*  Le périmètre de l'agent, sous son nom. Sans cette phrase, un référent qui
+    voit trois demandes croit à une panne plutôt qu'à un périmètre. */
+header .portee{ font-size: var(--corps-xs); color: var(--encre-pale); margin-top: 1px }
+
+/*  Trois largeurs, et pas une de plus. Elles existaient déjà, à quelques
+    pixels près : 660 pour les formulaires, 1080 pour le tableau de bord,
+    1280 pour le poste de travail. Les écarts de 20 ou 40 px entre pages
+    n'étaient pas des décisions, c'était de la dérive. */
+main{ max-width: 1080px; margin: 0 auto; padding: var(--pas-5) var(--pas-4) 60px }
+
+/*  Une page publique : peu d'éléments, très espacés. Ce qui fait qu'elle
+    respire n'est pas la marge extérieure mais l'écart entre les sections. */
+body.publique main{ max-width: 960px; padding: 40px 24px var(--souffle-l) }
+body.publique main > section{ margin-bottom: var(--souffle-l) }
+
+/*  Un champ de saisie n'a aucune raison de faire 900 px de large : au-delà de
+    ~30 caractères, l'œil ne suit plus la ligne, et un bouton étiré sur toute
+    la page se lit comme une barre, pas comme une action. */
+body.publique .saisie{ max-width: 440px }
+body.publique .saisie input, body.publique .saisie select,
+body.publique .saisie textarea, body.publique .saisie button{ width: 100% }
+body.publique main > section:last-child{ margin-bottom: 0 }
+
+/*  Sur téléphone, le souffle se paie en défilement : cinq sections à 96 px
+    font une page qu'on parcourt au pouce pendant dix secondes avant d'écrire
+    quoi que ce soit. On garde de l'air, moitié moins. */
+@media (max-width: 640px){
+  body.publique main{ padding: 24px 20px var(--souffle) }
+  /*  « main > section » ne suffit pas : dans un formulaire, les sections sont
+      enfants du <form>, pas de <main>. C'est .bloc qui porte l'espacement. */
+  body.publique main > section, body.publique .bloc{ margin-bottom: 44px }
+  body.publique .bloc > h2{ font-size: 26px }
+}
+
+/*  Le navigateur donne aux fieldset un rembourrage et une bordure hérités des
+    formulaires de 1995. Toutes les pages les remettaient à zéro, chacune de
+    son côté — l'oublier ici ferait rentrer ce cadre par la fenêtre. */
+fieldset{ border: 0; padding: 0; margin: 0 0 18px }
+
+/*  Toutes les pages posaient « label,legend » ensemble, hors de tout .champ.
+    Le restreindre aux champs faisait retomber les étiquettes libres à 16 px. */
+label, legend{ display: block; font-size: var(--corps-m); font-weight: 600;
+               margin-bottom: 6px; color: var(--encre) }
+label .opt{ font-weight: 400; color: var(--encre-pale) }
+
+/*  Une colonne de saisie ne dépasse pas ~30 caractères de large : au-delà,
+    l'œil perd la ligne, et un champ étiré sur toute la page se lit comme une
+    barre. Vaut pour un formulaire entier comme pour un champ isolé. */
+body.publique .champ, body.publique .saisie{ max-width: 460px }
+
+/*  Un formulaire lu au téléphone, debout dans une cour : une colonne étroite
+    s'y lit mieux qu'une pleine largeur. */
+main.colonne{ max-width: 660px; padding: 18px 14px 60px }
+
+/*  Le poste de travail montre une liste et une fiche côte à côte. */
+main.large{ max-width: 1280px }
+
+@media (prefers-reduced-motion: reduce){
+  *{ transition: none !important; animation: none !important }
+}
+
+/* ── Impression ──────────────────────────────────────────────────────────
+   Le PDF se fabrique avec « Enregistrer au format PDF » du navigateur : pas
+   de bibliothèque embarquée, et un vrai document paginé plutôt qu'une capture
+   étirée. Ce socle pose le minimum ; chaque page complète si besoin. */
+@media print{
+  @page{ size: A4 portrait; margin: 14mm 12mm }
+  body{ background: #fff; font-size: 11.5pt; line-height: 1.4 }
+  header{ border-bottom: 2px solid var(--encre); padding: 0 0 10px; margin-bottom: 14px }
+  main{ max-width: none; padding: 0 }
+  .nonimprimable{ display: none !important }
+  a[href]:after{ content: '' }
+  /*  Les fonds de couleur ne s'impriment pas par défaut : sans ceci, les
+      barres et les pastilles disparaissent et les tableaux perdent leur sens. */
+  header::after{ height: 22px; background-size: 36px 22px }
+  .encart, .chiffre, .barre, .barre i, .etat, header::after{
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+}

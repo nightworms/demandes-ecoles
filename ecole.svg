@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" width="420" height="260" role="img" aria-label="Une école créole avec sa varangue">
+<g fill="none" stroke="#1C1A19" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Toit à deux pentes, avec sa lucarne -->
+  <path d="M62 118 L150 62 L238 118"/>
+  <path d="M132 84 h36 v-20 h-36 z"/>
+  <path d="M126 84 h48"/>
+  <!-- Corps du bâtiment -->
+  <path d="M76 118 v92 M224 118 v92 M60 210 h180"/>
+  <!-- Varangue : poteaux et lambrequin -->
+  <path d="M76 150 h148"/>
+  <path d="M96 150 v60 M150 150 v60 M204 150 v60"/>
+  <path d="M76 156 q10 0 10 8 t10 8 10-8 10-8 q10 0 10 8 t10 8 10-8 10-8
+           q10 0 10 8 t10 8 10-8 10-8 q10 0 10 8 t10 8 10-8 10-8" stroke-width="1.2"/>
+  <!-- Fenêtres à persiennes -->
+  <path d="M108 168 h28 v34 h-28 z M164 168 h28 v34 h-28 z"/>
+  <path d="M108 176 h28 M108 184 h28 M108 192 h28 M164 176 h28 M164 184 h28 M164 192 h28" stroke-width="1"/>
+  <!-- Porte -->
+  <path d="M138 210 v-32 h24 v32"/>
+  <!-- Marches -->
+  <path d="M126 210 h48 M120 218 h60 M60 218 h180" stroke-width="1.2"/>
+  <!-- Flamboyant, à droite -->
+  <path d="M330 218 v-56"/>
+  <path d="M330 178 q-16-10-22-26 M330 186 q18-8 26-24"/>
+  <path d="M296 140 q10-26 34-30 t36 26 q6 22-16 26 t-40 4 q-18-6-14-26z"/>
+  <!-- Palmier, plus loin -->
+  <path d="M382 218 q-4-34 2-56"/>
+  <path d="M384 162 q-18-14-30-10 M384 162 q-8-20-24-24 M384 162 q10-20 28-18 M384 162 q18-8 24 4"/>
+  <!-- Sol -->
+  <path d="M20 218 h380" stroke-width="1.2"/>
+  <!-- Semis de points, à la manière d'un fond quadrillé léger -->
+  <g stroke="none" fill="#1C1A19" opacity=".16">
+    <circle cx="34" cy="60" r="1.7"/><circle cx="34" cy="82" r="1.7"/><circle cx="34" cy="104" r="1.7"/>
+    <circle cx="56" cy="60" r="1.7"/><circle cx="56" cy="82" r="1.7"/>
+    <circle cx="386" cy="72" r="1.7"/><circle cx="386" cy="94" r="1.7"/>
+    <circle cx="364" cy="72" r="1.7"/>
+  </g>
+</g>
+<!-- Une seule touche de couleur, sur les fleurs du flamboyant -->
+<g fill="#0B6E75" opacity=".9">
+  <circle cx="308" cy="132" r="3.4"/><circle cx="326" cy="122" r="3.4"/>
+  <circle cx="344" cy="134" r="3.4"/><circle cx="322" cy="144" r="3.4"/>
+  <circle cx="352" cy="118" r="2.6"/>
+</g>
+</svg>

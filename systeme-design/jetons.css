@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   JETONS — « basalte & lagon »
+   La seule chose à changer pour changer l'identité de toute la plateforme.
+
+   ARRÊTÉ PAR ANTHONY LE 31/08/2026, et appliqué aux six pages.
+
+   Ce qu'elle remplace : la palette précédente était celle de Tailwind par
+   défaut — treize couleurs sur seize reprises telles quelles, et aucune police
+   choisie. C'est ce qui donnait à la plateforme son air de logiciel générique.
+
+   Ce qui change, et pourquoi :
+   · Le gris ne tire plus sur le bleu mais sur le brun — c'est le basalte de
+     l'île, et un fond chaud plutôt que froid.
+   · Le bleu est devenu un bleu-vert de lagon. On ne le confond avec aucun
+     autre logiciel.
+   · L'alerte est le rouge du flamboyant, « agir » la canne, « fait » le
+     vétiver. Trois signaux tirés d'ici, pas d'une bibliothèque.
+   · Deux vraies polices : une serif pour les titres, qui donne à un document
+     administratif son poids, et une humaniste pour l'interface.
+
+   Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible est
+   le bord des champs, à 3,82:1.
+
+   ⚠️ Ceci reste une identité de travail. Si le service communication fournit
+   la CHARTE GRAPHIQUE OFFICIELLE DE LA VILLE, elle prime — et le remplacement
+   ne touchera, là encore, que ce fichier.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
+
+:root{
+  /* ── Couleur d'action — le lagon ─────────────────────────────────────── */
+  --marine:        #0B6E75;
+  --marine-clair:  #0A5D63;
+  --marine-encre:  #084B50;
+  --marine-pale:   #D6EEF0;
+
+  /* ── Encre et papier — le basalte ────────────────────────────────────── */
+  --encre:         #1C1A19;
+  --encre-doux:    #4A4644;
+  --encre-pale:    #6E6864;
+  /*  Le fond de page est BLANC, pas teinté. C'est le premier levier de
+      l'épuré : poser le contenu sur du blanc plutôt que des cartes sur un
+      fond coloré. Le papier chaud reste, pour détacher un encart ou une
+      zone secondaire — jamais pour porter toute une page. */
+  --fond:          #FFFFFF;
+  --papier:        #FAF8F5;
+  --blanc:         #FFFFFF;
+  --trait:         #EDE9E4;   /* plus clair : un filet doit se deviner */
+  --trait-champ:   #8A817A;
+
+  /* ── Les trois signaux ───────────────────────────────────────────────── */
+  --agir:          #8A5B00;   /* la canne */
+  --agir-pale:     #FBF0D5;
+  --fait:          #3F6212;   /* le vétiver */
+  --fait-pale:     #ECF5DC;
+  --alerte:        #A32014;   /* le flamboyant */
+  --alerte-pale:   #FCE8E4;
+
+  /* ── Typographie — enfin choisie ─────────────────────────────────────── */
+  /*  UNE seule police. La serif a été essayée puis abandonnée le 31/08 :
+      dans un registre épuré, c'est la TAILLE et la GRAISSE qui font la
+      hiérarchie, pas un changement de famille. Deux familles sur une page
+      dépouillée se remarquent — et ce qui se remarque n'est plus épuré. */
+  --police:  'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --police-titre: var(--police);
+  --mono:    ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --corps-xs: 12.5px; --corps-s: 13.5px; --corps-m: 15px; --corps: 17px;
+  --titre-s: 18px; --titre-m: 24px; --titre-l: 30px;
+  /*  Le titre d'ouverture d'une page publique. Grand, et il en faut UN par
+      page — c'est lui qui donne la respiration, pas les marges. */
+  --titre-xl: 52px;
+
+  /* Des angles moins arrondis : 12 px partout donne l'air d'une application
+     grand public. Un service public gagne à être un peu plus sobre. */
+  /*  Des angles presque droits. 7 px donnait encore l'air d'une application
+      grand public ; 4 px se voit à peine, et c'est ce qu'on veut. */
+  --rayon-s: 3px; --rayon: 4px; --rayon-rond: 999px;
+  /*  L'air entre les sections. C'est ce qui manquait le plus : les blocs se
+      touchaient à 12 px, là où une page respirée en met soixante. */
+  --souffle: 64px; --souffle-l: 96px;
+  --pas-1: 4px; --pas-2: 8px; --pas-3: 12px;
+  --pas-4: 16px; --pas-5: 24px; --pas-6: 32px;
+  --cible: 44px; --cible-large: 48px;
+}
+
+/*  La serif est réservée au TITRE DE LA PAGE, dans socle.css. Elle ne descend
+    pas sur les titres de section : la serif dit « document », le sans dit
+    « interface ». Les mélanger à tous les niveaux brouille les deux.
+    (Une règle h1,h2,h3 vivait ici : elle n'avait rien à faire dans un fichier
+    de jetons, et elle mettait en serif des titres qui ne le sont pas en
+    production.) */

@@ -2,115 +2,100 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Demandes des écoles — Pôle Technique, Ville de Saint-Denis</title>
-<meta name="description" content="Signaler une demande de maintenance pour votre école, et suivre son traitement.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
 <style>
-:root{
-  /* ── Charte « basalte & lagon » — arrêtée par Anthony le 31/08/2026 ───────
-     Même bloc que sur les six autres pages. La source est
-     systeme-design/jetons.css — modifier là-bas, puis reporter. */
-  --marine:#0B6E75; --marine-clair:#0A5D63; --marine-pale:#D6EEF0; --marine-encre:#084B50;
-  --encre:#1C1A19; --encre-doux:#4A4644; --encre-pale:#6E6864;
-  --fond:#FAF8F5; --blanc:#fff; --trait:#E4DED7; --trait-champ:#8A817A;
-  --agir:#8A5B00; --agir-pale:#FBF0D5;
-  --fait:#3F6212; --fait-pale:#ECF5DC;
-  --alerte:#A32014; --alerte-pale:#FCE8E4;
-  --police:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  --police-titre:'Spectral',Georgia,'Times New Roman',serif;
-  --rayon:7px;
-}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
-     font-size:16px;line-height:1.6}
-header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:34px 20px;
-       padding-top:calc(34px + env(safe-area-inset-top))}
-header .dedans{max-width:640px;margin:0 auto}
-header h1{margin:0;font-size:26px;font-weight:600;font-family:var(--police-titre)}
-header p{margin:8px 0 0;font-size:15px;color:var(--encre-doux)}
-/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
-   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
-header .marque{display:flex;align-items:center;gap:14px;min-width:0}
-header .logo{height:56px;width:auto;flex:none;display:block}
-@media (max-width:480px){header .logo{height:44px}}
-main{max-width:640px;margin:0 auto;padding:26px 16px 60px}
-.porte{display:block;background:var(--blanc);border:1px solid var(--trait);
-       border-left:4px solid var(--marine);border-radius:7px;padding:20px 22px;
-       margin-bottom:14px;text-decoration:none;color:inherit}
-.porte:hover{border-color:var(--marine-clair);box-shadow:0 3px 14px rgba(0,0,0,.07)}
-.porte:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
-.porte h2{margin:0 0 5px;font-size:18px;font-weight:650;color:var(--marine)}
-.porte p{margin:0;font-size:15px;color:var(--encre-doux)}
-.encart{background:var(--marine-pale);border-radius:6px;padding:16px 18px;
-        margin:22px 0 0;font-size:14.5px;color:var(--marine-encre)}
-.encart strong{display:block;margin-bottom:4px}
-footer{max-width:640px;margin:0 auto;padding:0 16px 40px;font-size:13.5px;
-       color:var(--encre-pale);border-top:1px solid var(--trait);padding-top:18px}
-footer a{color:var(--encre-doux)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système :
+   systeme-design/jetons.css · socle.css · composants.css
 
-/* ─── Lambrequin ──────────────────────────────────────────────────────────
-   La dentelle de bois des varangues créoles, en frise sous l'en-tête.
-   Dessinée en CSS : nette à toutes les tailles, imprimable, sans image. */
-header{position:relative;padding-bottom:48px;border-bottom:0}
-header::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:30px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
-  background-repeat:repeat-x;background-size:48px 30px;pointer-events:none;
-  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+   C'est la seule page du service qui soit une page d'accueil : on la voit une
+   fois, on la parcourt, elle doit dire en dix secondes ce que fait la
+   plateforme. Elle a donc un titre d'ouverture, une illustration et beaucoup
+   de vide — trois choses qu'aucune page de travail ne doit avoir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ouverture{ display: grid; grid-template-columns: 1fr 420px;
+            gap: 48px; align-items: center }
+@media (max-width: 820px){
+  .ouverture{ grid-template-columns: 1fr; gap: 32px; text-align: center }
+  .ouverture svg{ margin: 0 auto }
 }
+.ouverture h1{ margin: 0 0 18px; font-size: var(--titre-xl); line-height: 1.08;
+               font-weight: 700; letter-spacing: -.025em }
+@media (max-width: 820px){ .ouverture h1{ font-size: 38px } }
+.ouverture h1 em{ font-style: normal; color: var(--marine) }
+.chapeau{ margin: 0 0 30px; font-size: 19px; color: var(--encre-doux); max-width: 30em }
+.actions{ display: flex; gap: 14px; flex-wrap: wrap }
+@media (max-width: 820px){ .actions{ justify-content: center } }
+
+/*  Les trois temps du service. Alignés, sans cadre, séparés par du vide. */
+.temps{ text-align: center }
+.trois{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; margin-top: 56px }
+@media (max-width: 820px){ .trois{ grid-template-columns: 1fr } }
+.temps h3{ margin: 20px 0 6px; font-size: var(--titre-s); font-weight: 650 }
+.temps p{ margin: 0; font-size: var(--corps-m); color: var(--encre-doux); line-height: 1.55 }
+.pastille{ display: inline-flex; align-items: center; justify-content: center;
+           width: 30px; height: 30px; border: 1.5px solid var(--marine);
+           color: var(--marine); border-radius: 50%; font-size: 14px; font-weight: 700 }
+
+footer{ border-top: 1px solid var(--trait); padding: 36px 24px 56px }
+footer .dedans{ max-width: 960px; margin: 0 auto; font-size: var(--corps-m); color: var(--encre-pale) }
+footer strong{ color: var(--encre); font-weight: 600 }
+footer a{ color: var(--marine) }
 </style>
 </head>
-<body>
-
-<header>
-  <div class="dedans">
-    <div class="marque">
-      <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
-      <div>
-        <h1>Demandes des écoles</h1>
-            <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
-      </div>
-    </div>
-  </div>
-</header>
+<body class="publique">
+<header><div class="dedans"><div class="marque">
+  <img class="logo" src="logo-saint-denis.png" alt="" width="27" height="38">
+  <div><h1>Pôle Technique</h1>
+  <p>Direction de l'Éducation — Ville de Saint-Denis</p></div>
+</div></div></header>
 
 <main>
-  <a class="porte" href="formulaire-v3.html">
-    <h2>Signaler une demande</h2>
-    <p>Une panne, une dégradation, un besoin d'intervention dans votre école.
-       Vous recevrez un lien de connexion par courriel&nbsp;: pas de mot de passe
-       à retenir, et le formulaire arrive déjà rempli au nom de votre école.</p>
-  </a>
+  <section class="ouverture">
+    <div>
+      <h1>Une panne dans votre école&nbsp;? <em>Dites-le en deux minutes.</em></h1>
+      <p class="chapeau">Un ventilateur qui ne tourne plus, une fuite, une porte qui
+         ferme mal. Vous recevez un lien par courriel, et le formulaire arrive
+         déjà rempli au nom de votre école.</p>
+      <div class="actions">
+        <a class="principal" href="formulaire-v3.html">Signaler une demande</a>
+        <a class="secondaire" href="connexion.html">Suivre mes demandes</a>
+      </div>
+    </div>
+    <img src="ecole.svg" alt="" width="420" height="260">
+  </section>
 
-  <a class="porte" href="connexion.html">
-    <h2>Suivre mes demandes</h2>
-    <p>Voir où en sont les demandes de votre école. Vous recevrez un lien de
-       connexion par courriel, sans mot de passe à retenir.</p>
-  </a>
-
-  <div class="encart">
-    <strong>Vous êtes agent du Pôle Technique ?</strong>
-    Le poste de travail est <a href="gestion-v3.html">ici</a>.
-  </div>
-
-  <div class="encart">
-    <strong>Les messages que vous recevez de ce service</strong>
-    Ils arrivent de <b>demandes@relais-ecoles.fr</b> et vous mènent toujours à une
-    adresse en <b>relais-ecoles.fr</b>. Un message qui vous emmène ailleurs ne
-    vient pas de nous.
-  </div>
+  <section class="temps">
+    <h2>Trois étapes, et <em>vous n'y revenez plus</em></h2>
+    <p class="aide" style="margin-left:auto;margin-right:auto">Le Pôle Technique s'occupe
+       du reste, et vous tient informé à chaque passage.</p>
+    <div class="trois">
+      <div><span class="pastille">1</span>
+        <h3>Vous décrivez</h3>
+        <p>Le domaine, l'endroit, ce que ça empêche de faire. Une photo si vous en avez une.</p></div>
+      <div><span class="pastille">2</span>
+        <h3>Nous intervenons</h3>
+        <p>La demande part au bon agent, ou au bon service. Vous recevez son numéro.</p></div>
+      <div><span class="pastille">3</span>
+        <h3>Vous confirmez</h3>
+        <p>Rien ne se referme sans votre accord. Si ce n'est pas réglé, vous le dites.</p></div>
+    </div>
+  </section>
 </main>
 
-<footer>
-  Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis<br>
-  18 rue Vallon Hoareau, 97400 Saint-Denis<br>
-  0262 40 45 11 · <a href="mailto:s.elisabeth@saintdenis.re">s.elisabeth@saintdenis.re</a>
-</footer>
-
+<footer><div class="dedans">
+  <p><strong>Les messages que vous recevez de ce service</strong> arrivent de
+     <strong>demandes@relais-ecoles.fr</strong> et vous mènent toujours à une adresse en
+     <strong>relais-ecoles.fr</strong>. Un message qui vous emmène ailleurs ne vient pas de nous.</p>
+  <p>Vous êtes agent du Pôle Technique&nbsp;? <a href="gestion-v3.html">Le poste de travail est ici</a>.</p>
+</div></footer>
 </body>
 </html>

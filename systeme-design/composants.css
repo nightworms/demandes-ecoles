@@ -1,0 +1,223 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPOSANTS — extraits des six pages en production, jamais inventés
+   Dépend de jetons.css et socle.css.
+
+   Chaque règle vient d'une page existante. Là où deux pages divergeaient, le
+   choix est tranché et la raison écrite sur place.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Bloc ─────────────────────────────────────────────────────────────────
+   La brique de mise en page : une carte blanche sur le fond clair. Présente
+   sur cinq des six pages. */
+/*  Sur une page publique, le bloc n'est PLUS une carte : ni fond, ni bordure,
+    ni coin arrondi. C'est le premier levier de l'épuré — une page où chaque
+    zone est encadrée est une page où l'œil ne sait plus où se poser. Ce qui
+    sépare les blocs, c'est le vide entre eux. */
+.bloc{ padding: 0; margin-bottom: var(--souffle) }
+
+/*  Sur les pages de travail, la carte reste : elle porte la structure d'une
+    liste qu'on balaie du regard, et sans elle on ne distingue plus une
+    demande de la suivante. */
+body.travail .bloc{
+  background: var(--blanc);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 18px 16px;
+  margin-bottom: var(--pas-3);
+}
+/*  Le titre d'une section publique est grand, et il porte l'accent sur UN
+    groupe de mots — jamais sur toute la ligne. C'est ce qui fait qu'une seule
+    couleur saturée suffit à toute une page. */
+.bloc > h2{ margin: 0 0 var(--pas-2); font-size: var(--titre-l); font-weight: 700;
+            letter-spacing: -.02em; line-height: 1.15 }
+/*  L'accent porte sur UN groupe de mots dans un titre, jamais sur la ligne
+    entière — c'est ce qui fait qu'une seule couleur saturée suffit à toute
+    une page. On écrit <em>, et il n'est pas mis en italique : c'est une
+    emphase de couleur, pas de style. */
+h1 em, h2 em, h3 em{ font-style: normal; color: var(--marine) }
+body.travail .bloc > h2{ margin: 0 0 var(--pas-1); font-size: var(--titre-s);
+                         font-weight: 650; letter-spacing: 0 }
+.bloc > p.aide{ margin: 0 0 var(--pas-5); font-size: var(--corps);
+                color: var(--encre-doux); max-width: 34em }
+body.travail .bloc > p.aide{ margin: 0 0 var(--pas-4); font-size: var(--corps-m) }
+
+/*  Numéro d'étape, dans les formulaires en plusieurs temps. */
+.bloc > h2 .num{
+  background: var(--marine-pale); color: var(--marine-encre);
+  width: 26px; height: 26px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex: none; margin-right: 9px;
+}
+
+/* ── Boutons ──────────────────────────────────────────────────────────────
+   Trois niveaux, et pas un de plus : l'action de la page, une action
+   secondaire, et ce qui se range dans une barre d'outils. */
+/*  Les pages écrivent « class="principal" » sur un <button> ou un <a> — jamais
+    « class="bouton principal" ». Le système décrit ce qui existe : c'est donc
+    le sélecteur qui s'adapte, pas les sept pages qu'on réécrit. */
+button.principal, button.secondaire, button.discret,
+a.principal, a.secondaire, a.discret{
+  min-height: var(--cible); padding: 0 var(--pas-4);
+  font-family: inherit; font-size: var(--corps-m); font-weight: 600;
+  border-radius: var(--rayon-s); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; white-space: nowrap; border: 0;
+}
+button.principal, a.principal{ background: var(--marine); color: #fff; font-weight: 650 }
+button.principal:disabled{ background: #A9B7C6; cursor: not-allowed }
+button.secondaire, a.secondaire{
+  background: var(--blanc); color: var(--marine-encre);
+  border: 1.5px solid var(--trait-champ);
+}
+button.discret, a.discret{
+  background: var(--blanc); color: var(--encre-doux);
+  border: 1px solid var(--trait-champ); font-size: var(--corps-s); min-height: 38px;
+  padding: 0 13px;
+}
+/*  Sur une page publique, une action secondaire d'en-tête n'est pas un
+    bouton : c'est un lien. Un cadre de plus dans un registre épuré se voit. */
+body.publique header button.discret, body.publique header a.discret{
+  background: none; border: 0; padding: 0; min-height: auto;
+  color: var(--marine); text-decoration: underline; font-weight: 600;
+}
+button.discret, a.discret:hover, button.secondaire, a.secondaire:hover{
+  background: var(--fond); border-color: var(--marine-clair);
+}
+
+/*  Sur un formulaire rempli au téléphone, l'action principale occupe la
+    largeur : elle se trouve au pouce, sans viser.
+    Les pages en avaient SIX hauteurs — 42, 46, 52, 52, 54, 54 — dont aucune
+    n'avait de raison. Deux suffisent : 44 px dans une barre, 52 px pour
+    l'action d'un formulaire. */
+button.principal.pleine, a.principal.pleine{ width: 100%; min-height: 52px;
+                                             font-size: var(--titre-s); margin-top: var(--pas-3) }
+
+/* ── Champs ───────────────────────────────────────────────────────────── */
+.champ{ margin-bottom: 15px }
+.champ label, .champ legend{
+  display: block; font-size: var(--corps-m); font-weight: 600;
+  margin-bottom: 6px; color: var(--encre);
+}
+.champ label .opt{ font-weight: 400; color: var(--encre-pale) }
+
+input[type=text], input[type=email], input[type=tel], input[type=search],
+input[type=number], input[type=date], select, textarea{
+  width: 100%; min-height: var(--cible-large); padding: 12px 13px;
+  /*  16 px n'est pas négociable : en dessous, les navigateurs mobiles
+      zooment tout seuls dès qu'on touche le champ. */
+  font-size: var(--corps); font-family: inherit; color: var(--encre);
+  background: var(--blanc); border: 1.5px solid var(--trait-champ);
+  border-radius: var(--rayon); appearance: none;
+}
+textarea{ min-height: 110px; resize: vertical; line-height: 1.5 }
+input:focus, select:focus, textarea:focus{ border-color: var(--marine-clair) }
+select{
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px;
+}
+
+/*  Choix unique présenté en cartes plutôt qu'en boutons radio nus : la zone
+    cliquable devient la ligne entière, ce qui compte au doigt. */
+.choix{
+  display: flex; align-items: flex-start; gap: 11px; padding: 13px;
+  border: 1.5px solid var(--trait-champ); border-radius: 5px;
+  margin-bottom: 7px; cursor: pointer; background: var(--blanc); font-size: 15px;
+}
+.choix input{ margin: 2px 0 0; width: 20px; height: 20px; flex: none; accent-color: var(--marine) }
+.choix:has(input:checked){ border-color: var(--marine-encre); background: var(--marine-pale) }
+.choix span small{ display: block; font-size: 13px; color: var(--encre-doux); margin-top: 2px }
+
+/* ── Encarts ──────────────────────────────────────────────────────────────
+   ⚠️ DIVERGENCE TRANCHÉE. Le même objet s'appelait « alerte » sur le
+   formulaire et « attention » sur le poste de travail. Deux noms pour une
+   chose : une correction faite d'un côté ne prenait pas de l'autre, et des
+   encarts se sont affichés sans fond ni bordure faute du bon nom.
+   Le nom retenu est « attention », parce qu'il dit ce que l'encart fait —
+   il attire l'attention — quand « alerte » se confond avec « erreur ». */
+/*  Trois pages écrivaient « padding:13px 15px », trois autres « 14px 16px »,
+    une septième autre chose encore. Aucun de ces écarts n'était une décision :
+    c'est ce que produit une charte copiée sept fois. On retient la plus serrée. */
+.encart{ border-radius: 5px; padding: 13px 15px; font-size: var(--corps-m); margin: var(--pas-3) 0 }
+.encart.info     { background: var(--marine-pale); color: var(--marine-encre) }
+.encart.attention{ background: var(--agir-pale);   color: var(--agir);   border-left: 4px solid var(--agir) }
+.encart.erreur   { background: var(--alerte-pale); color: var(--alerte); border-left: 4px solid var(--alerte) }
+.encart.fait     { background: var(--fait-pale);   color: var(--fait);   border-left: 4px solid var(--fait) }
+
+/*  ⚠️ « first-child » n'est pas un détail. Sans lui, TOUT mot mis en gras au
+    fil du texte partait sur sa propre ligne et coupait la phrase en deux —
+    « Ouvrez-le / depuis cet appareil / . Il est valable une heure ». Le défaut
+    a vécu sur les dix pages jusqu'au 31/08/2026, parce que la règle était
+    copiée dans chacune. Seul le PREMIER gras fait office de titre. */
+.encart > strong:first-child{ display: block; margin-bottom: var(--pas-1) }
+.encart ul{ margin: var(--pas-2) 0 0; padding-left: 20px }
+
+/* ── États ────────────────────────────────────────────────────────────────
+   La pastille qui dit où en est une demande. Trois familles seulement :
+   neutre, « à vous de jouer », « c'est fini ». */
+.etat{
+  display: inline-block; padding: 3px 10px; border-radius: var(--rayon-rond);
+  font-size: var(--corps-xs); font-weight: 650; white-space: nowrap;
+  background: var(--fond); color: var(--encre-doux); border: 1px solid var(--trait);
+}
+.etat.agir  { background: var(--agir-pale);   color: var(--agir);   border-color: transparent }
+.etat.fait  { background: var(--fait-pale);   color: var(--fait);   border-color: transparent }
+.etat.retard{ background: var(--alerte-pale); color: var(--alerte); border-color: transparent }
+
+/* ── Compteurs et chiffres ────────────────────────────────────────────────
+   Deux objets voisins qu'il ne faut pas confondre : le COMPTEUR est un
+   filtre — on clique dessus et la liste se réduit. Le CHIFFRE ne se clique
+   pas : c'est une mesure dans un rapport. */
+.compteurs, .chiffres{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 11px; margin-bottom: var(--pas-4);
+}
+.compteur{
+  background: var(--blanc); border: 1px solid var(--trait); border-left: 4px solid var(--marine);
+  border-radius: var(--rayon); padding: 13px 15px; cursor: pointer; text-align: left;
+  font-family: inherit;
+}
+.compteur:hover{ border-color: var(--marine-clair) }
+.compteur[aria-pressed="true"]{ border-color: var(--marine-encre); background: var(--marine-pale) }
+.chiffre{
+  background: var(--blanc); border: 1px solid var(--trait); border-left: 4px solid var(--marine);
+  border-radius: 6px; padding: 13px 15px;
+}
+.compteur .n, .chiffre .n{
+  display: block; font-size: 26px; font-weight: 700; line-height: 1.1;
+  letter-spacing: -.02em; color: var(--marine-encre);
+}
+.compteur .l, .chiffre .l{ display: block; font-size: 13px; color: var(--encre-doux); margin-top: 3px }
+.chiffre .p{ display: block; font-size: var(--corps-xs); color: var(--encre-pale); margin-top: 2px }
+.compteur.agir,   .chiffre.agir  { border-left-color: var(--agir) }
+.compteur.retard, .chiffre.alerte{ border-left-color: var(--alerte) }
+.compteur.fait,   .chiffre.fait  { border-left-color: var(--fait) }
+.compteur.agir .n,   .chiffre.agir .n  { color: var(--agir) }
+.compteur.retard .n, .chiffre.alerte .n{ color: var(--alerte) }
+.compteur.fait .n,   .chiffre.fait .n  { color: var(--fait) }
+
+/* ── Tableaux et barres ──────────────────────────────────────────────────
+   Des barres horizontales, jamais de camembert : on compare des longueurs
+   bien mieux que des angles, et une barre survit à l'impression. */
+table{ width: 100%; border-collapse: collapse; font-size: var(--corps-m) }
+th{
+  text-align: left; font-size: var(--corps-xs); font-weight: 650; color: var(--encre-pale);
+  text-transform: uppercase; letter-spacing: .03em;
+  padding: 0 10px 7px 0; border-bottom: 1px solid var(--trait);
+}
+th.n, td.n{ text-align: right; font-variant-numeric: tabular-nums }
+td{ padding: 8px 10px 8px 0; border-bottom: 1px solid var(--fond); vertical-align: middle }
+tr:last-child td{ border-bottom: 0 }
+td.mesure{ width: 42%; min-width: 120px }
+.barre{
+  display: block; height: 9px; border-radius: 5px;
+  background: var(--marine-pale); min-width: 2px; position: relative;
+}
+.barre i{ position: absolute; inset: 0; width: var(--part, 0%); background: var(--marine); border-radius: 5px }
+.barre.chaud i{ background: var(--agir) }
+
+/* ── Utilitaires ─────────────────────────────────────────────────────────
+   Volontairement peu nombreux : un système qui en compte cinquante n'est
+   plus un système, c'est un second langage à apprendre. */
+.masque{ position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.attente{ text-align: center; color: var(--encre-pale); padding: 34px var(--pas-4); font-size: 15px }
+.rien{ color: var(--encre-pale); font-size: var(--corps-m); margin: 0 }

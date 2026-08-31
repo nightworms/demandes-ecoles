@@ -6,176 +6,84 @@
 <title>Signaler une demande — Écoles de Saint-Denis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
 <style>
-:root{
-  /* ── Charte « basalte & lagon » — arrêtée par Anthony le 31/08/2026 ───────
-     Elle remplace la palette précédente, qui était celle de Tailwind par
-     défaut : treize couleurs sur seize reprises telles quelles, et aucune
-     police choisie. C'est ce qui donnait à la plateforme son air de logiciel
-     générique.
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système :
+   systeme-design/jetons.css · socle.css · composants.css
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-     Ici : le basalte de l'île plutôt qu'un gris bleuté, un bleu-vert de lagon
-     plutôt qu'un bleu de framework, et pour les trois signaux la canne, le
-     vétiver et le flamboyant.
+/*  Les douze domaines, en cartes cliquables. C'est le seul endroit de la
+    plateforme où le cadre est justifié sur une page publique : ces cartes ne
+    décorent pas, elles se cliquent, et il faut voir laquelle est choisie. */
+.domaines{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+           gap: 10px; margin-top: var(--pas-3) }
+.domaine{ position: relative; display: flex; flex-direction: column; justify-content: center;
+          min-height: 104px; padding: 14px 15px; background: var(--blanc);
+          border: 1.5px solid var(--trait); border-radius: var(--rayon); cursor: pointer;
+          text-align: left; font-family: inherit; font-size: var(--corps-m);
+          font-weight: 600; color: var(--encre); line-height: 1.3 }
+.domaine:hover{ border-color: var(--marine) }
+.domaine small{ display: block; font-weight: 400; font-size: 13px;
+                color: var(--encre-pale); margin-top: 3px }
+.domaine[aria-pressed="true"]{ border-color: var(--marine); background: var(--marine-pale);
+                               color: var(--marine-encre) }
+.domaine[aria-pressed="true"]::after{ content: "✓"; position: absolute; top: 8px; right: 10px;
+                                      font-size: 13px; font-weight: 700; color: var(--marine-encre) }
+/*  Une icône par domaine, dessinée au trait. Décorative : c'est le libellé
+    qui porte le sens, un code inconnu ne rend simplement rien. */
+.domaine .ico{ width: 26px; height: 26px; flex: none; align-self: flex-start;
+               margin-bottom: 9px; color: var(--encre-pale) }
+.domaine[aria-pressed="true"] .ico{ color: var(--marine) }
 
-     Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible
-     est le bord des champs, à 3,82:1.
+/*  Le compte connecté, et l'école qu'il dessert : ce que l'école n'a plus à
+    saisir. C'est le cœur de l'authentification obligatoire. */
+.compte{ display: flex; align-items: baseline; gap: var(--pas-2); flex-wrap: wrap;
+         margin: 0 0 var(--pas-4); font-size: var(--corps-m) }
+.compte .quoi{ font-weight: 600; color: var(--encre-pale); font-size: 13px }
+.compte .valeur{ color: var(--encre); word-break: break-word }
+.mon-ecole{ margin: 0; padding: 14px 16px; background: var(--marine-pale);
+            color: var(--marine-encre); border-radius: var(--rayon); font-size: var(--corps) }
+.mon-ecole strong{ display: block; font-size: 17px; margin-bottom: 3px }
+.mon-ecole span{ display: block; font-size: var(--corps-s); opacity: .85; margin-top: 2px }
 
-     ⚠️ Ce bloc est le même sur les six pages. La source est
-     systeme-design/jetons.css — modifier là-bas, puis reporter. */
+/*  Photos : une vignette carrée, et un carré en pointillé pour en ajouter. */
+.photos{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--pas-3) }
+.vignette{ position: relative; width: 88px; height: 88px; border-radius: var(--rayon);
+           overflow: hidden; border: 1px solid var(--trait) }
+.vignette img{ width: 100%; height: 100%; object-fit: cover; display: block }
+.vignette button{ position: absolute; top: 3px; right: 3px; width: 26px; height: 26px;
+                  border: 0; border-radius: 50%; background: rgba(0,0,0,.62); color: #fff;
+                  font-size: 15px; line-height: 1; cursor: pointer; padding: 0 }
+.ajout-photo{ width: 88px; height: 88px; border: 1.5px dashed var(--trait-champ);
+              border-radius: var(--rayon); background: var(--blanc); cursor: pointer;
+              font-size: 26px; color: var(--encre-pale); display: flex;
+              align-items: center; justify-content: center }
 
-  --marine:#0B6E75; --marine-clair:#0A5D63; --marine-pale:#D6EEF0; --marine-encre:#084B50;
-  --encre:#1C1A19; --encre-doux:#4A4644; --encre-pale:#6E6864;
-  --fond:#FAF8F5; --blanc:#fff; --trait:#E4DED7; --trait-champ:#8A817A;
-  --agir:#8A5B00; --agir-pale:#FBF0D5;
-  --fait:#3F6212; --fait-pale:#ECF5DC;
-  --alerte:#A32014; --alerte-pale:#FCE8E4;
+/*  La barre d'envoi reste collée en bas : sur un téléphone, l'action ne doit
+    pas se chercher au bout d'un formulaire de cinq écrans. */
+.envoi{ position: fixed; left: 0; right: 0; bottom: 0; background: var(--blanc);
+        border-top: 1px solid var(--trait); padding: 12px 24px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20 }
+.envoi .dedans{ max-width: 960px; margin: 0 auto; display: flex; gap: 11px; align-items: center }
+.envoi button.principal{ flex: 1 }
 
-  /*  Alias : le formulaire nommait « urgent » et « attention » ce que les
-      autres pages nomment « alerte » et « agir ». Deux noms pour une chose.
-      On garde les anciens le temps d'unifier, sans dupliquer les valeurs. */
-  --urgent:var(--alerte); --urgent-pale:var(--alerte-pale);
-  --attention:var(--agir); --attention-pale:var(--agir-pale);
+/*  L'accusé de réception, une fois la demande partie. */
+.recu{ text-align: center; padding: var(--souffle) 20px }
+.recu h2{ margin: 0 0 var(--pas-3); font-size: var(--titre-l) }
+.recu .numero{ font-size: 30px; font-weight: 700; color: var(--marine-encre);
+               letter-spacing: .02em; background: var(--marine-pale); padding: 12px 22px;
+               border-radius: var(--rayon); display: inline-block; margin: var(--pas-3) 0 }
 
-  /*  Deux vraies polices, enfin. La serif des titres est ce qui fait basculer
-      la lecture de « tableau de bord » vers « document de la collectivité ». */
-  --police:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  --police-titre:'Spectral',Georgia,'Times New Roman',serif;
-  --mono:ui-monospace,'SF Mono',Menlo,monospace;
-
-  --rayon:7px;
-}
-*{box-sizing:border-box}
-/* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
-   navigateur : sans ceci, tout élément marqué hidden dont la classe impose un
-   display reste visible. C'est ce qui laissait le voile de la fiche affiché en
-   permanence, grisant la page entière. */
-[hidden]{display:none!important}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
-     font-size:16px;line-height:1.55;padding-bottom:96px}
-header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:20px 18px;
-       padding-top:calc(20px + env(safe-area-inset-top))}
-header h1{margin:0;font-size:24px;font-weight:600;font-family:var(--police-titre);}
-header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
-/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
-   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
-header .marque{display:flex;align-items:center;gap:14px;min-width:0}
-header .logo{height:56px;width:auto;flex:none;display:block}
-@media (max-width:480px){header .logo{height:44px}}
-header .dedans{max-width:660px;margin:0 auto}
-main{max-width:660px;margin:0 auto;padding:16px 14px}
-.bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:var(--rayon);
-      padding:18px 16px;margin-bottom:14px}
-.bloc > h2{margin:0 0 4px;font-size:17px;font-weight:650;display:flex;align-items:center;gap:9px}
-.num{background:var(--marine-pale);color:var(--marine-encre);width:26px;height:26px;border-radius:50%;
-     display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
-.bloc > p.aide{margin:0 0 16px 35px;font-size:14px;color:var(--encre-doux)}
-.champ{margin-bottom:15px}
-label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;color:var(--encre)}
-label .opt{font-weight:400;color:var(--encre-pale)}
-input[type=text],input[type=email],input[type=tel],select,textarea{
-  width:100%;min-height:48px;padding:12px 13px;font-size:16px;font-family:inherit;color:var(--encre);
-  background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:5px;appearance:none}
-textarea{min-height:110px;resize:vertical;line-height:1.5}
-select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
-       background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
-input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,
-.domaine:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
-input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
-fieldset{border:0;padding:0;margin:0 0 15px}
-.domaines{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
-.domaine{position:relative;display:flex;flex-direction:column;justify-content:center;
-         min-height:96px;padding:12px 13px;background:var(--blanc);border:1.5px solid var(--trait-champ);
-         border-radius:6px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px;
-         font-weight:600;color:var(--encre);line-height:1.3}
-.domaine small{display:block;font-weight:400;font-size:13px;color:var(--encre-pale);margin-top:3px}
-.domaine[aria-pressed="true"]{border-color:var(--marine-encre);background:var(--marine-pale);color:var(--marine-encre)}
-.domaine[aria-pressed="true"]::after{content:"✓";position:absolute;top:7px;right:9px;
-         font-size:13px;font-weight:700;color:var(--marine-encre)}
-.domaine .ico{width:24px;height:24px;flex:none;align-self:flex-start;margin-bottom:7px;
-              color:var(--encre-pale)}
-.domaine[aria-pressed="true"] .ico{color:var(--marine-encre)}
-.choix{display:flex;align-items:flex-start;gap:11px;padding:13px;border:1.5px solid var(--trait-champ);
-       border-radius:5px;margin-bottom:7px;cursor:pointer;background:var(--blanc);font-size:15px}
-.choix input{margin:2px 0 0;width:20px;height:20px;flex:none;accent-color:var(--marine)}
-.choix:has(input:checked){border-color:var(--marine-encre);background:var(--marine-pale)}
-.choix span small{display:block;font-size:13px;color:var(--encre-doux);margin-top:2px}
-.encart{border-radius:5px;padding:13px 15px;font-size:14.5px;margin:14px 0}
-.encart.info{background:var(--marine-pale);color:var(--marine-encre)}
-.encart.alerte{background:var(--attention-pale);color:var(--attention);border-left:4px solid var(--attention)}
-.encart.erreur{background:var(--urgent-pale);color:var(--urgent);border-left:4px solid var(--urgent)}
-/* Seul le PREMIER strong d'un encart fait office de titre. Sans « first-child »,
-   tout mot mis en gras au fil du texte partait sur sa propre ligne et coupait
-   la phrase en deux. */
-.encart > strong:first-child{display:block;margin-bottom:4px}
-.encart ul{margin:8px 0 0;padding-left:20px}
-.photos{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
-.vignette{position:relative;width:88px;height:88px;border-radius:5px;overflow:hidden;border:1.5px solid var(--trait-champ)}
-.vignette img{width:100%;height:100%;object-fit:cover;display:block}
-.vignette button{position:absolute;top:3px;right:3px;width:26px;height:26px;border:0;border-radius:50%;
-       background:rgba(0,0,0,.62);color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0}
-.ajout-photo{width:88px;height:88px;border:1.5px dashed var(--trait);border-radius:5px;background:var(--blanc);
-       cursor:pointer;font-size:26px;color:var(--encre-pale);display:flex;align-items:center;justify-content:center}
-.envoi{position:fixed;left:0;right:0;bottom:0;background:var(--blanc);border-top:1px solid var(--trait);
-       padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:20}
-.envoi .dedans{max-width:660px;margin:0 auto;display:flex;gap:11px;align-items:center}
-button.principal{flex:1;min-height:52px;background:var(--marine);color:#fff;border:0;border-radius:6px;
-       font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
-button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
-button.secondaire{min-height:52px;padding:0 18px;background:var(--blanc);color:var(--marine);
-       border:1.5px solid var(--trait-champ);border-radius:6px;font-size:15px;font-weight:600;
-       font-family:inherit;cursor:pointer}
-.recu{text-align:center;padding:28px 20px}
-.recu .numero{font-size:27px;font-weight:700;color:var(--marine-encre);letter-spacing:.02em;
-       background:var(--marine-pale);padding:12px 20px;border-radius:6px;display:inline-block;margin:14px 0}
-.recu h2{margin:0;font-size:21px}
-.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-/* ─── Ajouts pour l'accès identifié ─────────────────────────────────────── */
-header .dedans{display:flex;align-items:center;justify-content:space-between;gap:12px}
-button.deconnexion{background:none;border:0;padding:6px 2px;font-family:inherit;font-size:13.5px;
-       font-weight:600;color:var(--marine-encre);cursor:pointer;text-decoration:underline;flex:none}
-/* Sur téléphone, garder le bouton sur la même ligne écrase le titre sur deux
-   lignes et le sous-titre sur trois. Il passe donc dessous, aligné à droite. */
-@media (max-width:520px){
-  header .dedans{flex-wrap:wrap}
-  header .marque{flex:1 1 100%}
-  button.deconnexion{margin-left:auto;padding-top:2px}
-}
-.compte{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 15px;
-        padding:11px 13px;background:var(--fond);border:1px solid var(--trait);border-radius:5px;
-        font-size:14.5px}
-.compte .quoi{font-weight:600;color:var(--encre-doux);font-size:13px}
-.compte .valeur{color:var(--encre);word-break:break-word}
-.mon-ecole{margin:0;padding:13px 15px;background:var(--marine-pale);color:var(--marine-encre);
-           border-radius:5px;font-size:15px}
-.mon-ecole strong{display:block;font-size:16px;margin-bottom:3px}
-.mon-ecole span{display:block;font-size:13.5px;opacity:.85;margin-top:2px}
-#ecran-connexion p.aide,#ecran-inconnu p.aide{margin-left:0}
-.attente{text-align:center;color:var(--encre-pale);padding:34px 16px;font-size:15px}
-
-/* ─── Lambrequin ──────────────────────────────────────────────────────────
-   La dentelle de bois des varangues créoles, en frise sous l'en-tête.
-   Dessinée en CSS : nette à toutes les tailles, imprimable, et pas un octet
-   d'image à charger. Elle remplace le filet gris qui séparait l'en-tête.
-
-   30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
-   il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
-   en-tête blanc — si le fond de l'en-tête change, ce blanc doit suivre. */
-header{position:relative;padding-bottom:34px;border-bottom:0}
-header::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:30px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
-  background-repeat:repeat-x;background-size:48px 30px;
-  pointer-events:none;
-  -webkit-print-color-adjust:exact;print-color-adjust:exact;
-}
+/*  Le corps du formulaire laisse la place à la barre d'envoi. */
+body{ padding-bottom: 96px }
 </style>
 </head>
-<body>
-<header>
+<body class="publique">
+<header class="colonne">
   <div class="dedans">
     <div class="marque">
       <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
@@ -184,7 +92,7 @@ header::after{
         <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
       </div>
     </div>
-    <button type="button" class="deconnexion" id="deconnexion" hidden>Se déconnecter</button>
+    <button type="button" class="discret" id="deconnexion" hidden>Se déconnecter</button>
   </div>
 </header>
 <main>
@@ -195,7 +103,7 @@ header::after{
   <!-- ─── Connexion ──────────────────────────────────────────────────────
        Le formulaire n'est plus ouvert à tout venant : c'est le compte qui
        dit de quelle école on parle, et la base le revérifie de son côté. -->
-  <section class="bloc" id="ecran-connexion" hidden>
+  <section class="bloc saisie" id="ecran-connexion" hidden>
     <h2>Accéder au formulaire</h2>
     <p class="aide">Saisissez l'adresse email de votre école. Vous recevrez un lien
        qui vous connectera directement, sans mot de passe à retenir.</p>
@@ -205,7 +113,7 @@ header::after{
         <input type="email" id="email-connexion" required autocomplete="email"
                inputmode="email" placeholder="ecole@saintdenis.re">
       </div>
-      <button type="submit" class="principal" id="bouton-lien">Recevoir mon lien</button>
+      <button type="submit" class="principal pleine" id="bouton-lien">Recevoir mon lien</button>
     </form>
     <div id="lien-envoye" class="encart info" role="status" hidden>
       <strong>Regardez votre boîte mail</strong>
@@ -220,7 +128,7 @@ header::after{
     <p class="aide">Vous êtes bien connecté, mais nous ne savons pas quelle école
        vous représentez. Il s'agit sans doute d'une adresse que nous ne connaissons
        pas encore.</p>
-    <div class="encart alerte">
+    <div class="encart attention">
       <strong>Que faire&nbsp;?</strong>
       Appelez le Pôle Technique au <b>0262 40 45 11</b> en indiquant l'adresse
       utilisée&nbsp;: <b id="adresse-inconnue"></b>. Nous la rattacherons à votre école.
@@ -258,7 +166,7 @@ header::after{
     <section class="bloc" id="bloc-type" hidden>
       <h2><span class="num" aria-hidden="true">4</span> Plus précisément</h2>
       <fieldset><legend class="masque">Type de demande</legend><div id="types"></div></fieldset>
-      <div id="doublons" class="encart alerte" role="status" hidden></div>
+      <div id="doublons" class="encart attention" role="status" hidden></div>
     </section>
     <section class="bloc" id="bloc-details" hidden>
       <h2><span class="num" aria-hidden="true">5</span> Décrivez la situation</h2>
@@ -305,7 +213,7 @@ header::after{
   </section>
 </main>
 <div class="envoi" id="pied" hidden><div class="dedans">
-  <button type="submit" form="formulaire" class="principal" id="bouton-envoi" disabled>Envoyer ma demande</button>
+  <button type="submit" form="formulaire" class="principal pleine" id="bouton-envoi" disabled>Envoyer ma demande</button>
 </div></div>
 <script>
 // ─────────────────────────────────────────────────────────────────────────

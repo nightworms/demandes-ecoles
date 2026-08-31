@@ -7,132 +7,52 @@
 <title>Signaler une intervention terminée — Demandes des écoles</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
 <style>
-:root{
-  /* ── Charte « basalte & lagon » — arrêtée par Anthony le 31/08/2026 ───────
-     Elle remplace la palette précédente, qui était celle de Tailwind par
-     défaut : treize couleurs sur seize reprises telles quelles, et aucune
-     police choisie. C'est ce qui donnait à la plateforme son air de logiciel
-     générique.
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système :
+   systeme-design/jetons.css · socle.css · composants.css
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-     Ici : le basalte de l'île plutôt qu'un gris bleuté, un bleu-vert de lagon
-     plutôt qu'un bleu de framework, et pour les trois signaux la canne, le
-     vétiver et le flamboyant.
+/*  Cette page s'ouvre depuis un lien reçu par mail, souvent par un agent
+    extérieur, sur un téléphone tenu d'une main. */
+.choix:focus-within{ outline: 3px solid var(--marine-clair); outline-offset: 2px }
+textarea{ min-height: 110px }
 
-     Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible
-     est le bord des champs, à 3,82:1.
+/*  La fiche récapitulative de la demande, en table de définitions. */
+.fiche{ width: 100%; border-collapse: collapse; margin: 2px 0 4px }
+.fiche td{ padding: 9px 2px; font-size: var(--corps-m); vertical-align: top;
+           border-bottom: 1px solid var(--trait) }
+.fiche tr:last-child td{ border-bottom: 0 }
+.fiche td.cle{ color: var(--encre-doux); width: 40%; white-space: nowrap; padding-right: 12px }
 
-     ⚠️ Ce bloc est le même sur les six pages. La source est
-     systeme-design/jetons.css — modifier là-bas, puis reporter. */
+.numero{ font-family: var(--mono); font-size: var(--corps-s); color: var(--encre-pale);
+         letter-spacing: .02em; display: block; margin-bottom: 3px }
+.desc{ background: var(--fond); border-radius: 5px; padding: 13px 15px; margin-top: var(--pas-3);
+       font-size: var(--corps-m); white-space: pre-wrap }
+.desc strong{ display: block; margin-bottom: 5px; font-size: var(--corps-s);
+              color: var(--encre-doux); font-weight: 650; text-transform: uppercase;
+              letter-spacing: .03em }
 
-  --marine:#0B6E75; --marine-clair:#0A5D63; --marine-pale:#D6EEF0; --marine-encre:#084B50;
-  --encre:#1C1A19; --encre-doux:#4A4644; --encre-pale:#6E6864;
-  --fond:#FAF8F5; --blanc:#fff; --trait:#E4DED7; --trait-champ:#8A817A;
-  --agir:#8A5B00; --agir-pale:#FBF0D5;
-  --fait:#3F6212; --fait-pale:#ECF5DC;
-  --alerte:#A32014; --alerte-pale:#FCE8E4;
+/*  L'encart d'attente : la demande est déjà passée à l'étape suivante. */
+.encart.attente{ background: var(--marine-pale); color: var(--marine-encre) }
 
-  /*  Alias : le formulaire nommait « urgent » et « attention » ce que les
-      autres pages nomment « alerte » et « agir ». Deux noms pour une chose.
-      On garde les anciens le temps d'unifier, sans dupliquer les valeurs. */
-  --urgent:var(--alerte); --urgent-pale:var(--alerte-pale);
-  --attention:var(--agir); --attention-pale:var(--agir-pale);
+/*  L'écran de fin. */
+.fini{ text-align: center; padding: 26px 20px }
+.fini .marque{ width: 62px; height: 62px; border-radius: 50%; background: var(--fait-pale);
+               color: var(--fait); display: flex; align-items: center; justify-content: center;
+               font-size: 31px; margin: 0 auto var(--pas-4) }
+.fini h2{ font-size: 20px; margin-bottom: var(--pas-2) }
 
-  /*  Deux vraies polices, enfin. La serif des titres est ce qui fait basculer
-      la lecture de « tableau de bord » vers « document de la collectivité ». */
-  --police:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  --police-titre:'Spectral',Georgia,'Times New Roman',serif;
-  --mono:ui-monospace,'SF Mono',Menlo,monospace;
-
-  --rayon:7px;
-}
-*{box-sizing:border-box}
-/* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
-   navigateur : sans ceci, tout élément marqué hidden dont la classe impose un
-   display reste visible. C'est ce qui laissait le voile de la fiche affiché en
-   permanence, grisant la page entière. */
-[hidden]{display:none!important}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--police);
-     font-size:16px;line-height:1.55}
-header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:20px 18px;
-       padding-top:calc(20px + env(safe-area-inset-top))}
-header .dedans{max-width:660px;margin:0 auto}
-header h1{margin:0;font-size:24px;font-weight:600;font-family:var(--police-titre);}
-header p{margin:5px 0 0;font-size:13.5px;color:var(--encre-doux)}
-/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
-   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
-header .marque{display:flex;align-items:center;gap:14px;min-width:0}
-header .logo{height:56px;width:auto;flex:none;display:block}
-@media (max-width:480px){header .logo{height:44px}}
-main{max-width:660px;margin:0 auto;padding:18px 14px 60px}
-.bloc{background:var(--blanc);border:1px solid var(--trait);border-radius:7px;
-      padding:20px 18px;margin-bottom:14px}
-h2{margin:0 0 6px;font-size:17px;font-weight:650}
-p.aide{margin:0 0 18px;font-size:14.5px;color:var(--encre-doux)}
-label,legend{display:block;font-size:14.5px;font-weight:600;margin-bottom:6px;color:var(--encre)}
-label .opt{font-weight:400;color:var(--encre-pale)}
-textarea{width:100%;min-height:110px;padding:12px 13px;font-size:16px;font-family:inherit;
-  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);
-  border-radius:5px;resize:vertical;line-height:1.5;appearance:none}
-textarea:focus{border-color:var(--marine-clair)}
-textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--marine-clair);outline-offset:2px}
-fieldset{border:0;padding:0;margin:0 0 16px}
-button.principal{width:100%;min-height:54px;margin-top:16px;background:var(--marine);color:#fff;
-  border:0;border-radius:6px;font-size:17px;font-weight:650;font-family:inherit;cursor:pointer}
-button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
-.encart{border-radius:5px;padding:14px 16px;font-size:14.5px;margin:16px 0}
-.encart.info{background:var(--marine-pale);color:var(--marine-encre)}
-.encart.attente{background:var(--agir-pale);color:var(--agir);border-left:4px solid var(--agir)}
-.encart.erreur{background:var(--alerte-pale);color:var(--alerte);border-left:4px solid var(--alerte)}
-/* Seul le PREMIER strong d'un encart fait office de titre. Sans « first-child »,
-   tout mot mis en gras au fil du texte partait sur sa propre ligne et coupait
-   la phrase en deux. */
-.encart > strong:first-child{display:block;margin-bottom:4px}
-.fiche{width:100%;border-collapse:collapse;margin:2px 0 4px}
-.fiche td{padding:9px 2px;font-size:14.5px;vertical-align:top;border-bottom:1px solid var(--trait)}
-.fiche tr:last-child td{border-bottom:0}
-.fiche td.cle{color:var(--encre-doux);width:40%;white-space:nowrap;padding-right:12px}
-.numero{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13.5px;
-        color:var(--encre-pale);letter-spacing:.02em;display:block;margin-bottom:3px}
-.desc{background:var(--fond);border-radius:5px;padding:13px 15px;margin-top:14px;
-      font-size:14.5px;white-space:pre-wrap}
-.desc strong{display:block;margin-bottom:5px;font-size:13.5px;color:var(--encre-doux);
-             font-weight:650;text-transform:uppercase;letter-spacing:.03em}
-.etat{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:650;
-      padding:4px 10px;border-radius:20px;background:var(--marine-pale);color:var(--marine-encre)}
-.etat.agir{background:var(--agir-pale);color:var(--agir)}
-.etat.fait{background:var(--fait-pale);color:var(--fait)}
-.fini{text-align:center;padding:26px 20px}
-.fini .marque{width:62px;height:62px;border-radius:50%;background:var(--fait-pale);color:var(--fait);
-      display:flex;align-items:center;justify-content:center;font-size:31px;margin:0 auto 16px}
-.fini h2{font-size:20px;margin-bottom:8px}
-.chargement{text-align:center;padding:40px 20px;color:var(--encre-doux)}
-.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-
-/* ─── Lambrequin ──────────────────────────────────────────────────────────
-   La dentelle de bois des varangues créoles, en frise sous l'en-tête.
-   Dessinée en CSS : nette à toutes les tailles, imprimable, et pas un octet
-   d'image à charger. Elle remplace le filet gris qui séparait l'en-tête.
-
-   30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
-   il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
-   en-tête blanc — si le fond de l'en-tête change, ce blanc doit suivre. */
-header{position:relative;padding-bottom:34px;border-bottom:0}
-header::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:30px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
-  background-repeat:repeat-x;background-size:48px 30px;
-  pointer-events:none;
-  -webkit-print-color-adjust:exact;print-color-adjust:exact;
-}
+.chargement{ text-align: center; padding: 40px 20px; color: var(--encre-doux) }
 </style>
 </head>
-<body>
+<body class="publique">
 
-<header>
+<header class="colonne">
   <div class="dedans">
     <div class="marque">
       <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
@@ -144,7 +64,7 @@ header::after{
   </div>
 </header>
 
-<main>
+<main class="colonne">
   <div id="erreur" class="encart erreur" role="alert" hidden></div>
 
   <p class="chargement" id="chargement">Chargement de la demande…</p>
@@ -164,7 +84,7 @@ header::after{
       <label for="commentaire">Ce qui a été fait <span class="opt">— facultatif, mais utile à l'école</span></label>
       <textarea id="commentaire" maxlength="1500"
                 placeholder="Ex : joint du siphon remplacé, robinet d'arrêt révisé."></textarea>
-      <button type="submit" class="principal" id="valider">Déclarer l'intervention terminée</button>
+      <button type="submit" class="principal pleine" id="valider">Déclarer l'intervention terminée</button>
     </form>
   </section>
 
