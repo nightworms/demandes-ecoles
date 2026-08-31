@@ -160,6 +160,8 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 /* Seul le PREMIER strong d'un encart fait office de titre — sinon tout mot
    mis en gras au fil du texte part sur sa propre ligne. */
 .encart > strong:first-child{display:block;margin-bottom:3px}
+/* Le périmètre de l'agent, sous son nom : discret, mais toujours là. */
+.portee{font-size:12.5px;color:var(--encre-pale);margin-top:2px}
 .connexion{max-width:440px;margin:40px auto;background:var(--blanc);border:1px solid var(--trait);
            border-radius:12px;padding:24px}
 .connexion h2{margin:0 0 6px;font-size:18px}
@@ -188,6 +190,7 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
       <div>
         <h1>Demandes des écoles</h1>
               <div class="qui" id="qui">Pôle Technique — Direction de l'Éducation</div>
+        <div class="portee" id="portee" hidden></div>
       </div>
     </div>
     </div>
@@ -426,9 +429,58 @@ function aPlanifier(d) {
 }
 
 // ─── Compteurs ───────────────────────────────────────────────────────────
+// ─── Ce que chacun voit, et ce qu'il peut faire ──────────────────────────
+//
+//  La sécurité par ligne fait déjà le tri : un technicien ne reçoit que les
+//  demandes qui lui sont affectées, un référent que ses domaines, un chef que
+//  sa cellule. La page n'a donc rien à filtrer — mais elle doit DIRE à
+//  l'agent ce qu'il regarde, sinon une liste courte ressemble à une panne.
+//
+//  Elle doit aussi ne proposer que les gestes qui aboutiront : les politiques
+//  d'écriture sont plus étroites que celles de lecture. Le secrétariat lit
+//  tout et ne modifie rien ; un technicien non plus. Leur montrer un
+//  formulaire « Traiter » qui échouerait serait une promesse en l'air.
+const PEUT_MODIFIER = ['direction', 'assistante', 'chef_cellule', 'referent'];
+
+function portee() {
+  switch (moi?.fonction) {
+    case 'technicien':   return 'Vous voyez les demandes qui vous sont affectées.';
+    case 'referent':     return 'Vous voyez les demandes de vos domaines.';
+    case 'chef_cellule': return 'Vous voyez les demandes de votre cellule.';
+    case 'direction':
+    case 'assistante':
+    case 'secretariat':  return 'Vous voyez toutes les demandes.';
+    default:             return '';
+  }
+}
+function peutModifier() { return PEUT_MODIFIER.includes(moi?.fonction); }
+
+//  Prendre en charge arrête l'horloge du délai de réaction. Le secrétariat
+//  lit tout mais ne traite rien : lui laisser ce geste flatterait l'indicateur
+//  sans que personne n'ait touché la demande.
+function peutPrendre() {
+  return ['direction', 'assistante', 'chef_cellule', 'referent', 'technicien']
+    .includes(moi?.fonction);
+}
+
+//  Un technicien n'a que faire du coût, de la planification ou de l'attente
+//  d'une école : ce ne sont pas ses gestes. On ne lui montre que sa file.
+const COMPTEURS_TECHNICIEN = ['', 'a_prendre', 'en_cours', 'en_retard', 'closes'];
+
+function compteursVisibles() {
+  return moi?.fonction === 'technicien'
+    ? COMPTEURS.filter(c => COMPTEURS_TECHNICIEN.includes(c.cle))
+    : COMPTEURS;
+}
+
 const COMPTEURS = [
   { cle:'',           libelle:'Toutes',            classe:'',       test: () => true },
-  { cle:'nouveau',    libelle:'Nouvelles',         classe:'',       test: d => d.statut === 'nouveau' },
+  //  « Nouvelles » a disparu : elle comptait exactement « À prendre en charge »
+  //  moins « Rouvertes », soit trois compteurs pour deux informations.
+  { cle:'a_prendre',  libelle:'À prendre en charge',classe:'agir',
+    test: d => ['nouveau', 'rouvert'].includes(d.statut) },
+  { cle:'en_cours',   libelle:'En cours',           classe:'',
+    test: d => !CLOS.includes(d.statut) && !['nouveau', 'rouvert'].includes(d.statut) },
   { cle:'en_retard',  libelle:'En retard',         classe:'retard', test: enRetard },
   { cle:'ecole',      libelle:'Attente de l’école',classe:'agir',   test: d => d.statut === 'en_attente_validation_ecole' },
   { cle:'rouvert',    libelle:'Rouvertes',         classe:'retard', test: d => d.statut === 'rouvert' },
@@ -438,7 +490,7 @@ const COMPTEURS = [
 ];
 
 function dessinerCompteurs() {
-  $('#compteurs').innerHTML = COMPTEURS.map(c => {
+  $('#compteurs').innerHTML = compteursVisibles().map(c => {
     const n = DEMANDES.filter(c.test).length;
     return `<button type="button" class="compteur ${c.classe}" data-cle="${c.cle}"
               aria-pressed="${filtres.compteur === c.cle}">
@@ -642,7 +694,15 @@ function dessinerFiche(d, notes, journal, photos) {
         Le dépôt est privé : chaque ouverture crée un lien valable une heure.</p>
     </div>` : ''}
 
-    ${clos ? '' : `<div class="carte">
+    ${clos || !peutPrendre() || !['nouveau', 'rouvert'].includes(d.statut) ? '' : `<div class="carte">
+      <h3>Prendre en charge</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        Dites que vous vous en saisissez. L'école n'en est pas avertie ; c'est
+        l'horloge du délai de réaction qui s'arrête.</p>
+      <button type="button" class="principal" id="prendre">Je prends cette demande en charge</button>
+    </div>`}
+
+    ${clos || !peutModifier() ? '' : `<div class="carte">
       <h3>Traiter</h3>
       <div class="deux">
         <div class="champ"><label for="a-statut">État</label>
@@ -778,6 +838,26 @@ function brancherActionsFiche(d) {
     } catch (err) {
       b.disabled = false; b.textContent = 'Déclarer l’intervention terminée';
       messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#prendre')?.addEventListener('click', async () => {
+    const b = $('#prendre');
+    b.disabled = true; b.textContent = 'Enregistrement…';
+    try {
+      const r = await api('rpc/prendre_en_charge', { method: 'POST',
+        body: JSON.stringify({ _demande_id: d.id }) });
+      if (r?.ok !== true) {
+        messageFiche(r?.motif || "La prise en charge n'a pas abouti.", true);
+        b.disabled = false; b.textContent = 'Je prends cette demande en charge';
+        return;
+      }
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche('Vous avez pris cette demande en charge.', false);
+    } catch (err) {
+      messageFiche("La prise en charge n'a pas abouti. Réessayez.", true);
+      b.disabled = false; b.textContent = 'Je prends cette demande en charge';
     }
   });
 
@@ -938,6 +1018,10 @@ function montrerConnexion(message) {
     ? `${moi.nom} — ${moi.fonction.replace('_', ' ')}${REF.cellules[moi.cellule_id]
         ? ' · ' + REF.cellules[moi.cellule_id].libelle : ''}`
     : mail;
+  //  Sans cette phrase, un référent qui voit trois demandes croit à une panne
+  //  plutôt qu'à un périmètre.
+  $('#portee').textContent = portee();
+  $('#portee').hidden = !portee();
 
   try {
     await chargerDemandes();
