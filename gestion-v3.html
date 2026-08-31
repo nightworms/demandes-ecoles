@@ -270,6 +270,12 @@ const CLEF_SESSION = 'demandes-ecoles-pole';
 // pôle : ce sont eux qui décident ce que « en retard » veut dire.
 const RETARD_JOURS = 7;
 const RETARD_URGENT_JOURS = 3;
+//  Une demande confiée à un autre service — DTP, DSB, ERP, élagage — sort du
+//  compteur « En retard » : son retard n'est pas opposable au pôle. Mais la
+//  relancer l'est. Ces seuils sont plus larges que ceux de l'interne : on ne
+//  maîtrise pas la charge d'un autre service. Arrêtés par Anthony le 31/08.
+const EXTERNE_JOURS = 15;
+const EXTERNE_URGENT_JOURS = 5;
 
 const $ = s => document.querySelector(s);
 
@@ -402,7 +408,9 @@ async function chargerReferentiels() {
 async function chargerDemandes() {
   const [d, del] = await Promise.all([
     api('demandes?select=*&order=created_at.desc'),
-    api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,a_planifier_pour,delai_hors_perimetre')
+    api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,a_planifier_pour,'
+      + 'delai_hors_perimetre,jours_chez_service,service_externe,service_contact,'
+      + 'service_email,service_injoignable,dernier_cran_relance')
   ]);
   DEMANDES = d;
   DELAIS = parId(del);
@@ -423,6 +431,14 @@ function enRetard(d) {
   if (!del || del.delai_hors_perimetre) return false;
   const seuil = d.priorite === 'urgente' ? RETARD_URGENT_JOURS : RETARD_JOURS;
   return (del.delai_reaction_jours || 0) > seuil;
+}
+//  Sans nouvelles du service à qui on l'a confiée. L'horloge est calculée en
+//  base (v_demandes_delais.jours_chez_service) et s'arrête d'elle-même dès
+//  que le service a répondu : ici on ne fait que comparer au seuil.
+function sansNouvelles(d) {
+  const j = DELAIS[d.id]?.jours_chez_service;
+  if (j == null) return false;
+  return j > (d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS);
 }
 function aPlanifier(d) {
   return !CLOS.includes(d.statut) && !!DELAIS[d.id]?.a_planifier_pour;
@@ -485,6 +501,7 @@ const COMPTEURS = [
   { cle:'ecole',      libelle:'Attente de l’école',classe:'agir',   test: d => d.statut === 'en_attente_validation_ecole' },
   { cle:'rouvert',    libelle:'Rouvertes',         classe:'retard', test: d => d.statut === 'rouvert' },
   { cle:'planifier',  libelle:'À planifier',       classe:'agir',   test: aPlanifier },
+  { cle:'sans_nouv',  libelle:'Sans nouvelles',     classe:'retard', test: sansNouvelles },
   { cle:'cout',       libelle:'Coût à saisir',     classe:'',       test: d => d.cout_statut === 'a_renseigner' && CLOS.includes(d.statut) },
   { cle:'closes',     libelle:'Closes',            classe:'fait',   test: d => CLOS.includes(d.statut) }
 ];
@@ -557,7 +574,10 @@ function dessinerListe() {
       ? 'close le ' + jour(d.cloture_le || d.updated_at)
       : (d.pris_en_charge_le
           ? (del.delai_realisation_jours != null ? del.delai_realisation_jours + ' j de travail' : 'à planifier')
-          : (del.delai_reaction_jours || 0) + ' j sans réponse');
+          : (del.jours_chez_service != null
+            ? 'chez ' + (del.service_externe || 'un autre service')
+              + ' depuis ' + del.jours_chez_service + ' j'
+            : (del.delai_reaction_jours || 0) + ' j sans réponse'));
     return `<button type="button" class="${classes}" data-id="${d.id}">
       <div>
         <span class="num">${echapper(d.numero)}</span>
@@ -664,10 +684,28 @@ function dessinerFiche(d, notes, journal, photos) {
         ${paire('Prise en charge', d.pris_en_charge_le ? echapper(jourHeure(d.pris_en_charge_le))
                                                        : '<em>pas encore</em>')}
         ${d.transmis_le ? paire('Transmise le', echapper(jourHeure(d.transmis_le))) : ''}
+        ${del.jours_chez_service != null
+          ? paire('Attente dehors', del.jours_chez_service + ' jours ouvrés'
+              + (sansNouvelles(d) ? ' — sans nouvelles' : '')) : ''}
         ${d.cloture_le ? paire('Close le', echapper(jourHeure(d.cloture_le))) : ''}
         ${service ? paire('Service extérieur',
-            echapper(service.libelle) + (service.contact_nom ? ' — ' + echapper(service.contact_nom) : '')) : ''}
+            echapper(service.libelle) + (service.contact_nom ? ' — ' + echapper(service.contact_nom) : '')
+            + (service.contact_email ? '<br><a href="mailto:' + echapper(service.contact_email)
+                 + '?subject=' + encodeURIComponent('Relance ' + d.numero + ' — ' + nomEcole(d))
+                 + '">' + echapper(service.contact_email) + '</a>' : '')) : ''}
       </dl>
+
+      ${del.service_injoignable ? `<div class="encart attention" style="margin:12px 0 0">
+        <strong>Ce service n'a pas d'adresse enregistrée</strong>
+        La demande lui a été attribuée, mais aucun message n'a pu partir : elle
+        est partie sur le papier et nulle part en réalité. Ajoutez un contact
+        à ce service, puis prévenez-le.</div>` : ''}
+
+      ${sansNouvelles(d) ? `<div class="encart attention" style="margin:12px 0 0">
+        <strong>Sans nouvelles depuis ${del.jours_chez_service} jours ouvrés</strong>
+        Le seuil est de ${d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS} jours
+        pour une demande ${d.priorite === 'urgente' ? 'urgente' : 'ordinaire'}.
+        Ce retard n'est pas le vôtre, mais la relance l'est.</div>` : ''}
     </div>
 
     <div class="carte">
