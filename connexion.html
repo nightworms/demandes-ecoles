@@ -111,11 +111,13 @@ button.principal:disabled{background:#A9B7C6;cursor:not-allowed}
          width="1400" height="350" decoding="async">
     <h2>Accéder à l'espace de votre école</h2>
     <p class="aide">Saisissez l'adresse de votre école. Vous recevrez un lien qui
-       vous connectera directement, sans mot de passe à retenir.</p>
+       vous connectera directement, sans mot de passe à retenir.<br>
+       <strong>Utilisez de préférence l'adresse de l'école en @saintdenis.re</strong> —
+       les adresses en @ac-reunion.fr refusent aujourd'hui nos messages.</p>
     <form id="form-connexion" novalidate>
       <label for="email">Adresse email de l'école</label>
       <input type="email" id="email" required autocomplete="email" inputmode="email"
-             placeholder="ce.XXXXXXX@ac-reunion.fr">
+             placeholder="ecole@saintdenis.re">
       <button type="submit" class="principal" id="bouton-lien">Recevoir mon lien</button>
     </form>
     <div id="lien-envoye" class="encart info" role="status" hidden>
