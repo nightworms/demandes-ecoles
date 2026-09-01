@@ -1,93 +1,90 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   JETONS — « basalte & lagon »
+   JETONS — « Broadsheet », le papier journal
    La seule chose à changer pour changer l'identité de toute la plateforme.
 
-   ARRÊTÉ PAR ANTHONY LE 31/08/2026, et appliqué aux six pages.
+   Repris du système Claude Design fourni par Anthony. Du papier journal pour
+   le web : Source Serif 4 sur un fond papier, deux encres de process — cyan
+   et magenta — posées petit et rare, comme des tons directs.
 
-   Ce qu'elle remplace : la palette précédente était celle de Tailwind par
-   défaut — treize couleurs sur seize reprises telles quelles, et aucune police
-   choisie. C'est ce qui donnait à la plateforme son air de logiciel générique.
+   ⚠️ QUATRE VALEURS ONT ÉTÉ APPROFONDIES, et il faut savoir pourquoi.
+   Le système d'origine cale son accent à 3:1 — son propre guide le dit :
+   « enough for icons, large text and interface chrome, not for body copy ».
+   Nous avons besoin de 4,5:1 sur le texte et 3:1 sur les contrôles. Les
+   quatre écarts sont corrigés en descendant d'un ou deux crans dans les
+   rampes du système lui-même, comme son guide le recommande — jamais en
+   inventant une couleur à côté.
 
-   Ce qui change, et pourquoi :
-   · Le gris ne tire plus sur le bleu mais sur le brun — c'est le basalte de
-     l'île, et un fond chaud plutôt que froid.
-   · Le bleu est devenu un bleu-vert de lagon. On ne le confond avec aucun
-     autre logiciel.
-   · L'alerte est le rouge du flamboyant, « agir » la canne, « fait » le
-     vétiver. Trois signaux tirés d'ici, pas d'une bibliothèque.
-   · Deux vraies polices : une serif pour les titres, qui donne à un document
-     administratif son poids, et une humaniste pour l'interface.
-
-   Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible est
-   le bord des champs, à 3,82:1.
-
-   ⚠️ Ceci reste une identité de travail. Si le service communication fournit
-   la CHARTE GRAPHIQUE OFFICIELLE DE LA VILLE, elle prime — et le remplacement
-   ne touchera, là encore, que ce fichier.
+     #0088b0 sur le papier     3,65:1  →  #006786 (accent-700)   5,72:1
+     blanc sur #0088b0         4,08:1  →  blanc sur #006786      6,39:1
+     #7d7979 en texte doux     3,85:1  →  #605d5d (neutral-700)  5,83:1
+     #9b9797 en bord de champ  2,89:1  →  #7d7979 (neutral-600)  4,30:1
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,600;0,700;1,400;1,600&display=swap');
 
 :root{
-  /* ── Couleur d'action — le lagon ─────────────────────────────────────── */
-  --marine:        #0B6E75;
-  --marine-clair:  #0A5D63;
-  --marine-encre:  #084B50;
-  --marine-pale:   #D6EEF0;
+  /* ── L'encre d'action — le cyan de process ───────────────────────────────
+     Une seule couleur pour ce sur quoi on clique. Le cyan pur ne sert qu'aux
+     aplats larges et aux filets ; tout ce qui porte du texte prend le 700. */
+  --marine:        #006786;   /* accent-700 — liens, texte, fonds de bouton */
+  --marine-clair:  #1186ac;   /* accent-600 — survol */
+  --marine-encre:  #004961;   /* accent-800 — texte sur fond pâle */
+  --marine-pale:   #cbeeff;   /* accent-200 — fonds d'encart */
+  --marine-vif:    #0088b0;   /* l'accent tel quel : filets, aplats, jamais de texte */
 
-  /* ── Encre et papier — le basalte ────────────────────────────────────── */
-  --encre:         #1C1A19;
-  --encre-doux:    #4A4644;
-  --encre-pale:    #6E6864;
-  /*  Le fond de page est BLANC, pas teinté. C'est le premier levier de
-      l'épuré : poser le contenu sur du blanc plutôt que des cartes sur un
-      fond coloré. Le papier chaud reste, pour détacher un encart ou une
-      zone secondaire — jamais pour porter toute une page. */
-  --fond:          #FFFFFF;
-  --papier:        #FAF8F5;
-  --blanc:         #FFFFFF;
-  --trait:         #EDE9E4;   /* plus clair : un filet doit se deviner */
-  --trait-champ:   #8A817A;
+  /* ── La seconde encre — le magenta, rare par principe ────────────────────
+     Le guide est explicite : jamais les deux accents dans un même petit
+     composant. Elle sert à ce qui doit se remarquer une fois par page. */
+  --magenta:       #aa0b56;   /* accent-2-700 — 6,5:1 sur le papier */
+  --magenta-vif:   #d6006c;
+  --magenta-pale:  #ffdee6;
 
-  /* ── Les trois signaux ───────────────────────────────────────────────── */
-  --agir:          #8A5B00;   /* la canne */
-  --agir-pale:     #FBF0D5;
-  --fait:          #3F6212;   /* le vétiver */
-  --fait-pale:     #ECF5DC;
-  --alerte:        #A32014;   /* le flamboyant */
-  --alerte-pale:   #FCE8E4;
+  /* ── Encre et papier ────────────────────────────────────────────────── */
+  --encre:         #201e1d;
+  --encre-doux:    #605d5d;   /* neutral-700 */
+  --encre-pale:    #7d7979;   /* neutral-600 */
+  --fond:          #f3f2f2;   /* le papier */
+  --papier:        #eae9e9;   /* la surface, un ton plus soutenu */
+  --blanc:         #ffffff;
+  --trait:         #d7d3d3;   /* neutral-300 */
+  --trait-champ:   #7d7979;   /* neutral-600 — 4,3:1 sur blanc */
 
-  /* ── Typographie — enfin choisie ─────────────────────────────────────── */
-  /*  UNE seule police. La serif a été essayée puis abandonnée le 31/08 :
-      dans un registre épuré, c'est la TAILLE et la GRAISSE qui font la
-      hiérarchie, pas un changement de famille. Deux familles sur une page
-      dépouillée se remarquent — et ce qui se remarque n'est plus épuré. */
-  --police:  'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* ── Les trois signaux ───────────────────────────────────────────────────
+     Ils ne viennent pas du système d'origine, qui n'en a pas : Broadsheet a
+     deux tons directs, pas une sémantique d'état. On garde les nôtres, en
+     les ramenant dans le registre du papier. Tous mesurés au-dessus de 5:1. */
+  --agir:          #8a5b00;   --agir-pale:   #fdf3d6;
+  --fait:          #2f6a3f;   --fait-pale:   #e4f0e6;
+  --alerte:        #b3261e;   --alerte-pale: #fbe4e2;
+
+  /*  Alias hérités : le formulaire nommait « urgent » et « attention » ce que
+      les autres pages nomment « alerte » et « agir ». */
+  --urgent:var(--alerte); --urgent-pale:var(--alerte-pale);
+  --attention:var(--agir); --attention-pale:var(--agir-pale);
+
+  /* ── Typographie ─────────────────────────────────────────────────────────
+     Une seule famille, en romain et en italique vrai. L'italique porte
+     l'emphase — jamais un oblique synthétisé.
+     ⚠️ La serif ne descend PAS sur les pages de travail : voir socle.css.
+     Sur une liste de quarante lignes balayée chaque jour, une humaniste se
+     parcourt plus vite. C'est la même logique que la densité. */
+  --police:       'Source Serif 4', Georgia, 'Times New Roman', serif;
   --police-titre: var(--police);
-  --mono:    ui-monospace, 'SF Mono', Menlo, monospace;
+  --police-travail: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono:         ui-monospace, 'SF Mono', Menlo, monospace;
 
   --corps-xs: 12.5px; --corps-s: 13.5px; --corps-m: 15px; --corps: 17px;
-  --titre-s: 18px; --titre-m: 24px; --titre-l: 30px;
-  /*  Le titre d'ouverture d'une page publique. Grand, et il en faut UN par
-      page — c'est lui qui donne la respiration, pas les marges. */
-  --titre-xl: 52px;
+  --titre-s: 19px; --titre-m: 26px; --titre-l: 34px;
+  --titre-xl: 60px;      /* la manchette d'une page publique */
 
-  /* Des angles moins arrondis : 12 px partout donne l'air d'une application
-     grand public. Un service public gagne à être un peu plus sobre. */
-  /*  Des angles presque droits. 7 px donnait encore l'air d'une application
-      grand public ; 4 px se voit à peine, et c'est ce qu'on veut. */
-  --rayon-s: 3px; --rayon: 4px; --rayon-rond: 999px;
-  /*  L'air entre les sections. C'est ce qui manquait le plus : les blocs se
-      touchaient à 12 px, là où une page respirée en met soixante. */
-  --souffle: 64px; --souffle-l: 96px;
-  --pas-1: 4px; --pas-2: 8px; --pas-3: 12px;
-  --pas-4: 16px; --pas-5: 24px; --pas-6: 32px;
+  /*  Presque droit. Le système d'origine dit 2 px, et il a raison : un angle
+      arrondi est une convention d'application, pas de page imprimée. */
+  --rayon-s: 1px; --rayon: 2px; --rayon-rond: 999px;
+
+  /*  L'air entre les sections. Sur une page sans cadres ni filets, c'est la
+      seule chose qui sépare — le guide du système est catégorique là-dessus. */
+  --souffle: 72px; --souffle-l: 104px;
+  --pas-1: 5px; --pas-2: 10px; --pas-3: 15px;
+  --pas-4: 20px; --pas-5: 30px; --pas-6: 40px;
   --cible: 44px; --cible-large: 48px;
 }
-
-/*  La serif est réservée au TITRE DE LA PAGE, dans socle.css. Elle ne descend
-    pas sur les titres de section : la serif dit « document », le sans dit
-    « interface ». Les mélanger à tous les niveaux brouille les deux.
-    (Une règle h1,h2,h3 vivait ici : elle n'avait rien à faire dans un fichier
-    de jetons, et elle mettait en serif des titres qui ne le sont pas en
-    production.) */

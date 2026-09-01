@@ -14,6 +14,9 @@
 
 html{ -webkit-text-size-adjust: 100% }
 
+/*  Le fond est le PAPIER, pas le blanc pur : c'est ce qui fait la feuille
+    imprimée plutôt que l'écran. Le blanc ne sert plus que d'aplat, sur un
+    champ de saisie ou une carte du poste de travail. */
 body{
   margin: 0;
   background: var(--fond);
@@ -41,6 +44,15 @@ header{ padding: 26px 24px }
 /*  Sauf sur les pages de travail, où le repère vaut mieux que le silence :
     le poste de travail et le tableau de bord gardent leur bandeau. */
 body.travail header{ background: var(--blanc); border-bottom: 1px solid var(--trait) }
+
+/*  ⚠️ LA SERIF NE DESCEND PAS SUR LES PAGES DE TRAVAIL.
+    Le guide de Broadsheet dit « set everything in the serif », et c'est juste
+    pour une page qu'on lit. Le poste de travail est une page qu'on BALAIE :
+    quarante lignes parcourues chaque jour, où l'on cherche un numéro et un
+    état. Une humaniste s'y parcourt plus vite qu'une romane, et l'écart se
+    mesure. Même raisonnement que pour la densité : le registre suit l'usage. */
+body.travail{ font-family: var(--police-travail) }
+body.travail h1, body.travail h2, body.travail h3{ font-family: var(--police-travail) }
 header .dedans{
   max-width: 1080px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between;
@@ -58,6 +70,11 @@ header .marque{ display: flex; align-items: center; gap: 14px; min-width: 0 }
     un octet d'image à charger. Elle remplace le filet gris qui séparait
     l'en-tête, d'où le border-bottom à zéro.
 
+    ⚠️ La couleur du motif est écrite EN DUR dans le SVG (%23006786) : une
+    donnée en URL ne lit pas les variables CSS. Si l'encre d'action change
+    dans jetons.css, il faut la reporter ici — c'est le seul endroit de tout
+    le système où une couleur n'est pas un jeton.
+
     30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
     il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
     en-tête blanc — si ce fond change, ce blanc doit suivre. */
@@ -67,7 +84,7 @@ header .marque{ display: flex; align-items: center; gap: 14px; min-width: 0 }
 body.travail header{ position: relative; padding-bottom: 34px; border-bottom: 0 }
 body.travail header::after{
   content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 30px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%23006786'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%23006786' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%23006786' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
   background-repeat: repeat-x; background-size: 48px 30px;
   pointer-events: none;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
@@ -75,8 +92,9 @@ body.travail header::after{
 /*  56 px sur six pages, 52 sur la septième. Aucune raison à l'écart. */
 header .logo{ height: 56px; width: auto; flex: none; display: block }
 @media (max-width: 480px){ header .logo{ height: 44px } }
-header h1{ margin: 0; font-size: var(--titre-m); font-weight: 700;
-           letter-spacing: -.02em }
+/*  Drapeau à gauche, sans resserrement : une romane ne veut pas du crénage
+    négatif qu'on donne à une grotesque. */
+header h1{ margin: 0; font-size: var(--titre-m); font-weight: 600; letter-spacing: 0 }
 
 /*  Sur une page publique, l'en-tête n'est plus le titre : ce n'est qu'une
     signature discrète en haut de page. Le titre, c'est celui de la section. */

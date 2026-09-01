@@ -7,7 +7,7 @@
 <title>Demandes des écoles — Pôle Technique</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="systeme-design/jetons.css">
 <link rel="stylesheet" href="systeme-design/socle.css">
 <link rel="stylesheet" href="systeme-design/composants.css">
@@ -20,44 +20,11 @@
    rendrait inutilisable — on y balaie quarante demandes d'un regard.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-:root{
-  /* ── Charte « basalte & lagon » — arrêtée par Anthony le 31/08/2026 ───────
-     Elle remplace la palette précédente, qui était celle de Tailwind par
-     défaut : treize couleurs sur seize reprises telles quelles, et aucune
-     police choisie. C'est ce qui donnait à la plateforme son air de logiciel
-     générique.
-
-     Ici : le basalte de l'île plutôt qu'un gris bleuté, un bleu-vert de lagon
-     plutôt qu'un bleu de framework, et pour les trois signaux la canne, le
-     vétiver et le flamboyant.
-
-     Contrastes mesurés : texte 4,5:1 minimum, contrôles 3:1. Le plus faible
-     est le bord des champs, à 3,82:1.
-
-     ⚠️ Ce bloc est le même sur les six pages. La source est
-     systeme-design/jetons.css — modifier là-bas, puis reporter. */
-
-  --marine:#0B6E75; --marine-clair:#0A5D63; --marine-pale:#D6EEF0; --marine-encre:#084B50;
-  --encre:#1C1A19; --encre-doux:#4A4644; --encre-pale:#6E6864;
-  --fond:#FAF8F5; --blanc:#fff; --trait:#E4DED7; --trait-champ:#8A817A;
-  --agir:#8A5B00; --agir-pale:#FBF0D5;
-  --fait:#3F6212; --fait-pale:#ECF5DC;
-  --alerte:#A32014; --alerte-pale:#FCE8E4;
-
-  /*  Alias : le formulaire nommait « urgent » et « attention » ce que les
-      autres pages nomment « alerte » et « agir ». Deux noms pour une chose.
-      On garde les anciens le temps d'unifier, sans dupliquer les valeurs. */
-  --urgent:var(--alerte); --urgent-pale:var(--alerte-pale);
-  --attention:var(--agir); --attention-pale:var(--agir-pale);
-
-  /*  Deux vraies polices, enfin. La serif des titres est ce qui fait basculer
-      la lecture de « tableau de bord » vers « document de la collectivité ». */
-  --police:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  --police-titre:var(--police);   /* la serif a été abandonnée le 31/08 */
-  --mono:ui-monospace,'SF Mono',Menlo,monospace;
-
-  --rayon:7px;
-}
+/*  Le bloc :root a été retiré le 01/09 : il redéclarait localement toute la
+    palette et l'emportait sur systeme-design/jetons.css, chargé plus haut.
+    Cette page restait donc sur l'ancienne charte pendant que les six autres
+    changeaient. C'est exactement ce que le système est censé empêcher — une
+    page qui garde sa copie garde son passé. */
 *{box-sizing:border-box}
 /* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
    navigateur : sans ceci, tout élément marqué hidden dont la classe impose un
@@ -200,22 +167,9 @@ button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-/* ─── Lambrequin ──────────────────────────────────────────────────────────
-   La dentelle de bois des varangues créoles, en frise sous l'en-tête.
-   Dessinée en CSS : nette à toutes les tailles, imprimable, et pas un octet
-   d'image à charger. Elle remplace le filet gris qui séparait l'en-tête.
-
-   30 px, et c'est un minimum : en dessous de 20 px le découpage disparaît et
-   il ne reste qu'un zigzag de fanions. Le blanc du percement suppose un
-   en-tête blanc — si le fond de l'en-tête change, ce blanc doit suivre. */
-header{position:relative;padding-bottom:34px;border-bottom:0}
-header::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:30px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='30' viewBox='0 0 48 30'><path d='M0 0h48v3H0z' fill='%230B6E75'/><path d='M0 3h48v3c-6 0-8 4-9 8s-6 14-15 14-13-10-15-14-3-8-9-8z' fill='%230B6E75' opacity='.20'/><circle cx='24' cy='11' r='3' fill='%23fff'/><path d='M24 17v9' stroke='%230B6E75' stroke-opacity='.30' stroke-width='2' stroke-linecap='round'/></svg>");
-  background-repeat:repeat-x;background-size:48px 30px;
-  pointer-events:none;
-  -webkit-print-color-adjust:exact;print-color-adjust:exact;
-}
+/*  Le lambrequin vivait ici en copie : il est désormais dans
+    systeme-design/socle.css, sous « body.travail header::after ». Deux
+    endroits à corriger pour un seul motif, c'est ce que le système supprime. */
 </style>
 </head>
 <body class="travail">

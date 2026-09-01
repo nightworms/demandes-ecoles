@@ -28,13 +28,15 @@ body.travail .bloc{
 /*  Le titre d'une section publique est grand, et il porte l'accent sur UN
     groupe de mots — jamais sur toute la ligne. C'est ce qui fait qu'une seule
     couleur saturée suffit à toute une page. */
-.bloc > h2{ margin: 0 0 var(--pas-2); font-size: var(--titre-l); font-weight: 700;
-            letter-spacing: -.02em; line-height: 1.15 }
-/*  L'accent porte sur UN groupe de mots dans un titre, jamais sur la ligne
-    entière — c'est ce qui fait qu'une seule couleur saturée suffit à toute
-    une page. On écrit <em>, et il n'est pas mis en italique : c'est une
-    emphase de couleur, pas de style. */
-h1 em, h2 em, h3 em{ font-style: normal; color: var(--marine) }
+.bloc > h2{ margin: 0 0 var(--pas-2); font-size: var(--titre-l); font-weight: 600;
+            letter-spacing: 0; line-height: 1.15 }
+/*  L'emphase d'un titre passe par l'ITALIQUE VRAI de la romane, pas par la
+    couleur : c'est la voix de cette famille, et Source Serif 4 est chargée
+    avec son italique. Sur les pages de travail, qui sont en grotesque, on
+    retombe sur la couleur — un oblique synthétisé n'a pas de voix. */
+h1 em, h2 em, h3 em{ font-style: italic; font-weight: inherit; color: inherit }
+body.travail h1 em, body.travail h2 em, body.travail h3 em{
+  font-style: normal; color: var(--marine) }
 body.travail .bloc > h2{ margin: 0 0 var(--pas-1); font-size: var(--titre-s);
                          font-weight: 650; letter-spacing: 0 }
 .bloc > p.aide{ margin: 0 0 var(--pas-5); font-size: var(--corps);
@@ -63,7 +65,9 @@ a.principal, a.secondaire, a.discret{
   display: inline-flex; align-items: center; justify-content: center;
   text-decoration: none; white-space: nowrap; border: 0;
 }
-button.principal, a.principal{ background: var(--marine); color: #fff; font-weight: 650 }
+/*  Le fond du bouton est l'accent-700, pas le cyan pur : blanc sur #0088b0
+    ne donne que 4,08:1, blanc sur #006786 donne 6,39:1. */
+button.principal, a.principal{ background: var(--marine); color: #fff; font-weight: 600 }
 button.principal:disabled{ background: #A9B7C6; cursor: not-allowed }
 button.secondaire, a.secondaire{
   background: var(--blanc); color: var(--marine-encre);
@@ -199,20 +203,23 @@ select{
    Des barres horizontales, jamais de camembert : on compare des longueurs
    bien mieux que des angles, et une barre survit à l'impression. */
 table{ width: 100%; border-collapse: collapse; font-size: var(--corps-m) }
+/*  L'en-tête d'un tableau est de la « furniture » de page : petites capitales
+    espacées, et un filet plein dessous. C'est le seul endroit où le système
+    imprime un trait — son guide le réserve à ça. */
 th{
-  text-align: left; font-size: var(--corps-xs); font-weight: 650; color: var(--encre-pale);
-  text-transform: uppercase; letter-spacing: .03em;
-  padding: 0 10px 7px 0; border-bottom: 1px solid var(--trait);
+  text-align: left; font-size: var(--corps-xs); font-weight: 600; color: var(--encre-doux);
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 0 10px 7px 0; border-bottom: 1.5px solid var(--encre);
 }
 th.n, td.n{ text-align: right; font-variant-numeric: tabular-nums }
 td{ padding: 8px 10px 8px 0; border-bottom: 1px solid var(--fond); vertical-align: middle }
 tr:last-child td{ border-bottom: 0 }
 td.mesure{ width: 42%; min-width: 120px }
 .barre{
-  display: block; height: 9px; border-radius: 5px;
+  display: block; height: 9px; border-radius: var(--rayon-s);
   background: var(--marine-pale); min-width: 2px; position: relative;
 }
-.barre i{ position: absolute; inset: 0; width: var(--part, 0%); background: var(--marine); border-radius: 5px }
+.barre i{ position: absolute; inset: 0; width: var(--part, 0%); background: var(--marine-vif); border-radius: var(--rayon-s) }
 .barre.chaud i{ background: var(--agir) }
 
 /* ── Utilitaires ─────────────────────────────────────────────────────────
