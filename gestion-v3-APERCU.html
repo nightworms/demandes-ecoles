@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>APERÇU — Demandes des écoles — Pôle Technique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système :
+   systeme-design/jetons.css · socle.css · composants.css
+
+   Page de travail : elle garde ses cartes et sa densité. Le registre épuré la
+   rendrait inutilisable — on y balaie quarante demandes d'un regard.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*  Le bloc :root a été retiré le 01/09 : il redéclarait localement toute la
+    palette et l'emportait sur systeme-design/jetons.css, chargé plus haut.
+    Cette page restait donc sur l'ancienne charte pendant que les six autres
+    changeaient. C'est exactement ce que le système est censé empêcher — une
+    page qui garde sa copie garde son passé. */
+*{box-sizing:border-box}
+/* Une règle d'auteur qui fixe « display » l'emporte sur l'attribut hidden du
+   navigateur : sans ceci, tout élément marqué hidden dont la classe impose un
+   display reste visible. C'est ce qui laissait le voile de la fiche affiché en
+   permanence, grisant la page entière. */
+[hidden]{display:none!important}
+
+/* ─── En-tête ─────────────────────────────────────────────── */
+header{background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:14px 18px;
+       padding-top:calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:30}
+header .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* Le lien vers le tableau de bord porte l'allure des boutons voisins : c'est
+   une destination de plus dans la même barre, pas un lien de texte perdu. */
+header .actions a{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
+              border-radius:5px;padding:8px 13px;font-size:13.5px;font-family:inherit;
+              cursor:pointer;white-space:nowrap;min-height:38px;text-decoration:none;
+              display:inline-flex;align-items:center}
+header .actions a:hover{background:var(--fond);border-color:var(--marine-clair)}
+header button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
+              border-radius:5px;padding:8px 13px;font-size:13.5px;font-family:inherit;
+              cursor:pointer;white-space:nowrap;min-height:38px}
+header button:hover{background:var(--fond);border-color:var(--marine-clair)}
+
+/* Logo de la Ville, extrait de banniere.jpg. Décoratif là où le sous-titre
+   nomme déjà la Ville : alt vide, le lecteur d'écran le saute. */
+header .marque{display:flex;align-items:center;gap:14px;min-width:0}
+
+/* ─── Indicateurs ─────────────────────────────────────────── */
+.compteurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.compteur .n{display:block;font-size:26px;font-weight:700;line-height:1.1;color:var(--marine-encre)}
+.compteur .l{display:block;font-size:13px;color:var(--encre-doux);margin-top:3px}
+.compteur.agir{border-left-color:var(--agir)} .compteur.agir .n{color:var(--agir)}
+.compteur.retard{border-left-color:var(--alerte)} .compteur.retard .n{color:var(--alerte)}
+.compteur.fait{border-left-color:var(--fait)} .compteur.fait .n{color:var(--fait)}
+
+/* ─── Filtres ─────────────────────────────────────────────── */
+.filtres{background:var(--blanc);border:1px solid var(--trait);border-radius:7px;
+         padding:13px 15px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.filtres .champ{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 150px}
+.filtres .champ.large{flex:2 1 240px}
+.filtres label{font-size:13px;font-weight:650;color:var(--encre-doux)}
+.filtres select,.filtres input{min-height:40px;padding:8px 11px;font-size:14.5px;font-family:inherit;
+  color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);border-radius:5px;
+  appearance:none;width:100%}
+.filtres select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+       background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+input:focus,select:focus,textarea:focus{border-color:var(--marine-clair)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible
+  {outline:3px solid var(--marine-clair);outline-offset:2px}
+.filtres button{min-height:40px;padding:0 15px;border-radius:5px;font-family:inherit;font-size:14px;
+  font-weight:600;cursor:pointer;background:var(--blanc);color:var(--marine);border:1.5px solid var(--trait-champ)}
+.filtres button:hover{border-color:var(--marine-clair)}
+
+/* ─── Liste ───────────────────────────────────────────────── */
+.resume{font-size:13.5px;color:var(--encre-doux);margin:0 0 10px 2px}
+.demande{background:var(--blanc);border:1px solid var(--trait);border-left:4px solid var(--trait);
+         border-radius:6px;padding:13px 15px;margin-bottom:9px;cursor:pointer;
+         display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:start;
+         width:100%;text-align:left;font-family:inherit;font-size:15px;color:var(--encre)}
+.demande:hover{border-color:var(--marine-clair)}
+.demande.p-urgente{border-left-color:var(--alerte)}
+.demande.p-haute{border-left-color:var(--agir)}
+.demande.close{border-left-color:var(--fait);opacity:.72}
+.demande .num{font-family:var(--mono);font-size:13px;color:var(--encre-pale);letter-spacing:.02em}
+.demande h3{margin:2px 0 3px;font-size:15.5px;font-weight:650}
+.demande .meta{font-size:13.5px;color:var(--encre-doux)}
+.demande .droite{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.demande .age{font-size:13px;color:var(--encre-pale);white-space:nowrap}
+.demande .age.retard{color:var(--alerte);font-weight:650}
+.etat.alerte{background:var(--alerte-pale);color:var(--alerte)}
+.puce{display:inline-block;font-size:13px;font-weight:650;padding:2px 8px;border-radius:20px;
+      background:var(--fond);color:var(--encre-doux);margin-left:6px}
+.puce.urgente{background:var(--alerte-pale);color:var(--alerte)}
+.puce.haute{background:var(--agir-pale);color:var(--agir)}
+.vide{text-align:center;padding:44px 20px;color:var(--encre-doux);background:var(--blanc);
+      border:1px solid var(--trait);border-radius:7px}
+
+/* ─── Fiche ───────────────────────────────────────────────── */
+.voile{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:40;display:flex;
+       justify-content:flex-end}
+.fiche{background:var(--fond);width:min(620px,100%);height:100%;overflow-y:auto;
+       box-shadow:-4px 0 24px rgba(0,0,0,.18)}
+.fiche .barre{position:sticky;top:0;background:var(--blanc);color:var(--encre);border-bottom:1px solid var(--trait);padding:15px 18px;
+              display:flex;justify-content:space-between;align-items:center;gap:14px;z-index:2}
+.fiche .barre h2{margin:0;font-size:18px;font-weight:700}
+.fiche .barre .num{font-family:var(--mono);font-size:13px;color:var(--encre-doux);display:block}
+.fiche .barre button{background:var(--blanc);color:var(--encre-doux);border:1px solid var(--trait-champ);
+       border-radius:5px;width:38px;height:38px;font-size:19px;line-height:1;cursor:pointer;flex:none}
+.fiche .corps{padding:16px}
+.carte{background:var(--blanc);border:1px solid var(--trait);border-radius:7px;
+       padding:15px 16px;margin-bottom:12px}
+.carte h3{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--encre-doux);
+          text-transform:uppercase;letter-spacing:.04em}
+.paires{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:14.5px}
+.paires dt{color:var(--encre-doux);white-space:nowrap}
+.paires dd{margin:0}
+.texte{background:var(--fond);border-radius:5px;padding:11px 13px;font-size:14.5px;
+       white-space:pre-wrap;margin-top:4px}
+.champ label{display:block;font-size:13px;font-weight:650;color:var(--encre-doux);margin-bottom:5px}
+.champ select,.champ input,.champ textarea{width:100%;min-height:42px;padding:9px 11px;font-size:15px;
+  font-family:inherit;color:var(--encre);background:var(--blanc);border:1.5px solid var(--trait-champ);
+  border-radius:5px;appearance:none}
+.champ textarea{min-height:78px;resize:vertical}
+.champ select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%235A6B80' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+       background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.principal{width:100%;min-height:46px;background:var(--marine);color:#fff;border:0;
+  border-radius:5px;font-size:15.5px;font-weight:650;font-family:inherit;cursor:pointer}
+button.discret{min-height:42px;padding:0 15px;background:var(--blanc);color:var(--marine);
+  border:1.5px solid var(--trait-champ);border-radius:5px;font-size:14.5px;font-weight:600;
+  font-family:inherit;cursor:pointer}
+.journal{font-size:13.5px}
+.journal li{list-style:none;padding:7px 0;border-bottom:1px solid var(--trait)}
+.journal li:last-child{border-bottom:0}
+.journal .quand{color:var(--encre-pale);font-size:13px}
+.note{padding:9px 0;border-bottom:1px solid var(--trait);font-size:14.5px;white-space:pre-wrap}
+.note:last-child{border-bottom:0}
+.note .qui{display:block;font-size:13px;color:var(--encre-pale);margin-bottom:2px;white-space:normal}
+
+/* ─── Encarts et connexion ────────────────────────────────── */
+.encart{border-radius:5px;padding:13px 15px;font-size:14.5px;margin:14px 0}
+/* Seul le PREMIER strong d'un encart fait office de titre — sinon tout mot
+   mis en gras au fil du texte part sur sa propre ligne. */
+.encart > strong:first-child{display:block;margin-bottom:3px}
+/* Le périmètre de l'agent, sous son nom : discret, mais toujours là. */
+.portee{font-size:12.5px;color:var(--encre-pale);margin-top:2px}
+.connexion{max-width:440px;margin:40px auto;background:var(--blanc);border:1px solid var(--trait);
+           border-radius:7px;padding:24px}
+.connexion h2{margin:0 0 6px;font-size:18px}
+.connexion p{margin:0 0 16px;font-size:14.5px;color:var(--encre-doux)}
+.connexion input{width:100%;min-height:48px;padding:12px;font-size:16px;font-family:inherit;
+  border:1.5px solid var(--trait-champ);border-radius:5px}
+.connexion button{width:100%;min-height:50px;margin-top:12px;background:var(--marine);color:#fff;
+  border:0;border-radius:5px;font-size:16px;font-weight:650;font-family:inherit;cursor:pointer}
+.chargement{text-align:center;padding:44px 20px;color:var(--encre-doux)}
+@media (max-width:640px){
+  .demande{grid-template-columns:1fr}
+  .demande .droite{flex-direction:row;align-items:center;justify-content:flex-start}
+  .deux{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/*  Le lambrequin vivait ici en copie : il est désormais dans
+    systeme-design/socle.css, sous « body.travail header::after ». Deux
+    endroits à corriger pour un seul motif, c'est ce que le système supprime. */
+</style>
+</head>
+<body class="travail">
+
+<header>
+  <div class="dedans">
+    <div>
+      <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="39" height="56" decoding="async">
+      <div>
+        <h1>Demandes des écoles — APERÇU</h1>
+              <div class="qui" id="qui">Pôle Technique — Direction de l'Éducation</div>
+        <div class="portee" id="portee" hidden></div>
+      </div>
+    </div>
+    </div>
+    <div class="actions">
+      <a id="vers-tableau" href="tableau-de-bord.html" hidden>Tableau de bord</a>
+      <button type="button" id="actualiser" hidden>Actualiser</button>
+      <button type="button" id="exporter" hidden>Exporter</button>
+      <button type="button" id="deconnexion" hidden>Se déconnecter</button>
+    </div>
+  </div>
+</header>
+
+<main class="large">
+  <div id="erreur" class="encart erreur" role="alert" hidden></div>
+  <p class="chargement" id="chargement">Chargement…</p>
+
+  <!-- ─── Connexion ─────────────────────────────────────────── -->
+  <section class="connexion" id="ecran-connexion" hidden>
+    <h2>Accès du Pôle Technique</h2>
+    <p>Saisissez votre adresse professionnelle. Vous recevrez un lien qui vous
+       connecte directement, sans mot de passe.</p>
+    <form id="form-connexion" novalidate>
+      <label for="email" class="masque">Adresse email</label>
+      <input type="email" id="email" required autocomplete="email" inputmode="email"
+             placeholder="prenom.nom@saintdenis.re">
+      <button type="submit" id="bouton-lien">Recevoir mon lien</button>
+    </form>
+    <div id="lien-envoye" class="encart info" role="status" hidden>
+      <strong>Regardez votre boîte mail</strong>
+      Ouvrez le lien <strong>depuis cet appareil</strong>. Il ne sert qu'une fois.
+    </div>
+  </section>
+
+  <!-- ─── Poste de travail ──────────────────────────────────── -->
+  <section id="ecran-travail" hidden>
+    <div class="compteurs" id="compteurs"></div>
+
+    <div class="filtres">
+      <div class="champ large">
+        <label for="f-texte">Rechercher</label>
+        <input type="search" id="f-texte" placeholder="numéro, école, description, localisation…">
+      </div>
+      <div class="champ"><label for="f-statut">État</label><select id="f-statut"></select></div>
+      <div class="champ"><label for="f-domaine">Domaine</label><select id="f-domaine"></select></div>
+      <div class="champ"><label for="f-secteur">Quartier</label><select id="f-secteur"></select></div>
+      <div class="champ"><label for="f-priorite">Priorité</label><select id="f-priorite"></select></div>
+      <button type="button" id="raz">Tout effacer</button>
+    </div>
+
+    <p class="resume" id="resume"></p>
+    <div id="liste"></div>
+  </section>
+</main>
+
+<div class="voile" id="voile" hidden>
+  <section class="fiche" id="fiche" role="dialog" aria-modal="true" aria-labelledby="fiche-titre"></section>
+</div>
+
+<script>
+// ══════════ APERÇU — données d'exemple, aucun appel réseau ══════════
+// Montre le poste de travail sans base, sans compte et sans réseau : les
+// données sont celles d'un jeu d'essai, et les appels sont interceptés.
+// Données réelles extraites de la base d'essai.
+window.FIXTURES = {
+  'ecoles': [{"id":63,"nom":"Affouches","type_ecole":"Élémentaire","secteur":"MONTAGNE 15e","zone":"Ouest","adresse":"52, route Antide Boyer - 97 417 La Montagne","telephone":"0262 23 62 14","email_directeur":"ce.9740124S@ac-reunion.fr","email_secretariat":"sprimaire.affouches@saintdenis.re"}, 
+ {"id":46,"nom":"Alain Lorraine","type_ecole":"Maternelle","secteur":"MOUFIA","zone":"Est","adresse":"91, Allée des Tulipes - 97 490 Sainte-Clotilde","telephone":"0262 29 02 29","email_directeur":"ce.9740926N@ac-reunion.fr","email_secretariat":null}, 
+ {"id":17,"nom":"Ancien Théâtre","type_ecole":"Primaire","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"73, rue Alexis de Villeneuve - 97400 Saint-Denis","telephone":"0262 21 32 82","email_directeur":"ce.9740120M@ac-reunion.fr","email_secretariat":"vprimeuneaae.ancienthéâtre@saintdenis.re"}, 
+ {"id":1,"nom":"Application Bellepierre","type_ecole":"Primaire","secteur":"BELLEPIERRE","zone":"Ouest","adresse":"12 rue des Saphirs - Bellepierre - 97400 Saint-Denis","telephone":"0262 21 05 88","email_directeur":"ce.9740583R@ac-reunion.fr","email_secretariat":"sprimaireappli.bellepierre@saintdenis.re"}, 
+ {"id":16,"nom":"Application Léon Dierx","type_ecole":"Élémentaire","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"62, rue Ste-Marie - 97400 Saint-Denis","telephone":"0262 21 09 14","email_directeur":"ce.9740241U@ac-reunion.fr","email_secretariat":"selementaire.appli.leondierx@saintdenis.re"}, 
+ {"id":14,"nom":"Aurore","type_ecole":"Maternelle","secteur":"BRETAGNE","zone":"Est","adresse":"152, route Gabriel Macé - 97490 Ste-Clotilde","telephone":"0262 52 56 97","email_directeur":"ce.9740864W@ac-reunion.fr","email_secretariat":"selementaire.canaat.brule@steclotilde.re"}, 
+ {"id":53,"nom":"Badamiers","type_ecole":"Élémentaire","secteur":"MOUFIA 2","zone":"Est","adresse":"67, rue du Père Lafosse - 97 490 Sainte-Clotilde","telephone":"0262 28 28 54","email_directeur":"ce.9740745S@ac-reunion.fr","email_secretariat":"selementaire.lesbadamiers@saintdenis.re"}, 
+ {"id":52,"nom":"Badamiers","type_ecole":"Maternelle","secteur":"MOUFIA 2","zone":"Est","adresse":"28 C route du Moufia - 97 490 Sainte-Clotilde","telephone":"0262 28 29 42","email_directeur":"ce.9740709C@ac-reunion.fr","email_secretariat":"smaternelle.lesbadamiers@saintdenis.re"}, 
+ {"id":47,"nom":"Baies Roses","type_ecole":"Primaire","secteur":"MOUFIA","zone":"Est","adresse":"9 rue Pierre de Coubertin- Le Moufia","telephone":"0262 29 44 72","email_directeur":"ce.9741203P@ac-reunion.fr","email_secretariat":"smaternelle.lesbaiesroses@saintdenis.re"}, 
+ {"id":49,"nom":"Bancouliers","type_ecole":"Élémentaire","secteur":"MOUFIA","zone":"Est","adresse":"6, allée des Kentias - le Moufia - 97 490 Sainte-Clotilde","telephone":"0262 28 41 71","email_directeur":"ce.9740210K@ac-reunion.fr","email_secretariat":"selementaire.bancouliers@saintdenis.re"}, 
+ {"id":48,"nom":"Bancouliers","type_ecole":"Maternelle","secteur":"MOUFIA","zone":"Est","adresse":"8, allée des Kentias - le Moufia - 97 490 Sainte Clotilde","telephone":"0262 28 12 56","email_directeur":"ce.9740713G@ac-reunion.fr","email_secretariat":null}, 
+ {"id":7,"nom":"Bois de Nèfles","type_ecole":"Maternelle","secteur":"BOIS DE NÈFLES","zone":"Est","adresse":"132 Route des Ananas - 97490 Ste-Clotilde","telephone":"0262 28 24 07","email_directeur":"ce.9740824C@ac-reunion.fr","email_secretariat":"smaternelle.boisnefles@saintdenis.re"}, 
+ {"id":6,"nom":"Bois de Nèfles","type_ecole":"Élémentaire","secteur":"BOIS DE NÈFLES","zone":"Est","adresse":"151, route des Ananas - 97490 Ste-Clotilde","telephone":"0262 28 27 93","email_directeur":"ce.9740128W@ac-reunion.fr","email_secretariat":"selementaire.boisnefles@saintdenis.re"}, 
+ {"id":12,"nom":"Bory de Saint-Vincent","type_ecole":"Élémentaire","secteur":"BRETAGNE","zone":"Est","adresse":"4, chemin Bois Rouge - 97490 Ste-Clotilde","telephone":"0262 52 52 47","email_directeur":"ce.9740212M@ac-reunion.fr","email_secretariat":"selementaire.borystvincent@saintdenis.re"}, 
+ {"id":36,"nom":"Bouvet","type_ecole":"Maternelle","secteur":"VAUBAN","zone":"Ouest","adresse":"35, rue Bouvet - 97 400 Saint-Denis","telephone":"0262 21 22 92","email_directeur":"ce.9740456C@ac-reunion.fr","email_secretariat":"selementaire.bouvet.b@saintdenis.re"}, 
+ {"id":35,"nom":"Bouvet","type_ecole":"Élémentaire","secteur":"VAUBAN","zone":"Ouest","adresse":"35, rue Bouvet - 97 400 Saint-Denis","telephone":"0262 21 15 71","email_directeur":"ce.9740455B@ac-reunion.fr","email_secretariat":"selementaire.bouvet.b@saintdenis.re"}, 
+ {"id":24,"nom":"Camélias","type_ecole":"Maternelle","secteur":"CAMELIAS PROVIDENCE","zone":"Ouest","adresse":"5 rue Nicole de la Serve- 97400 Saint-Denis","telephone":"0262 21 18 20","email_directeur":"ce.9740245y@ac-reunion.fr","email_secretariat":"smaternelle.lescamelias@saintdenis.re"}, 
+ {"id":31,"nom":"Candide Azéma A","type_ecole":"Maternelle","secteur":"MONTGAILLARD","zone":"Ouest","adresse":"2 Bis rue Victor Hugo -97 400 Saint-Denis","telephone":"0262 30 35 25","email_directeur":"ce.9740244X@ac-reunion.fr","email_secretariat":"selementaire.candideazema.a@saintdenis.re"}, 
+ {"id":32,"nom":"Candide Azéma B","type_ecole":"Élémentaire","secteur":"MONTGAILLARD","zone":"Ouest","adresse":"2 rue Victor Hugo -97 400 Saint-Denis","telephone":"0262 56 34 81","email_directeur":"ce.9740136E@ac-reunion.fr","email_secretariat":"selementaire.candideazema.b@saintdenis.re"}, 
+ {"id":18,"nom":"Centrale","type_ecole":"Élémentaire","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"121 bis, rue Jules Auber - 97400 Saint-Denis","telephone":"0262 21 16 76","email_directeur":"ce.9741073Y@ac-reunion.fr","email_secretariat":"selementaire.canal.brule@denis.re"}, 
+ {"id":19,"nom":"Centrale","type_ecole":"Maternelle","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"51, rue Sainte-Anne - 97400 Saint-Denis","telephone":"0262 21 32 65","email_directeur":"ce.9740796X@ac-reunion.fr","email_secretariat":"selementaire.canaat.brule@.re"}, 
+ {"id":39,"nom":"Champ Fleuri","type_ecole":"Élémentaire","secteur":"STE CLOTILDE","zone":"Ouest","adresse":"46, ruelle Magnan - 97 490 Sainte-Clotilde","telephone":"0262 21 34 87","email_directeur":"ce.9740206F@ac-reunion.fr","email_secretariat":"selementaire.champfleuri@saintdenis.re"}, 
+ {"id":38,"nom":"Champ Fleuri","type_ecole":"Maternelle","secteur":"STE CLOTILDE","zone":"Ouest","adresse":"19 ruelle Magnan - 97 490 Sainte-Clotilde","telephone":"0262 21 34 86","email_directeur":"ce.9740823B@ac-reunion.fr","email_secretariat":"smaternelle.champfleuri@saintdenis.re"}, 
+ {"id":29,"nom":"Chaumière","type_ecole":"Primaire","secteur":"CHAUMIERE","zone":"Ouest","adresse":"1, rue de la Chaumière - 97400 Saint-Denis","telephone":"0262 30 34 52","email_directeur":"ce.9741267J@ac-reunion.fr","email_secretariat":"sprimaire.lachaumiere@saintdenis.re"}, 
+ {"id":56,"nom":"Damase Legros","type_ecole":"Maternelle","secteur":"CHAUDRON","zone":"Est","adresse":"14, rue de la Gare - 97 490 Sainte- Clotilde","telephone":"0262 28 13 93","email_directeur":"ce.9740700T@ac-reunion.fr","email_secretariat":"smaternelle.damaselegros@saintdenis.re"}, 
+ {"id":57,"nom":"Damase Legros","type_ecole":"Élémentaire","secteur":"CHAUDRON","zone":"Est","adresse":"16, rue de la Gare - 97 490 Sainte- Clotilde","telephone":"0262 28 04 96","email_directeur":"ce.9741198J@ac-reunion.fr","email_secretariat":"selementaire.damaselegros@saintdenis.re"}, 
+ {"id":43,"nom":"Debussy","type_ecole":"Maternelle","secteur":"STE CLOTILDE","zone":"Est","adresse":"16, rue Frédéric Chopin - 97 490 Sainte-Clotilde","telephone":"0262 29 70 72","email_directeur":"ce.9740662B@ac-reunion.fr","email_secretariat":"smaternelle.debussy@saintdenis.re"}, 
+ {"id":62,"nom":"Domenjod","type_ecole":"Maternelle","secteur":"DOMENJOD","zone":"Est","adresse":"45, route de Domenjod - 97 490 Sainte- Clotilde","telephone":"0262 53 53 70","email_directeur":"ce.9740211L@ac-reunion.fr","email_secretariat":"selementaire.domenjod@saintdenis.re"}, 
+ {"id":50,"nom":"Eglantines","type_ecole":"Primaire","secteur":"MOUFIA","zone":"Est","adresse":"13, rue de la Chapelle - 97 490 Sainte Clotilde","telephone":"0262 29 71 04","email_directeur":"ce.9740995N@ac-reunion.fr","email_secretariat":"smaternelle.lesbancouliers@saintdenis.re"}, 
+ {"id":54,"nom":"Eudoxie Nonge","type_ecole":"Primaire","secteur":"MOUFIA 2","zone":"Est","adresse":"40, avenue Eudoxie Nonge - 97 490 Sainte- Clotilde","telephone":"0262 28 11 40","email_directeur":"ce.9740209J@ac-reunion.fr","email_secretariat":"smaternelle.eudoxienonge@saintdenis.re"}, 
+ {"id":30,"nom":"Françoise Mollard","type_ecole":"Maternelle","secteur":"MONTGAILLARD","zone":"Ouest","adresse":"54, rue de la Maternelle - 97400 Saint-Denis","telephone":"0262 30 24 11","email_directeur":"ce.9740607S@ac-reunion.fr","email_secretariat":"smaternelle.françoisemollard@saintdenis.re"}, 
+ {"id":23,"nom":"Gabriel Macé","type_ecole":"Maternelle","secteur":"SOURCE","zone":"Ouest","adresse":"3 rue de la Source - 97400 Saint-Denis","telephone":"0262 21 22 95","email_directeur":"ce.9741074Z@ac-reunion.fr","email_secretariat":"selementaire.gabrielmace@saintdenis.re"}, 
+ {"id":21,"nom":"Gisèle Calmy","type_ecole":"Maternelle","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"107 bis, rue Ste-Marie - 97400 Saint-Denis","telephone":"0262 21 03 29","email_directeur":"ce.9740794V@ac-reunion.fr","email_secretariat":"smaternelle.giselecalmy@saintdenis.re"}, 
+ {"id":13,"nom":"Grand Canal","type_ecole":"Primaire","secteur":"BRETAGNE","zone":"Est","adresse":"79, chemin Grand Canal - 97490 Ste-Clotilde","telephone":"0262 52 52 69","email_directeur":"ce.9740631T@ac-reunion.fr","email_secretariat":"sprimaire.grandcanal@saintdenis.re"}, 
+ {"id":34,"nom":"Henry Dunant","type_ecole":"Maternelle","secteur":"MONTGAILLARD","zone":"Ouest","adresse":"99, Bd de la Trinité - 97 400 Saint-Denis","telephone":"0262 30 06 43","email_directeur":"ce.9740122P@ac-reunion.fr","email_secretariat":"sprimaire.henrydunant@saintdenis.re"}, 
+ {"id":58,"nom":"Herbinière Lebert","type_ecole":"Maternelle","secteur":"CHAUDRON","zone":"Est","adresse":"62, avenue Joseph Bédier - 97 490 Sainte- Clotilde","telephone":"0262 28 11 06","email_directeur":"ce.9740783H@ac-reunion.fr","email_secretariat":"smaternelle.damaselegros@saintdenis.re"}, 
+ {"id":59,"nom":"Herbinière Lebert","type_ecole":"Élémentaire","secteur":"CHAUDRON","zone":"Est","adresse":"66, avenue Joseph Bédier - 97 490 Sainte-Clotilde","telephone":"0262 28 11 35","email_directeur":"ce.9740207G@ac-reunion.fr","email_secretariat":"selementaire.herbinièrelebert@saintdenis.re"}, 
+ {"id":40,"nom":"J.B. Bossard","type_ecole":"Primaire","secteur":"STE CLOTILDE","zone":"Est","adresse":"7, rue Lacroix - 97 490 Sainte-Clotilde","telephone":"0262 28 21 40","email_directeur":"ce.9740667G@ac-reunion.fr","email_secretariat":"selementaire.jbbossard@saintdenis.re"}, 
+ {"id":44,"nom":"Jacarandas","type_ecole":"Maternelle","secteur":"STE CLOTILDE","zone":"Est","adresse":"2 rue de la Cure -97490 Sainte-Clotilde","telephone":"0262 28 07 58","email_directeur":"ce.9740708B@ac-reunion.fr","email_secretariat":"smaternelle.lesjacarandas@saintdenis.re"}, 
+ {"id":22,"nom":"Joinville","type_ecole":"Élémentaire","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"132, rue Jules Auber - 97400 Saint-Denis","telephone":"0262 21 06 45","email_directeur":"ce.9740134C@ac-reunion.fr","email_secretariat":"selementaire.canal.brule@saintdenis.re"}, 
+ {"id":70,"nom":"Jules Reydellet A","type_ecole":"Élémentaire","secteur":"BAS DE LA RIVIERE","zone":"Ouest","adresse":"94, rue de la République - 97 400 Saint-Denis","telephone":"0262 21 49 36","email_directeur":"ce.9741252T@ac-reunion.fr","email_secretariat":"selementaire.julesreydellet.a@saintdenis.re"}, 
+ {"id":71,"nom":"Jules Reydellet B","type_ecole":"Élémentaire","secteur":"BAS DE LA RIVIERE","zone":"Ouest","adresse":null,"telephone":null,"email_directeur":"ce.9741252T@ac-reunion.fr","email_secretariat":"selementaire.julesreydellet.b@saintdenis.re"}, 
+ {"id":4,"nom":"La Source","type_ecole":"Maternelle","secteur":"BELLEPIERRE","zone":"Ouest","adresse":"60 Bd de la Source - 97400 Saint-Denis","telephone":"0262 21 34 12","email_directeur":"ce.9740689F@ac-reunion.fr","email_secretariat":"smaternelle.lasource@saintdenis.re"}, 
+ {"id":15,"nom":"Le Brûlé","type_ecole":"Primaire","secteur":"BRÛLÉ","zone":"Ouest","adresse":"11 chemin des Frangipaniers - Le Brûlé - 97400 Saint-Denis","telephone":"0262 23 01 16","email_directeur":"ce.9740121N@ac-reunion.fr","email_secretariat":"sprimaire.brule.ledenis.re"}, 
+ {"id":9,"nom":"Les Bringelliers","type_ecole":"Maternelle","secteur":"BOIS DE NÈFLES","zone":"Est","adresse":"18 bis, chemin des Bringelliers - 97490 Ste-Clotilde","telephone":"0262 29 18 38","email_directeur":"ce.9740976T@ac-reunion.fr","email_secretariat":"smaternelle.lesbringelliers@saintdenis.re"}, 
+ {"id":8,"nom":"Les Bringelliers","type_ecole":"Élémentaire","secteur":"BOIS DE NÈFLES","zone":"Est","adresse":"18, chemin des Bringelliers - 97490 Ste-Clotilde","telephone":"0262 29 42 58","email_directeur":"ce.9740977U@ac-reunion.fr","email_secretariat":"selementaire.lesbringelliers@saintdenis.re"}, 
+ {"id":20,"nom":"Les Flamboyants","type_ecole":"Maternelle","secteur":"CENTRE VILLE","zone":"Ouest","adresse":"157, rue Jules Auber - 97400 Saint-Denis","telephone":"0262 21 13 82","email_directeur":"ce.9740629R@ac-reunion.fr","email_secretariat":"smatatre.lesflamboyants@satnisnis.re"}, 
+ {"id":3,"nom":"Les Rubis","type_ecole":"Maternelle","secteur":"BELLEPIERRE","zone":"Ouest","adresse":"45, allée des Rubis - Bellepierre - 97400 Saint-Denis","telephone":"0262 21 10 37","email_directeur":"ce.9740630S@ac-reunion.fr","email_secretariat":"smaternelle.canaldubrule@saintdenis.re"}, 
+ {"id":45,"nom":"Lilas/ Bois Noirs","type_ecole":"Maternelle","secteur":"STE CLOTILDE","zone":"Est","adresse":"4, rue de la Cure - 97 490 Sainte-Clotilde","telephone":"0262 28 00 96","email_directeur":"ce.9741259A@ac-reunion.fr","email_secretariat":"selementaire.lilas.boisnoirs@saintdenis.re"}, 
+ {"id":10,"nom":"Maxime Laope","type_ecole":"Primaire","secteur":"BRETAGNE","zone":"Est","adresse":"2, chemin du Finistère - 97490 Ste-Clotilde","telephone":"0262 52 52 36","email_directeur":"ce.9740491R@ac-reunion.fr","email_secretariat":"sprimaire.maximelaope@saintdenis.re"}, 
+ {"id":61,"nom":"Michel Debré","type_ecole":"Élémentaire","secteur":"CHAUDRON","zone":"Est","adresse":"3, rue Bridet- 97 490 Sainte- Clotilde","telephone":"0262 28 05 86","email_directeur":"ce.9740208H@ac-reunion.fr","email_secretariat":"selementaire.micheldebre@saintdenis.re"}, 
+ {"id":60,"nom":"Michel Debré","type_ecole":"Maternelle","secteur":"CHAUDRON","zone":"Est","adresse":"8, rue Indiana - 97 490 Sainte- Clotilde","telephone":"0262 28 00 78","email_directeur":"ce.9740126U@ac-reunion.fr","email_secretariat":"smaternelle.micheldebre@saintdenis.re"}, 
+ {"id":33,"nom":"Montgaillard","type_ecole":"Élémentaire","secteur":"MONTGAILLARD","zone":"Ouest","adresse":"43, rue du Stade - Montgaillard - 97 400 Saint-Denis","telephone":"0262 30 11 26","email_directeur":"ce.9740865X@ac-reunion.fr","email_secretariat":"smaternelle.montgaillard@saintdenis.re"}, 
+ {"id":11,"nom":"Philibert Commerson","type_ecole":"Primaire","secteur":"BRETAGNE","zone":"Est","adresse":"252, route Gabriel Macé - 97490 Ste-Clotilde","telephone":"0262 52 52 24","email_directeur":"ce.9740117J@ac-reunion.fr","email_secretariat":"sprimaire.philibertcommerson@saintdenis.re"}, 
+ {"id":67,"nom":"Philippe Vinson","type_ecole":"Maternelle","secteur":"MONTAGNE 8e","zone":"Ouest","adresse":"5 bis, chemin Bailly - 97 417 La Montagne","telephone":"0262 23 61 93","email_directeur":"ce.9740795W@ac-reunion.fr","email_secretariat":"smaternelle.montagne.8@saintdenis.re"}, 
+ {"id":66,"nom":"Philippe Vinson","type_ecole":"Élémentaire","secteur":"MONTAGNE 8e","zone":"Ouest","adresse":"34, route des Palmiers- 97 417 La Montagne","telephone":"0262 23 63 07","email_directeur":"ce.9740237P@ac-reunion.fr","email_secretariat":"selementaire.philippevinson@saintdenis.re"}, 
+ {"id":5,"nom":"Piton Bois de Nèfles","type_ecole":"Primaire","secteur":"BOIS DE NÈFLES","zone":"Est","adresse":"173, route Piton Bois de Nèfles - 97490 Ste-Clotilde","telephone":"0262 28 21 85","email_directeur":"ce.9740666F@ac-reunion.fr","email_secretariat":"sprimairepiton.boisnefles@saintdenis.re"}, 
+ {"id":55,"nom":"Primat","type_ecole":"Primaire","secteur":"PRIMAT","zone":"Est","adresse":"30 rue du Stade de l'Est - 97 490 Sainte- Clotilde","telephone":"0262 28 23 85","email_directeur":"ce.9740591Z@ac-reunion.fr","email_secretariat":"sprimaire.primat@saintdenis.re"}, 
+ {"id":26,"nom":"Providence","type_ecole":"Maternelle","secteur":"CAMELIAS PROVIDENCE","zone":"Ouest","adresse":"33 bis, Bd de la Providence - 97400 Saint-Denis","telephone":"0262 30 63 62","email_directeur":"ce.9740997R@ac-reunion.fr","email_secretariat":"smaternelle.providence@saintdenis.re"}, 
+ {"id":25,"nom":"Raymond Mondon","type_ecole":"Primaire","secteur":"CAMELIAS PROVIDENCE","zone":"Ouest","adresse":"6 rue Nicole de la Serve- 97400 Saint-Denis","telephone":"0262 21 17 56 / 0262 21 66 38","email_directeur":"ce.9740236N@ac-reunion.fr","email_secretariat":"selementaire.raymondmondon@saintdenis.re"}, 
+ {"id":72,"nom":"Rivière II","type_ecole":"Élémentaire","secteur":"BAS DE LA RIVIERE","zone":"Ouest","adresse":"43 Bis, Rue Antoine Picard - 97 400 Saint- Denis","telephone":"0262 21 08 96","email_directeur":"ce.9740940D@ac-reunion.fr","email_secretariat":"smaternelle.riviere2@saintdenis.re"}, 
+ {"id":68,"nom":"Ruisseau Blanc","type_ecole":"Élémentaire","secteur":"MONTAGNE 8e","zone":"Ouest","adresse":"3, chemin Charles Ollivier Manès- 97 417 La Montagne","telephone":"0262 23 60 14","email_directeur":"ce.9740242V@ac-reunion.fr","email_secretariat":"selementaire.ruisseaublanc@saintdenis.re"}, 
+ {"id":69,"nom":"Ruisseau Blanc","type_ecole":"Maternelle","secteur":"MONTAGNE 8e","zone":"Ouest","adresse":"1 chemin des Fucréas - 97 417 La Montagne","telephone":"0262 23 62 45","email_directeur":"ce.9740773X@ac-reunion.fr","email_secretariat":"smaternelle.ruisseaublanc@saintdenis.re"}, 
+ {"id":28,"nom":"Saint François","type_ecole":"Élémentaire","secteur":"SAINT FRANCOIS","zone":"Ouest","adresse":"10, Allée des Ecoles - 97400 Saint-Denis","telephone":"0262 30 09 71","email_directeur":"ce.9740127V@ac-reunion.fr","email_secretariat":"selementaire.stfrançois.pk7@saintdenis.re"}, 
+ {"id":27,"nom":"Saint François","type_ecole":"Maternelle","secteur":"SAINT FRANCOIS","zone":"Ouest","adresse":"137, route de Saint-François - 97400 Saint-Denis","telephone":"0262 30 09 33","email_directeur":"ce.9740628P@ac-reunion.fr","email_secretariat":"smaternelle.stfrancois.pk7@saintdenis.re"}, 
+ {"id":65,"nom":"Saint-Bernard","type_ecole":"Maternelle","secteur":"MONTAGNE 15e","zone":"Ouest","adresse":"59, Chemin du Père Raimbault- 97 417 La Montagne","telephone":"0262 23 62 44","email_directeur":"ce.9740665E@ac-reunion.fr","email_secretariat":"smaternelle.montagne.15@saintdenis.re"}, 
+ {"id":64,"nom":"Saint-Bernard","type_ecole":"Élémentaire","secteur":"MONTAGNE 15e","zone":"Ouest","adresse":"69, Chemin du Père Raimbault- 97 417 La Montagne","telephone":"0262 23 61 13","email_directeur":"ce.9740133B@ac-reunion.fr","email_secretariat":"selementaire.saintbernard@saintdenis.re"}, 
+ {"id":41,"nom":"Tamarins","type_ecole":"Maternelle","secteur":"STE CLOTILDE","zone":"Est","adresse":"78, rue Lacroix - 97 490 Sainte-Clotilde","telephone":"0262 28 21 52","email_directeur":"ce.9740743P@ac-reunion.fr","email_secretariat":"smaternelle.lestamarins@saintdenis.re"}, 
+ {"id":42,"nom":"Tamarins","type_ecole":"Élémentaire","secteur":"STE CLOTILDE","zone":"Est","adresse":"109, rue Lory les Hauts - 97 490 Sainte-Clotilde","telephone":"0262 28 14 19","email_directeur":"ce.9740772W@ac-reunion.fr","email_secretariat":"selementaire.lestamarins@saintdenis.re"}, 
+ {"id":2,"nom":"Topazes","type_ecole":"Élémentaire","secteur":"BELLEPIERRE","zone":"Ouest","adresse":"133 bis allée des Topazes Bellepierre - 97400 Saint-Denis","telephone":"0262 21 17 83","email_directeur":"ce.9740234L@ac-reunion.fr","email_secretariat":"selementaire.canal.brule@saintdenis.re"}, 
+ {"id":51,"nom":"Tulipiers","type_ecole":"Maternelle","secteur":"MOUFIA","zone":"Est","adresse":"89, Allée des Tulipes - Le Moufia- 97 490 Sainte-Clotilde","telephone":"0262 28 68 16","email_directeur":"ce.9740901L@ac-reunion.fr","email_secretariat":"smaternelle.lestulipiers@saintdenis.re"}, 
+ {"id":37,"nom":"Vauban","type_ecole":"Maternelle","secteur":"VAUBAN","zone":"Ouest","adresse":"1, Boulevard Vauban - 97 400 Saint-Denis","telephone":"0262 21 17 73","email_directeur":"ce.9740746T@ac-reunion.fr","email_secretariat":"smaternelle.vauban1@saintdenis.re"}, 
+ {"id":73,"nom":"Ylang Ylang","type_ecole":"Maternelle","secteur":"BAS DE LA RIVIERE","zone":"Ouest","adresse":"15, rue de la Digue - 97 400 Saint-Denis","telephone":"0262 21 94 09","email_directeur":"ce.9740744R@ac-reunion.fr","email_secretariat":"smaternelle.ylang-ylang@saintdenis.re"}],
+  'domaines': [{"id":1,"libelle":"Restauration scolaire","traitement":"interne","cellule_id":2,"service_externe_id":null}, 
+ {"id":2,"libelle":"Informatique","traitement":"interne","cellule_id":3,"service_externe_id":null}, 
+ {"id":3,"libelle":"Mobilier","traitement":"interne","cellule_id":1,"service_externe_id":null}, 
+ {"id":4,"libelle":"Ventilateur / brasseur d'air","traitement":"interne","cellule_id":1,"service_externe_id":null}, 
+ {"id":5,"libelle":"Rideaux d'occultation","traitement":"interne","cellule_id":1,"service_externe_id":null}, 
+ {"id":6,"libelle":"Clés et BIP d'accès","traitement":"interne","cellule_id":1,"service_externe_id":null}, 
+ {"id":7,"libelle":"Sécurité incendie — alarme et extincteurs","traitement":"externe","cellule_id":null,"service_externe_id":1}, 
+ {"id":8,"libelle":"Travaux et installations","traitement":"externe","cellule_id":null,"service_externe_id":2}, 
+ {"id":9,"libelle":"Bâtiment","traitement":"externe","cellule_id":null,"service_externe_id":3}, 
+ {"id":10,"libelle":"Élagage et aménagement paysager","traitement":"externe","cellule_id":null,"service_externe_id":4}, 
+ {"id":11,"libelle":"Dératisation et traitement 3D","traitement":"interne","cellule_id":1,"service_externe_id":null}, 
+ {"id":12,"libelle":"Je ne sais pas / autre sujet","traitement":"tri","cellule_id":null,"service_externe_id":null}],
+  'types_demande': [{"id":44,"domaine_id":10,"libelle":"Demande d'élagage"}, 
+ {"id":54,"domaine_id":12,"libelle":"Demande sans domaine identifié"}, 
+ {"id":8,"domaine_id":2,"libelle":"Panne sur l'équipement informatique"}, 
+ {"id":15,"domaine_id":3,"libelle":"Demande de mobilier supplémentaire"}, 
+ {"id":19,"domaine_id":4,"libelle":"Ventilateur en panne"}, 
+ {"id":23,"domaine_id":5,"libelle":"Demande de remplacement de rideau"}, 
+ {"id":26,"domaine_id":6,"libelle":"Demande de double de clé"}, 
+ {"id":29,"domaine_id":7,"libelle":"Maintenance de l'alarme incendie"}, 
+ {"id":33,"domaine_id":8,"libelle":"Demande de travaux"}, 
+ {"id":37,"domaine_id":9,"libelle":"Étanchéité"}, 
+ {"id":49,"domaine_id":11,"libelle":"Demande de dératisation"}, 
+ {"id":1,"domaine_id":1,"libelle":"Panne équipement"}, 
+ {"id":24,"domaine_id":5,"libelle":"Pose d'un rideau neuf"}, 
+ {"id":50,"domaine_id":11,"libelle":"Demande de désinsectisation"}, 
+ {"id":38,"domaine_id":9,"libelle":"Ravalement"}, 
+ {"id":27,"domaine_id":6,"libelle":"Demande de BIP"}, 
+ {"id":9,"domaine_id":2,"libelle":"Dysfonctionnement logiciel"}, 
+ {"id":34,"domaine_id":8,"libelle":"Demande de maintenance électrique"}, 
+ {"id":30,"domaine_id":7,"libelle":"Maintenance d'extincteur"}, 
+ {"id":20,"domaine_id":4,"libelle":"Brasseur d'air en panne"}, 
+ {"id":16,"domaine_id":3,"libelle":"Demande de remplacement de mobilier usagé"}, 
+ {"id":2,"domaine_id":1,"libelle":"Dysfonctionnement réseau gaz"}, 
+ {"id":45,"domaine_id":10,"libelle":"Demande d'abattage"}, 
+ {"id":3,"domaine_id":1,"libelle":"Demande de nettoyage de hotte"}, 
+ {"id":35,"domaine_id":8,"libelle":"Maintenance de l'alarme anti-intrusion"}, 
+ {"id":17,"domaine_id":3,"libelle":"Demande d'évacuation de mobilier"}, 
+ {"id":21,"domaine_id":4,"libelle":"Demande d'installation de ventilateur ou de brasseur"}, 
+ {"id":25,"domaine_id":5,"libelle":"Autres"}, 
+ {"id":28,"domaine_id":6,"libelle":"Autres"}, 
+ {"id":39,"domaine_id":9,"libelle":"Réfection de sanitaire"}, 
+ {"id":31,"domaine_id":7,"libelle":"Fourniture ou remplacement d'extincteur"}, 
+ {"id":46,"domaine_id":10,"libelle":"Demande de plantation"}, 
+ {"id":10,"domaine_id":2,"libelle":"Dysfonctionnement téléphonique"}, 
+ {"id":51,"domaine_id":11,"libelle":"Demande de dératisation et désinsectisation"}, 
+ {"id":47,"domaine_id":10,"libelle":"Demande d'aménagement paysager"}, 
+ {"id":22,"domaine_id":4,"libelle":"Autres"}, 
+ {"id":40,"domaine_id":9,"libelle":"Réfection de sol souple"}, 
+ {"id":52,"domaine_id":11,"libelle":"Demande d'intervention pour l'entretien des pièges"}, 
+ {"id":36,"domaine_id":8,"libelle":"Autre"}, 
+ {"id":18,"domaine_id":3,"libelle":"Autres"}, 
+ {"id":32,"domaine_id":7,"libelle":"Autre"}, 
+ {"id":4,"domaine_id":1,"libelle":"Nettoyage (autre que la hotte)"}, 
+ {"id":11,"domaine_id":2,"libelle":"Photocopieur ou imprimante"}, 
+ {"id":48,"domaine_id":10,"libelle":"Autre"}, 
+ {"id":5,"domaine_id":1,"libelle":"Bâti de la cantine (sol, mur, plomberie, porte)"}, 
+ {"id":12,"domaine_id":2,"libelle":"Télécopieur"}, 
+ {"id":41,"domaine_id":9,"libelle":"Réfection de sol synthétique"}, 
+ {"id":53,"domaine_id":11,"libelle":"Autre"}, 
+ {"id":42,"domaine_id":9,"libelle":"Aménagement"}, 
+ {"id":13,"domaine_id":2,"libelle":"Dysfonctionnement de la connexion internet"}, 
+ {"id":6,"domaine_id":1,"libelle":"Fourniture ou remplacement d'équipement de cuisine"}, 
+ {"id":14,"domaine_id":2,"libelle":"Autres"}, 
+ {"id":7,"domaine_id":1,"libelle":"Autres"}, 
+ {"id":43,"domaine_id":9,"libelle":"Autre"}],
+  'cellules': [{"id": 1, "libelle": "Cellule Écoles", "chef_agent_id": 10}, {"id": 2, "libelle": "Cellule Maintenance / Restauration", "chef_agent_id": 11}, {"id": 3, "libelle": "Cellule Informatique", "chef_agent_id": 1}],
+  'domaine_referents': [{"domaine_id": 1, "agent_id": 5}, {"domaine_id": 1, "agent_id": 6}, {"domaine_id": 1, "agent_id": 7}, {"domaine_id": 2, "agent_id": 1}, {"domaine_id": 3, "agent_id": 2}, {"domaine_id": 4, "agent_id": 3}, {"domaine_id": 5, "agent_id": 4}, {"domaine_id": 6, "agent_id": 4}, {"domaine_id": 11, "agent_id": 4}, {"domaine_id": 12, "agent_id": 12}],
+  'agents': [{"id":3,"nom":"Alain BOURGES","fonction":"referent","cellule_id":1,"zone":null,"email":"a.bourges@saintdenis.re","actif":true}, 
+ {"id":13,"nom":"Anthony PAUSE","fonction":"direction","cellule_id":null,"zone":null,"email":"a.pause@saintdenis.re","actif":true}, 
+ {"id":5,"nom":"Fabienne BRUNO","fonction":"referent","cellule_id":2,"zone":null,"email":"f.bruno@saintdenis.re","actif":true}, 
+ {"id":10,"nom":"Georges DE FONDAUMIERE","fonction":"chef_cellule","cellule_id":1,"zone":null,"email":"GM.DEFONDAUMIERE@saintdenis.re","actif":true}, 
+ {"id":8,"nom":"Georges MITHRA","fonction":"technicien","cellule_id":2,"zone":"Ouest","email":"g.mithra@saintdenis.re","actif":true}, 
+ {"id":7,"nom":"Habiba ATTOUMANE","fonction":"referent","cellule_id":2,"zone":null,"email":"h.attoumane@saintdenis.re","actif":true}, 
+ {"id":6,"nom":"Hélène CLAIN","fonction":"referent","cellule_id":2,"zone":null,"email":"hel.clain@saintdenis.re","actif":true}, 
+ {"id":11,"nom":"Jean Bernard JALMA","fonction":"chef_cellule","cellule_id":2,"zone":null,"email":"jb.jalma@saintdenis.re","actif":true}, 
+ {"id":9,"nom":"Jean Marc COMTOIS","fonction":"technicien","cellule_id":2,"zone":"Est","email":"jm.comtois@saintdenis.re","actif":true}, 
+ {"id":14,"nom":"Mimose KERRINOT","fonction":"secretariat","cellule_id":3,"zone":null,"email":"m.kerrinot@saintdenis.re","actif":true}, 
+ {"id":2,"nom":"Olivier ANNETTE","fonction":"referent","cellule_id":1,"zone":null,"email":"o.annette@saintdenis.re","actif":true}, 
+ {"id":1,"nom":"Patrick PAYET","fonction":"chef_cellule","cellule_id":3,"zone":null,"email":"p.payet@saintdenis.re","actif":true}, 
+ {"id":15,"nom":"Rayhaan VALLY","fonction":"technicien","cellule_id":3,"zone":null,"email":"r.vally@saintdenis.re","actif":true}, 
+ {"id":12,"nom":"Stéphanie ELISABETH","fonction":"assistante","cellule_id":null,"zone":null,"email":"s.elisabeth@saintdenis.re","actif":true}, 
+ {"id":4,"nom":"Yohann ANILHA","fonction":"referent","cellule_id":1,"zone":null,"email":"y.anilha@saintdenis.re","actif":true}],
+  'services_externes': [{"id": 1, "libelle": "Sécurité incendie (service ERP)", "contact_nom": "Stéphanie CAZANOVE", "contact_email": "s.cazanove@saintdenis.re"}, {"id": 2, "libelle": "Direction des Travaux et de la Programmation", "contact_nom": "Joceline DIJOUX", "contact_email": "j.dijoux@saintdenis.re"}, {"id": 3, "libelle": "Direction des Services Bâtiments", "contact_nom": "Christine PAJANIANDY", "contact_email": "c.pajaniandy@saintdenis.re"}, {"id": 4, "libelle": "Élagage et aménagement paysager", "contact_nom": "Marie Eve LECHAT", "contact_email": null}],
+  'secteurs_intervention': [{"code":"EST","libelle":"Est"}, 
+ {"code":"OUEST","libelle":"Ouest"}],
+  'demandes': [{"id": "636f98b3-caf5-4833-9ce7-33b10419d08b", "numero": "DEM-2026-00001", "ecole_id": 1, "demandeur_nom": "Direction 1", "demandeur_email": "dir1@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000100", "domaine_id": 1, "type_demande_id": 1, "equipement_id": null, "localisation": "Cuisine, plonge", "description": "Le lave-vaisselle ne chauffe plus.", "observation_initiale": null, "priorite": "haute", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "nouveau", "referent_agent_id": null, "technicien_agent_id": 8, "service_externe_id": null, "pris_en_charge_le": null, "transmis_le": null, "intervention_finie_le": null, "cloture_le": null, "cout_reel": null, "cout_statut": "non_applicable", "token_intervention": "2931d4da-5931-4eb3-9f6a-791e71db270d", "token_cloture": "56e48a15-3daf-42ae-a72a-ca7c3c118c45", "created_at": "2026-08-21T16:34:12.872693+04:00", "updated_at": "2026-08-21T16:34:12.872693+04:00", "updated_by": null}, {"id": "d32aa56c-066a-4c2f-8881-3a6f297527e1", "numero": "DEM-2026-00008", "ecole_id": 8, "demandeur_nom": "Direction 8", "demandeur_email": "dir8@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000800", "domaine_id": 12, "type_demande_id": 54, "equipement_id": null, "localisation": "réfectoire", "description": "Je ne sais pas à qui m'adresser : odeur persistante.", "observation_initiale": null, "priorite": "normale", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "nouveau", "referent_agent_id": null, "technicien_agent_id": null, "service_externe_id": null, "pris_en_charge_le": null, "transmis_le": null, "intervention_finie_le": null, "cloture_le": null, "cout_reel": null, "cout_statut": "non_applicable", "token_intervention": "0461320a-9bc0-4f42-a161-29b8a4118001", "token_cloture": "2248937c-c4a9-4d22-a3f8-319adad81a1c", "created_at": "2026-08-21T16:34:12.872693+04:00", "updated_at": "2026-08-21T16:34:12.872693+04:00", "updated_by": null}, {"id": "8c7b308e-8e87-4527-9e10-c32aec68ad6c", "numero": "DEM-2026-00007", "ecole_id": 7, "demandeur_nom": "Direction 7", "demandeur_email": "dir7@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000700", "domaine_id": 6, "type_demande_id": 26, "equipement_id": null, "localisation": "portail", "description": "Le BIP du portail ne répond plus.", "observation_initiale": null, "priorite": "normale", "hors_presence_eleves": true, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "nouveau", "referent_agent_id": null, "technicien_agent_id": null, "service_externe_id": null, "pris_en_charge_le": null, "transmis_le": null, "intervention_finie_le": null, "cloture_le": null, "cout_reel": null, "cout_statut": "non_applicable", "token_intervention": "898a19d0-d5f6-4108-9036-96ed79d292d9", "token_cloture": "19c84776-44ed-40ac-b83d-d9eaa51628c1", "created_at": "2026-08-21T16:34:12.872693+04:00", "updated_at": "2026-08-21T16:34:12.885538+04:00", "updated_by": "Alain BOURGES"}, {"id": "ac673bd3-4f7a-44e7-8b1f-f99e30acda17", "numero": "DEM-2026-00004", "ecole_id": 4, "demandeur_nom": "Direction 4", "demandeur_email": "dir4@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000400", "domaine_id": 3, "type_demande_id": 15, "equipement_id": null, "localisation": "salle A1", "description": "Six chaises cassées, assises fendues.", "observation_initiale": null, "priorite": "normale", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "resolu", "referent_agent_id": null, "technicien_agent_id": 8, "service_externe_id": null, "pris_en_charge_le": "2026-08-21T16:34:12.885538+04:00", "transmis_le": null, "intervention_finie_le": "2026-08-21T16:34:12.886883+04:00", "cloture_le": "2026-08-21T16:34:12.887828+04:00", "cout_reel": null, "cout_statut": "non_applicable", "token_intervention": "180bfdc7-3ad6-414e-bf98-30604588e75b", "token_cloture": "24c0066f-c40a-42c3-9bb0-31158799d14f", "created_at": "2026-08-21T16:34:12.872693+04:00", "updated_at": "2026-08-21T16:34:12.887828+04:00", "updated_by": "système"}, {"id": "a0065e1e-1033-4280-af8b-c43302cf85c6", "numero": "DEM-2026-00005", "ecole_id": 5, "demandeur_nom": "Direction 5", "demandeur_email": "dir5@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000500", "domaine_id": 2, "type_demande_id": 8, "equipement_id": null, "localisation": "secrétariat", "description": "Le photocopieur affiche une erreur bourrage permanente.", "observation_initiale": null, "priorite": "basse", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "en_attente_validation_ecole", "referent_agent_id": null, "technicien_agent_id": null, "service_externe_id": null, "pris_en_charge_le": "2026-08-21T16:34:12.885538+04:00", "transmis_le": null, "intervention_finie_le": "2026-08-21T16:34:12.888384+04:00", "cloture_le": null, "cout_reel": null, "cout_statut": "non_applicable", "token_intervention": "1406bb9f-f8bd-4116-8b95-0459c3f12e38", "token_cloture": "fe92d7b1-ef06-48ae-924e-5ffd3cd5b528", "created_at": "2026-08-21T16:34:12.872693+04:00", "updated_at": "2026-08-21T16:34:12.888384+04:00", "updated_by": "système"}, {"id": "a02c4919-9f6a-488a-83bd-2af033e149bd", "numero": "DEM-2026-00003", "ecole_id": 3, "demandeur_nom": "Direction 3", "demandeur_email": "dir3@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000300", "domaine_id": 4, "type_demande_id": 19, "equipement_id": null, "localisation": "salle B3", "description": "Le brasseur d'air ne tourne plus depuis lundi.", "observation_initiale": null, "priorite": "normale", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "nouveau", "referent_agent_id": null, "technicien_agent_id": null, "service_externe_id": null, "pris_en_charge_le": null, "transmis_le": null, "intervention_finie_le": null, "cloture_le": null, "cout_reel": null, "cout_statut": "non_applicable", "token_intervention": "e3c28bdc-9cef-4d7f-bd49-c05a393c05c5", "token_cloture": "89bff589-c7a8-42f0-ac0e-6b96c65c0de6", "created_at": "2026-08-12T16:34:12.885422+04:00", "updated_at": "2026-08-21T16:34:12.885422+04:00", "updated_by": "système"}, {"id": "daaf34ea-c390-4d0b-9fc8-d3cc8305189c", "numero": "DEM-2026-00002", "ecole_id": 2, "demandeur_nom": "Direction 2", "demandeur_email": "dir2@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000200", "domaine_id": 9, "type_demande_id": 37, "equipement_id": null, "localisation": "Toiture aile est", "description": "Infiltration au plafond du couloir après les fortes pluies.", "observation_initiale": null, "priorite": "urgente", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "transmis_externe", "referent_agent_id": null, "technicien_agent_id": null, "service_externe_id": 3, "pris_en_charge_le": null, "transmis_le": "2026-08-27T08:32:30.918649+00:00", "intervention_finie_le": null, "cloture_le": null, "cout_reel": null, "cout_statut": "a_renseigner", "token_intervention": "9f44b8dd-1ba5-4ab8-bf5c-47ebd662dd51", "token_cloture": "5d629324-89bd-44d1-96e6-301ce63b0123", "created_at": "2026-08-03T16:34:12.885245+04:00", "updated_at": "2026-08-21T16:34:12.885245+04:00", "updated_by": "système"}, {"id": "28e079c6-6e4b-4c36-a49d-ee91fbe473ac", "numero": "DEM-2026-00006", "ecole_id": 6, "demandeur_nom": "Direction 6", "demandeur_email": "dir6@ac-reunion.fr", "demandeur_fonction": "Directeur", "demandeur_tel": "0692000600", "domaine_id": 10, "type_demande_id": 44, "equipement_id": null, "localisation": "cour", "description": "Branche cassée qui menace de tomber sur le préau.", "observation_initiale": null, "priorite": "urgente", "hors_presence_eleves": false, "fenetre_souhaitee": "des_que_possible", "date_souhaitee": null, "statut": "transmis_externe", "referent_agent_id": null, "technicien_agent_id": null, "service_externe_id": 4, "pris_en_charge_le": null, "transmis_le": "2026-08-05T08:32:30.919010+00:00", "intervention_finie_le": null, "cloture_le": null, "cout_reel": null, "cout_statut": "a_renseigner", "token_intervention": "e61a78a5-4405-4482-b100-78097deb2cf4", "token_cloture": "de01ddc6-318f-47e9-9f51-d218ce5a616c", "created_at": "2026-08-03T16:34:12.885245+04:00", "updated_at": "2026-08-21T16:34:12.885245+04:00", "updated_by": "système"}],
+  'v_demandes_delais': [{"id": "636f98b3-caf5-4833-9ce7-33b10419d08b", "delai_reaction_jours": 0, "delai_realisation_jours": 0, "a_planifier_pour": null, "delai_hors_perimetre": false, "jours_chez_service": null, "service_externe": null, "service_contact": null, "service_email": null, "service_injoignable": false, "dernier_cran_relance": null}, {"id": "a0065e1e-1033-4280-af8b-c43302cf85c6", "delai_reaction_jours": 0, "delai_realisation_jours": 0, "a_planifier_pour": null, "delai_hors_perimetre": false, "jours_chez_service": null, "service_externe": null, "service_contact": null, "service_email": null, "service_injoignable": false, "dernier_cran_relance": null}, {"id": "ac673bd3-4f7a-44e7-8b1f-f99e30acda17", "delai_reaction_jours": 0, "delai_realisation_jours": null, "a_planifier_pour": null, "delai_hors_perimetre": false, "jours_chez_service": null, "service_externe": null, "service_contact": null, "service_email": null, "service_injoignable": false, "dernier_cran_relance": null}, {"id": "a02c4919-9f6a-488a-83bd-2af033e149bd", "delai_reaction_jours": 7, "delai_realisation_jours": 7, "a_planifier_pour": null, "delai_hors_perimetre": false, "jours_chez_service": null, "service_externe": null, "service_contact": null, "service_email": null, "service_injoignable": false, "dernier_cran_relance": null}, {"id": "8c7b308e-8e87-4527-9e10-c32aec68ad6c", "delai_reaction_jours": 0, "delai_realisation_jours": null, "a_planifier_pour": "2026-10-12", "delai_hors_perimetre": false, "jours_chez_service": null, "service_externe": null, "service_contact": null, "service_email": null, "service_injoignable": false, "dernier_cran_relance": null}, {"id": "daaf34ea-c390-4d0b-9fc8-d3cc8305189c", "delai_reaction_jours": 14, "delai_realisation_jours": 14, "a_planifier_pour": null, "delai_hors_perimetre": true, "jours_chez_service": 2, "service_externe": "Direction des Services Bâtiments", "service_contact": "Christine PAJANIANDY", "service_email": "c.pajaniandy@saintdenis.re", "service_injoignable": false, "dernier_cran_relance": null}, {"id": "28e079c6-6e4b-4c36-a49d-ee91fbe473ac", "delai_reaction_jours": 14, "delai_realisation_jours": 14, "a_planifier_pour": null, "delai_hors_perimetre": true, "jours_chez_service": 18, "service_externe": "Élagage et aménagement paysager", "service_contact": "Marie Eve LECHAT", "service_email": null, "service_injoignable": true, "dernier_cran_relance": null}, {"id": "d32aa56c-066a-4c2f-8881-3a6f297527e1", "delai_reaction_jours": 0, "delai_realisation_jours": 0, "a_planifier_pour": null, "delai_hors_perimetre": false, "jours_chez_service": null, "service_externe": null, "service_contact": null, "service_email": null, "service_injoignable": false, "dernier_cran_relance": null}],
+  'demande_notes': [{"demande_id":"a0065e1e-1033-4280-af8b-c43302cf85c6","auteur":"service intervenant","contenu":"Photocopieur révisé.","created_at":"2026-08-21T16:34:12.888384+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","auteur":"école","contenu":"Parfait, merci.","created_at":"2026-08-21T16:34:12.887828+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","auteur":"service intervenant","contenu":"Chaises remplacées.","created_at":"2026-08-21T16:34:12.886883+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","auteur":"Alain BOURGES","contenu":"Pièce commandée le 12/08, livraison annoncée sous quinze jours.","created_at":"2026-08-21T16:34:12.885538+04:00"}],
+  'demande_historique': [{"demande_id":"a0065e1e-1033-4280-af8b-c43302cf85c6","champ":"statut","avant":"planifie","apres":"en_attente_validation_ecole","auteur":"système","changed_at":"2026-08-21T16:34:12.888384+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","champ":"statut","avant":"en_attente_validation_ecole","apres":"resolu","auteur":"système","changed_at":"2026-08-21T16:34:12.887828+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","champ":"statut","avant":"en_cours","apres":"en_attente_validation_ecole","auteur":"système","changed_at":"2026-08-21T16:34:12.886883+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","champ":"statut","avant":"nouveau","apres":"en_cours","auteur":"Alain BOURGES","changed_at":"2026-08-21T16:34:12.885538+04:00"}, 
+ {"demande_id":"ac673bd3-4f7a-44e7-8b1f-f99e30acda17","champ":"technicien","avant":null,"apres":"Georges MITHRA","auteur":"Alain BOURGES","changed_at":"2026-08-21T16:34:12.885538+04:00"}, 
+ {"demande_id":"a0065e1e-1033-4280-af8b-c43302cf85c6","champ":"statut","avant":"nouveau","apres":"planifie","auteur":"Alain BOURGES","changed_at":"2026-08-21T16:34:12.885538+04:00"}],
+  'demande_photos': []
+};
+
+// Bouchon d'essai : répond à la place de Supabase, avec les données réellement
+// extraites de la base d'essai. Aucun appel ne sort.
+(function () {
+  // Qui regarde ? Choisi dans l'adresse (?agent=…), sinon la direction.
+  // C'est ce qui permet de voir la page sous chaque casquette.
+  const VU_PAR = new URLSearchParams(location.search).get('agent')
+                 || 'a.pause@saintdenis.re';
+  const charge = btoa(JSON.stringify({ email: VU_PAR }))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  localStorage.setItem('demandes-ecoles-pole', JSON.stringify({
+    access_token: 'x.' + charge + '.y', refresh_token: 'r',
+    expire_le: Date.now() + 3600000 }));
+
+  const F = () => window.FIXTURES;
+  const journal = [];
+
+  //  Miroir des politiques de « demandes » : voir schema-v3-securite-rls.sql
+  //  et lot6-01-file-des-techniciens.sql. La vraie page ne filtre rien — c'est
+  //  la base qui trie. Un aperçu qui montrerait tout à un technicien mentirait
+  //  sur ce que la plateforme fait vraiment.
+  const AGENT = () => (F().agents || []).find(
+    a => (a.email || '').toLowerCase() === VU_PAR.toLowerCase()) || null;
+
+  function visiblePour(d) {
+    const a = AGENT();
+    if (!a) return false;
+    if (['direction', 'assistante', 'secretariat'].includes(a.fonction)) return true;
+    if (a.fonction === 'technicien') return d.technicien_agent_id === a.id;
+    if (a.fonction === 'referent')
+      return (F().domaine_referents || [])
+               .some(r => r.agent_id === a.id && r.domaine_id === d.domaine_id);
+    if (a.fonction === 'chef_cellule') {
+      const cel = (F().cellules || []).filter(c => c.chef_agent_id === a.id).map(c => c.id);
+      const dom = (F().domaines || []).find(x => x.id === d.domaine_id);
+      return !!dom && cel.includes(dom.cellule_id);
+    }
+    return false;
+  }
+
+  window.fetch = async function (url, options = {}) {
+    const u = String(url);
+    journal.push((options.method || 'GET') + ' ' + u.replace(/^https?:\/\/[^/]+/, ''));
+    window.APPELS = journal;
+
+    const rep = (corps, statut = 200) => ({
+      ok: statut < 400, status: statut,
+      json: async () => corps, text: async () => JSON.stringify(corps) });
+
+    if (u.includes('/rest/v1/rpc/prendre_en_charge')) {
+      const id = JSON.parse(options.body)._demande_id;
+      const d = F().demandes.find(x => x.id === id);
+      if (!d) return rep({ ok: false, motif: 'Demande introuvable.' });
+      if (!visiblePour(d))
+        return rep({ ok: false, motif: 'Cette demande ne relève pas de votre périmètre.' });
+      if (!['nouveau', 'rouvert'].includes(d.statut))
+        return rep({ ok: false, motif: 'Cette demande est déjà prise en charge.' });
+      d.statut = 'en_cours';
+      d.pris_en_charge_le = new Date().toISOString();
+      return rep({ ok: true, numero: d.numero, statut: 'en_cours' });
+    }
+    if (u.includes('/rest/v1/rpc/marquer_intervention_terminee')) {
+      const d = F().demandes.find(x => x.token_intervention === JSON.parse(options.body)._jeton);
+      if (d) { d.statut = 'en_attente_validation_ecole'; d.intervention_finie_le = new Date().toISOString(); }
+      return rep({ ok: true, numero: d ? d.numero : '?' });
+    }
+    if (u.includes('/rest/v1/demande_notes') && options.method === 'POST') {
+      const n = JSON.parse(options.body);
+      F().demande_notes.unshift({ ...n, created_at: new Date().toISOString() });
+      return rep(null, 204);
+    }
+    if (u.includes('/rest/v1/demandes?id=eq.') && options.method === 'PATCH') {
+      const id = u.split('id=eq.')[1].split('&')[0];
+      const d = F().demandes.find(x => x.id === id);
+      Object.assign(d, JSON.parse(options.body));
+      return rep(null, 204);
+    }
+
+    const m = u.match(/\/rest\/v1\/([a-z_]+)/);
+    if (m) {
+      let lignes = F()[m[1]] || [];
+      if (m[1] === 'demandes') lignes = lignes.filter(visiblePour);
+      const filtre = u.match(/demande_id=eq\.([0-9a-f-]+)/);
+      if (filtre) lignes = lignes.filter(x => x.demande_id === filtre[1]);
+      return rep(lignes);
+    }
+    return rep({}, 404);
+  };
+  //  Barre de l'aperçu : permet de voir la page sous chaque casquette.
+  //  N'existe que dans l'aperçu — la page réelle n'en a pas.
+  document.addEventListener('DOMContentLoaded', () => {
+    const agents = (window.FIXTURES.agents || []).filter(a => a.actif && a.email);
+    const ordre = ['direction', 'assistante', 'secretariat', 'chef_cellule', 'referent', 'technicien'];
+    const barre = document.createElement('div');
+    barre.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0F172A;'
+      + 'color:#fff;padding:9px 14px;font:600 13px/1.4 var(--police);display:flex;gap:9px;'
+      + 'align-items:center;flex-wrap:wrap';
+    const choix = ordre.map(f => {
+      const a = agents.find(x => x.fonction === f);
+      if (!a) return '';
+      const actif = a.email.toLowerCase() === VU_PAR.toLowerCase();
+      return `<a href="?agent=${encodeURIComponent(a.email)}" style="color:${actif ? '#0F172A' : '#fff'};
+        background:${actif ? '#fff' : 'transparent'};border:1px solid ${actif ? '#fff' : '#475569'};
+        padding:4px 10px;border-radius:999px;text-decoration:none">${a.fonction.replace('_',' ')}</a>`;
+    }).join('');
+    barre.innerHTML = '<span style="opacity:.7">APERÇU — voir la page en tant que :</span>' + choix;
+    document.body.appendChild(barre);
+    document.body.style.paddingBottom = '58px';
+  });
+})();
+
+</script>
+<script>
+// ═════════════════════════════════════════════════════════════════════════
+//  Poste de travail du Pôle Technique.
+//
+//  Tout passe par PostgREST avec le jeton de la session : la page ne décide
+//  jamais de ce qu'elle a le droit de voir. C'est la sécurité par ligne qui
+//  tranche, à la ligne près — un référent ne reçoit que ses domaines, un chef
+//  de cellule les siens, la direction tout. La page se contente d'afficher
+//  ce qui lui revient, et les boutons qu'elle propose ne sont qu'un confort :
+//  une action interdite serait de toute façon refusée par la base.
+//
+//  La clé publiable est faite pour partir dans le navigateur. Ne jamais
+//  placer ici une clé « sb_secret_ ».
+// ═════════════════════════════════════════════════════════════════════════
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'APERCU_AUCUNE_CLE';   // aucun appel réseau dans cet aperçu
+const CLEF_SESSION = 'demandes-ecoles-pole';
+
+// Seuils repris de l'ancienne plateforme (config.js). ⚠️ À confirmer avec le
+// pôle : ce sont eux qui décident ce que « en retard » veut dire.
+const RETARD_JOURS = 7;
+const RETARD_URGENT_JOURS = 3;
+//  Une demande confiée à un autre service — DTP, DSB, ERP, élagage — sort du
+//  compteur « En retard » : son retard n'est pas opposable au pôle. Mais la
+//  relancer l'est. Ces seuils sont plus larges que ceux de l'interne : on ne
+//  maîtrise pas la charge d'un autre service. Arrêtés par Anthony le 31/08.
+const EXTERNE_JOURS = 15;
+const EXTERNE_URGENT_JOURS = 5;
+
+const $ = s => document.querySelector(s);
+
+const ETATS = {
+  nouveau:                     { texte: 'Nouvelle',              classe: 'alerte' },
+  en_cours:                    { texte: 'En cours',              classe: '' },
+  en_attente_pieces:           { texte: 'Attente de pièces',     classe: '' },
+  en_attente_devis:            { texte: 'Attente de devis',      classe: '' },
+  planifie:                    { texte: 'Planifiée',             classe: '' },
+  transmis_externe:            { texte: 'Transmise au dehors',   classe: '' },
+  en_attente_validation_ecole: { texte: 'Attente de l’école',    classe: 'agir' },
+  resolu:                      { texte: 'Résolue',               classe: 'fait' },
+  cloture:                     { texte: 'Clôturée',              classe: 'fait' },
+  rouvert:                     { texte: 'Rouverte',              classe: 'alerte' },
+  annule:                      { texte: 'Annulée',               classe: 'fait' },
+  archive:                     { texte: 'Archivée',              classe: 'fait' }
+};
+// Ceux que le pôle pose lui-même. Les deux autres — « attente de l'école » et
+// « résolue » — sont posés par le circuit de clôture : les proposer ici
+// laisserait croire qu'on peut clore une demande sans l'accord de l'école.
+const STATUTS_MANUELS = ['nouveau','en_cours','en_attente_pieces','en_attente_devis',
+                         'planifie','transmis_externe','rouvert','annule'];
+//  « cloture » n'est PAS dans cette liste : ce statut n'existe pas. La
+//  contrainte de la table ne l'admet pas, et cloturer_demande() pose
+//  'resolu' ou 'rouvert'. L'y laisser laissait croire à un état réel.
+const CLOS = ['resolu','annule','archive'];
+const PRIORITES = { urgente:'Urgente', haute:'Haute', normale:'Normale', basse:'Basse' };
+const FENETRES = { des_que_possible:'Dès que possible', avant_la_rentree:'Avant la rentrée',
+                   pendant_les_vacances:'Pendant les vacances', date_precise:'À une date précise' };
+
+let session = null, moi = null;
+let REF = { ecoles:{}, domaines:{}, types:{}, cellules:{}, agents:{}, services:{}, secteurs:[] };
+let DEMANDES = [], DELAIS = {}, ouverte = null;
+const filtres = { texte:'', statut:'', domaine:'', secteur:'', priorite:'', compteur:'' };
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(texte) {
+  const e = $('#erreur'); e.textContent = texte; e.hidden = false;
+  window.scrollTo({ top: 0 });
+}
+function effacerErreur() { $('#erreur').hidden = true; }
+function jour(v) {
+  return v ? new Date(v).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+}
+function jourHeure(v) {
+  return v ? new Date(v).toLocaleString('fr-FR',
+    { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+}
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); } catch (e) { return null; }
+}
+function ecrireSession(s) { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); }
+function oublierSession() { localStorage.removeItem(CLEF_SESSION); }
+
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.length < 2) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) {
+    if (p.get('error_description')) erreur(decodeURIComponent(p.get('error_description')));
+    history.replaceState(null, '', location.pathname);
+    return null;
+  }
+  const s = { access_token: acces, refresh_token: p.get('refresh_token'),
+              expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000) };
+  ecrireSession(s);
+  history.replaceState(null, '', location.pathname);
+  return s;
+}
+
+async function rafraichir() {
+  if (!session?.refresh_token) return false;
+  const r = await fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+    method:'POST', headers:{ apikey: CLE, 'Content-Type':'application/json' },
+    body: JSON.stringify({ refresh_token: session.refresh_token }) });
+  if (!r.ok) return false;
+  const j = await r.json();
+  session = { access_token: j.access_token, refresh_token: j.refresh_token,
+              expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000) };
+  ecrireSession(session);
+  return true;
+}
+
+/** L'adresse vérifiée, lue dans le jeton. Sert à savoir qui l'on est ; la
+ *  base, elle, la relit de son côté — nous ne lui faisons rien croire. */
+function emailDuJeton() {
+  try {
+    const brut = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(brut + '==='.slice((brut.length + 3) % 4));
+    const charge = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+    return (charge.email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+
+// ─── Accès aux données ───────────────────────────────────────────────────
+async function api(chemin, options = {}) {
+  const lancer = () => fetch(API + '/rest/v1/' + chemin, {
+    ...options,
+    headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+               'Content-Type': 'application/json', ...(options.headers || {}) } });
+
+  let r = await lancer();
+  if (r.status === 401 && await rafraichir()) r = await lancer();
+  if (!r.ok) {
+    const detail = await r.text().catch(() => '');
+    throw new Error(r.status + ' ' + detail.slice(0, 200));
+  }
+  return r.status === 204 ? null : r.json();
+}
+
+function parId(liste) { return Object.fromEntries(liste.map(x => [x.id, x])); }
+
+async function chargerReferentiels() {
+  const [ecoles, domaines, types, cellules, agents, services, secteurs] = await Promise.all([
+    api('ecoles?select=id,nom,type_ecole,secteur,zone,adresse,telephone,email_directeur,email_secretariat&order=nom'),
+    api('domaines?select=id,libelle,traitement,cellule_id,service_externe_id&order=ordre'),
+    api('types_demande?select=id,domaine_id,libelle&order=ordre'),
+    api('cellules?select=id,libelle'),
+    api('agents?select=id,nom,fonction,cellule_id,zone,email,actif&order=nom'),
+    api('services_externes?select=id,libelle,contact_nom,contact_email'),
+    api('secteurs_intervention?select=code,libelle&order=code')
+  ]);
+  REF = { ecoles: parId(ecoles), domaines: parId(domaines), types: parId(types),
+          cellules: parId(cellules), agents: parId(agents), services: parId(services),
+          secteurs, listeAgents: agents, listeDomaines: domaines };
+}
+
+async function chargerDemandes() {
+  const [d, del] = await Promise.all([
+    api('demandes?select=*&order=created_at.desc'),
+    api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,a_planifier_pour,'
+      + 'delai_hors_perimetre,jours_chez_service,service_externe,service_contact,'
+      + 'service_email,service_injoignable,dernier_cran_relance')
+  ]);
+  DEMANDES = d;
+  DELAIS = parId(del);
+}
+
+// ─── Lecture d'une demande ───────────────────────────────────────────────
+function ecoleDe(d)   { return REF.ecoles[d.ecole_id] || {}; }
+function domaineDe(d) { return REF.domaines[d.domaine_id] || {}; }
+function typeDe(d)    { return REF.types[d.type_demande_id] || {}; }
+function nomEcole(d)  { const e = ecoleDe(d); return [e.type_ecole, e.nom].filter(Boolean).join(' '); }
+
+/** En retard quand la réaction tarde et que personne n'a encore pris la main.
+ *  Une demande confiée à un service extérieur n'y entre pas : son délai n'est
+ *  pas opposable au pôle, et la compter serait s'accuser du retard d'autrui. */
+function enRetard(d) {
+  if (CLOS.includes(d.statut) || d.pris_en_charge_le) return false;
+  const del = DELAIS[d.id];
+  if (!del || del.delai_hors_perimetre) return false;
+  const seuil = d.priorite === 'urgente' ? RETARD_URGENT_JOURS : RETARD_JOURS;
+  return (del.delai_reaction_jours || 0) > seuil;
+}
+//  Sans nouvelles du service à qui on l'a confiée. L'horloge est calculée en
+//  base (v_demandes_delais.jours_chez_service) et s'arrête d'elle-même dès
+//  que le service a répondu : ici on ne fait que comparer au seuil.
+function sansNouvelles(d) {
+  const j = DELAIS[d.id]?.jours_chez_service;
+  if (j == null) return false;
+  return j > (d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS);
+}
+function aPlanifier(d) {
+  return !CLOS.includes(d.statut) && !!DELAIS[d.id]?.a_planifier_pour;
+}
+
+// ─── Compteurs ───────────────────────────────────────────────────────────
+// ─── Ce que chacun voit, et ce qu'il peut faire ──────────────────────────
+//
+//  La sécurité par ligne fait déjà le tri : un technicien ne reçoit que les
+//  demandes qui lui sont affectées, un référent que ses domaines, un chef que
+//  sa cellule. La page n'a donc rien à filtrer — mais elle doit DIRE à
+//  l'agent ce qu'il regarde, sinon une liste courte ressemble à une panne.
+//
+//  Elle doit aussi ne proposer que les gestes qui aboutiront : les politiques
+//  d'écriture sont plus étroites que celles de lecture. Le secrétariat lit
+//  tout et ne modifie rien ; un technicien non plus. Leur montrer un
+//  formulaire « Traiter » qui échouerait serait une promesse en l'air.
+const PEUT_MODIFIER = ['direction', 'assistante', 'chef_cellule', 'referent'];
+
+function portee() {
+  switch (moi?.fonction) {
+    case 'technicien':   return 'Vous voyez les demandes qui vous sont affectées.';
+    case 'referent':     return 'Vous voyez les demandes de vos domaines.';
+    case 'chef_cellule': return 'Vous voyez les demandes de votre cellule.';
+    case 'direction':
+    case 'assistante':
+    case 'secretariat':  return 'Vous voyez toutes les demandes.';
+    default:             return '';
+  }
+}
+function peutModifier() { return PEUT_MODIFIER.includes(moi?.fonction); }
+
+//  Prendre en charge arrête l'horloge du délai de réaction. Le secrétariat
+//  lit tout mais ne traite rien : lui laisser ce geste flatterait l'indicateur
+//  sans que personne n'ait touché la demande.
+function peutPrendre() {
+  return ['direction', 'assistante', 'chef_cellule', 'referent', 'technicien']
+    .includes(moi?.fonction);
+}
+
+//  Un technicien n'a que faire du coût, de la planification ou de l'attente
+//  d'une école : ce ne sont pas ses gestes. On ne lui montre que sa file.
+const COMPTEURS_TECHNICIEN = ['', 'a_prendre', 'en_cours', 'en_retard', 'closes'];
+
+function compteursVisibles() {
+  return moi?.fonction === 'technicien'
+    ? COMPTEURS.filter(c => COMPTEURS_TECHNICIEN.includes(c.cle))
+    : COMPTEURS;
+}
+
+const COMPTEURS = [
+  { cle:'',           libelle:'Toutes',            classe:'',       test: () => true },
+  //  « Nouvelles » a disparu : elle comptait exactement « À prendre en charge »
+  //  moins « Rouvertes », soit trois compteurs pour deux informations.
+  { cle:'a_prendre',  libelle:'À prendre en charge',classe:'agir',
+    test: d => ['nouveau', 'rouvert'].includes(d.statut) },
+  { cle:'en_cours',   libelle:'En cours',           classe:'',
+    test: d => !CLOS.includes(d.statut) && !['nouveau', 'rouvert'].includes(d.statut) },
+  { cle:'en_retard',  libelle:'En retard',         classe:'retard', test: enRetard },
+  { cle:'ecole',      libelle:'Attente de l’école',classe:'agir',   test: d => d.statut === 'en_attente_validation_ecole' },
+  { cle:'rouvert',    libelle:'Rouvertes',         classe:'retard', test: d => d.statut === 'rouvert' },
+  { cle:'planifier',  libelle:'À planifier',       classe:'agir',   test: aPlanifier },
+  { cle:'sans_nouv',  libelle:'Sans nouvelles',     classe:'retard', test: sansNouvelles },
+  { cle:'cout',       libelle:'Coût à saisir',     classe:'',       test: d => d.cout_statut === 'a_renseigner' && CLOS.includes(d.statut) },
+  { cle:'closes',     libelle:'Closes',            classe:'fait',   test: d => CLOS.includes(d.statut) }
+];
+
+function dessinerCompteurs() {
+  $('#compteurs').innerHTML = compteursVisibles().map(c => {
+    const n = DEMANDES.filter(c.test).length;
+    return `<button type="button" class="compteur ${c.classe}" data-cle="${c.cle}"
+              aria-pressed="${filtres.compteur === c.cle}">
+              <span class="n">${n}</span><span class="l">${echapper(c.libelle)}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.compteur').forEach(b => b.addEventListener('click', () => {
+    filtres.compteur = b.dataset.cle === filtres.compteur ? '' : b.dataset.cle;
+    dessinerCompteurs(); dessinerListe();
+  }));
+}
+
+// ─── Filtres ─────────────────────────────────────────────────────────────
+function remplirFiltres() {
+  const opt = (v, t) => `<option value="${echapper(v)}">${echapper(t)}</option>`;
+  $('#f-statut').innerHTML = opt('', 'Tous les états')
+    + Object.entries(ETATS).map(([k, v]) => opt(k, v.texte)).join('');
+  $('#f-domaine').innerHTML = opt('', 'Tous les domaines')
+    + REF.listeDomaines.map(d => opt(d.id, d.libelle)).join('');
+  const quartiers = [...new Set(Object.values(REF.ecoles).map(e => e.secteur).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'fr'));
+  $('#f-secteur').innerHTML = opt('', 'Tous les quartiers') + quartiers.map(s => opt(s, s)).join('');
+  $('#f-priorite').innerHTML = opt('', 'Toutes priorités')
+    + Object.entries(PRIORITES).map(([k, v]) => opt(k, v)).join('');
+}
+
+function retenues() {
+  const c = COMPTEURS.find(x => x.cle === filtres.compteur);
+  const mots = filtres.texte.trim().toLowerCase();
+  return DEMANDES.filter(d => {
+    if (c && !c.test(d)) return false;
+    if (filtres.statut   && d.statut !== filtres.statut) return false;
+    if (filtres.domaine  && String(d.domaine_id) !== filtres.domaine) return false;
+    if (filtres.priorite && d.priorite !== filtres.priorite) return false;
+    if (filtres.secteur  && ecoleDe(d).secteur !== filtres.secteur) return false;
+    if (mots) {
+      const paille = [d.numero, nomEcole(d), d.description, d.localisation,
+                      d.demandeur_nom, domaineDe(d).libelle, typeDe(d).libelle]
+                     .join(' ').toLowerCase();
+      if (!paille.includes(mots)) return false;
+    }
+    return true;
+  });
+}
+
+// ─── Liste ───────────────────────────────────────────────────────────────
+function dessinerListe() {
+  const liste = retenues();
+  $('#resume').textContent = liste.length === 0 ? ''
+    : `${liste.length} demande${liste.length > 1 ? 's' : ''} sur ${DEMANDES.length}`;
+
+  if (!liste.length) {
+    $('#liste').innerHTML = `<div class="vide"><strong>Aucune demande ne correspond</strong>
+      <p>Modifiez les filtres, ou effacez-les.</p></div>`;
+    return;
+  }
+
+  $('#liste').innerHTML = liste.map(d => {
+    const e = ETATS[d.statut] || { texte: d.statut, classe: '' };
+    const del = DELAIS[d.id] || {};
+    const retard = enRetard(d);
+    const tech = REF.agents[d.technicien_agent_id];
+    const classes = ['demande', 'p-' + d.priorite, CLOS.includes(d.statut) ? 'close' : ''].join(' ');
+    const age = CLOS.includes(d.statut)
+      ? 'close le ' + jour(d.cloture_le || d.updated_at)
+      : (d.pris_en_charge_le
+          ? (del.delai_realisation_jours != null ? del.delai_realisation_jours + ' j de travail' : 'à planifier')
+          : (del.jours_chez_service != null
+            ? 'chez ' + (del.service_externe || 'un autre service')
+              + ' depuis ' + del.jours_chez_service + ' j'
+            : (del.delai_reaction_jours || 0) + ' j sans réponse'));
+    return `<button type="button" class="${classes}" data-id="${d.id}">
+      <div>
+        <span class="num">${echapper(d.numero)}</span>
+        <h3>${echapper(typeDe(d).libelle || domaineDe(d).libelle || '—')}
+          ${d.priorite === 'urgente' || d.priorite === 'haute'
+            ? `<span class="puce ${d.priorite}">${PRIORITES[d.priorite]}</span>` : ''}
+          ${d.hors_presence_eleves ? '<span class="puce">Hors présence</span>' : ''}</h3>
+        <div class="meta">${echapper(nomEcole(d))}${d.localisation ? ' · ' + echapper(d.localisation) : ''}
+          <br>${echapper(domaineDe(d).libelle || '')}${tech ? ' · ' + echapper(tech.nom) : ''}</div>
+      </div>
+      <div class="droite">
+        <span class="etat ${e.classe}">${echapper(e.texte)}</span>
+        <span class="age${retard ? ' retard' : ''}">${echapper(age)}</span>
+      </div>
+    </button>`;
+  }).join('');
+
+  document.querySelectorAll('.demande').forEach(b =>
+    b.addEventListener('click', () => ouvrirFiche(b.dataset.id)));
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  LA FICHE — tout ce qu'on sait d'une demande, et tout ce qu'on peut y faire
+// ═════════════════════════════════════════════════════════════════════════
+
+async function ouvrirFiche(id) {
+  const d = DEMANDES.find(x => x.id === id);
+  if (!d) return;
+  ouverte = d;
+  $('#voile').hidden = false;
+  document.body.style.overflow = 'hidden';
+  $('#fiche').innerHTML = `<div class="barre">
+      <div><span class="num">${echapper(d.numero)}</span>
+        <h2 id="fiche-titre">${echapper(typeDe(d).libelle || '—')}</h2></div>
+      <button type="button" id="fermer" aria-label="Fermer">×</button>
+    </div>
+    <div class="corps"><p class="chargement">Chargement…</p></div>`;
+  $('#fermer').addEventListener('click', fermerFiche);
+
+  let notes = [], journal = [], photos = [];
+  try {
+    [notes, journal, photos] = await Promise.all([
+      api(`demande_notes?select=auteur,contenu,created_at&demande_id=eq.${d.id}&order=created_at.desc`),
+      api(`demande_historique?select=champ,avant,apres,auteur,changed_at&demande_id=eq.${d.id}&order=changed_at.desc`),
+      api(`demande_photos?select=id,url,created_at&demande_id=eq.${d.id}&order=created_at`)
+    ]);
+  } catch (e) { /* la fiche reste lisible sans ses pièces */ }
+
+  dessinerFiche(d, notes, journal, photos);
+}
+
+function fermerFiche() {
+  ouverte = null;
+  $('#voile').hidden = true;
+  document.body.style.overflow = '';
+}
+$('#voile').addEventListener('click', ev => { if (ev.target === $('#voile')) fermerFiche(); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && ouverte) fermerFiche(); });
+
+function dessinerFiche(d, notes, journal, photos) {
+  const e = ecoleDe(d), dom = domaineDe(d);
+  const del = DELAIS[d.id] || {};
+  const etat = ETATS[d.statut] || { texte: d.statut, classe: '' };
+  const clos = CLOS.includes(d.statut);
+  const attenteEcole = d.statut === 'en_attente_validation_ecole';
+  const service = REF.services[d.service_externe_id];
+
+  const paire = (t, v) => v ? `<dt>${t}</dt><dd>${v}</dd>` : '';
+  const opt = (v, t, sel) => `<option value="${echapper(v)}"${String(sel) === String(v) ? ' selected' : ''}>${echapper(t)}</option>`;
+
+  const techniciens = REF.listeAgents.filter(a => a.actif && a.fonction === 'technicien');
+  const referents   = REF.listeAgents.filter(a => a.actif && a.fonction !== 'technicien');
+
+  $('#fiche .corps').innerHTML = `
+    <div id="fiche-erreur" class="encart erreur" role="alert" hidden></div>
+    <div id="fiche-ok" class="encart info" role="status" hidden></div>
+
+    ${enRetard(d) ? `<div class="encart erreur"><strong>Sans réponse depuis
+      ${del.delai_reaction_jours} jours ouvrés</strong>
+      Personne n'a encore pris cette demande en charge.</div>` : ''}
+    ${aPlanifier(d) ? `<div class="encart attention"><strong>À faire hors présence des élèves</strong>
+      Prochaine fenêtre possible : ${echapper(jour(del.a_planifier_pour))}. L'horloge de
+      réalisation est en pause jusque-là.</div>` : ''}
+    ${attenteEcole ? `<div class="encart attention"><strong>En attente de l'école</strong>
+      L'intervention a été déclarée terminée le ${echapper(jour(d.intervention_finie_le))}.
+      La demande se refermera quand l'école aura confirmé.</div>` : ''}
+
+    <div class="carte">
+      <h3>La demande</h3>
+      <dl class="paires">
+        ${paire('État', `<span class="etat ${etat.classe}">${echapper(etat.texte)}</span>`)}
+        ${paire('École', echapper(nomEcole(d)))}
+        ${paire('Quartier', echapper(e.secteur))}
+        ${paire('Adresse', echapper(e.adresse))}
+        ${paire('Téléphone', echapper(e.telephone))}
+        ${paire('Domaine', echapper(dom.libelle))}
+        ${paire('Type', echapper(typeDe(d).libelle))}
+        ${paire('Localisation', echapper(d.localisation))}
+        ${paire('Priorité', echapper(PRIORITES[d.priorite] || d.priorite))}
+        ${paire('Fenêtre', echapper(FENETRES[d.fenetre_souhaitee] || ''))}
+        ${d.date_souhaitee ? paire('Date souhaitée', echapper(jour(d.date_souhaitee))) : ''}
+        ${d.hors_presence_eleves ? paire('Contrainte', 'Hors présence des élèves') : ''}
+        ${paire('Déposée le', echapper(jourHeure(d.created_at)))}
+        ${paire('Prise en charge', d.pris_en_charge_le ? echapper(jourHeure(d.pris_en_charge_le))
+                                                       : '<em>pas encore</em>')}
+        ${d.transmis_le ? paire('Transmise le', echapper(jourHeure(d.transmis_le))) : ''}
+        ${del.jours_chez_service != null
+          ? paire('Attente dehors', del.jours_chez_service + ' jours ouvrés'
+              + (sansNouvelles(d) ? ' — sans nouvelles' : '')) : ''}
+        ${d.cloture_le ? paire('Close le', echapper(jourHeure(d.cloture_le))) : ''}
+        ${service ? paire('Service extérieur',
+            echapper(service.libelle) + (service.contact_nom ? ' — ' + echapper(service.contact_nom) : '')
+            + (service.contact_email ? '<br><a href="mailto:' + echapper(service.contact_email)
+                 + '?subject=' + encodeURIComponent('Relance ' + d.numero + ' — ' + nomEcole(d))
+                 + '">' + echapper(service.contact_email) + '</a>' : '')) : ''}
+      </dl>
+
+      ${del.service_injoignable ? `<div class="encart attention" style="margin:12px 0 0">
+        <strong>Ce service n'a pas d'adresse enregistrée</strong>
+        La demande lui a été attribuée, mais aucun message n'a pu partir : elle
+        est partie sur le papier et nulle part en réalité. Ajoutez un contact
+        à ce service, puis prévenez-le.</div>` : ''}
+
+      ${sansNouvelles(d) ? `<div class="encart attention" style="margin:12px 0 0">
+        <strong>Sans nouvelles depuis ${del.jours_chez_service} jours ouvrés</strong>
+        Le seuil est de ${d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS} jours
+        pour une demande ${d.priorite === 'urgente' ? 'urgente' : 'ordinaire'}.
+        Ce retard n'est pas le vôtre, mais la relance l'est.</div>` : ''}
+    </div>
+
+    <div class="carte">
+      <h3>Qui a signalé</h3>
+      <dl class="paires">
+        ${paire('Nom', echapper(d.demandeur_nom))}
+        ${paire('Fonction', echapper(d.demandeur_fonction))}
+        ${paire('Email', d.demandeur_email
+            ? `<a href="mailto:${echapper(d.demandeur_email)}">${echapper(d.demandeur_email)}</a>` : '')}
+        ${paire('Téléphone', d.demandeur_tel
+            ? `<a href="tel:${echapper(d.demandeur_tel)}">${echapper(d.demandeur_tel)}</a>` : '')}
+      </dl>
+      <div class="texte">${echapper(d.description)}</div>
+      ${d.observation_initiale ? `<div class="texte">${echapper(d.observation_initiale)}</div>` : ''}
+    </div>
+
+    ${photos.length ? `<div class="carte">
+      <h3>Photos (${photos.length})</h3>
+      <div id="photos">${photos.map(p =>
+        `<button type="button" class="discret" data-chemin="${echapper(p.url)}"
+                 style="margin:4px 6px 4px 0">Voir la photo du ${echapper(jour(p.created_at))}</button>`
+      ).join('')}</div>
+      <p style="font-size:13px;color:var(--encre-pale);margin:8px 0 0">
+        Le dépôt est privé : chaque ouverture crée un lien valable une heure.</p>
+    </div>` : ''}
+
+    ${clos || !peutPrendre() || !['nouveau', 'rouvert'].includes(d.statut) ? '' : `<div class="carte">
+      <h3>Prendre en charge</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        Dites que vous vous en saisissez. L'école n'en est pas avertie ; c'est
+        l'horloge du délai de réaction qui s'arrête.</p>
+      <button type="button" class="principal" id="prendre">Je prends cette demande en charge</button>
+    </div>`}
+
+    ${clos || !peutModifier() ? '' : `<div class="carte">
+      <h3>Traiter</h3>
+      <div class="deux">
+        <div class="champ"><label for="a-statut">État</label>
+          <select id="a-statut">${STATUTS_MANUELS.map(s => opt(s, ETATS[s].texte, d.statut)).join('')}
+            ${STATUTS_MANUELS.includes(d.statut) ? '' : opt(d.statut, ETATS[d.statut]?.texte || d.statut, d.statut)}
+          </select></div>
+        <div class="champ"><label for="a-priorite">Priorité</label>
+          <select id="a-priorite">${Object.entries(PRIORITES).map(([k, v]) => opt(k, v, d.priorite)).join('')}</select></div>
+        <div class="champ"><label for="a-technicien">Technicien</label>
+          <select id="a-technicien">${opt('', '— aucun —', d.technicien_agent_id || '')
+            + techniciens.map(a => opt(a.id, a.nom + (a.zone ? ' (' + a.zone + ')' : ''), d.technicien_agent_id)).join('')}</select></div>
+        <div class="champ"><label for="a-referent">Référent qui suit</label>
+          <select id="a-referent">${opt('', '— aucun —', d.referent_agent_id || '')
+            + referents.map(a => opt(a.id, a.nom, d.referent_agent_id)).join('')}</select></div>
+      </div>
+      <div class="champ"><label for="a-domaine">Domaine — le changer réoriente la demande</label>
+        <select id="a-domaine">${REF.listeDomaines.map(x => opt(x.id, x.libelle, d.domaine_id)).join('')}</select></div>
+      <div class="champ"><label for="a-cout">Coût réel constaté, en euros
+          <span style="font-weight:400;color:var(--encre-pale)">— le prix payé, jamais une estimation</span></label>
+        <input type="number" id="a-cout" step="0.01" min="0"
+               value="${d.cout_reel != null ? d.cout_reel : ''}"
+               placeholder="${d.cout_statut === 'non_applicable' ? 'sans objet ici' : 'à renseigner'}"></div>
+      <button type="button" class="principal" id="enregistrer">Enregistrer</button>
+    </div>`}
+
+    ${clos || attenteEcole ? '' : `<div class="carte">
+      <h3>Clore la demande</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        L'école recevra un message lui demandant de confirmer. Rien ne se referme
+        sans sa réponse.</p>
+      <div class="champ"><label for="a-fait">Ce qui a été fait
+          <span style="font-weight:400;color:var(--encre-pale)">— facultatif, mais utile à l'école</span></label>
+        <textarea id="a-fait" maxlength="1500"
+                  placeholder="Ex : résistance changée, appareil remis en service."></textarea></div>
+      <button type="button" class="principal" id="terminer">Déclarer l'intervention terminée</button>
+    </div>`}
+
+    <div class="carte">
+      <h3>Notes de suivi</h3>
+      <div class="champ"><label for="a-note" class="masque">Nouvelle note</label>
+        <textarea id="a-note" maxlength="1500" placeholder="Ajouter une note…"></textarea></div>
+      <button type="button" class="discret" id="ajouter-note">Ajouter la note</button>
+      <div id="notes" style="margin-top:12px">${notes.length
+        ? notes.map(n => `<div class="note"><span class="qui">${echapper(n.auteur)} ·
+            ${echapper(jourHeure(n.created_at))}</span>${echapper(n.contenu)}</div>`).join('')
+        : '<p style="color:var(--encre-pale);font-size:14px;margin:0">Aucune note.</p>'}</div>
+    </div>
+
+    <div class="carte">
+      <h3>Journal</h3>
+      <ul class="journal" style="margin:0;padding:0">
+        ${journal.length ? journal.map(h => `<li>
+            <strong>${echapper(h.champ)}</strong> :
+            ${echapper(h.avant || '—')} → ${echapper(h.apres || '—')}
+            <span class="quand">${echapper(h.auteur || '')} · ${echapper(jourHeure(h.changed_at))}</span>
+          </li>`).join('')
+        : '<li style="color:var(--encre-pale)">Rien depuis le dépôt.</li>'}
+        <li><strong>dépôt</strong> par ${echapper(d.demandeur_nom || '—')}
+          <span class="quand">${echapper(jourHeure(d.created_at))}</span></li>
+      </ul>
+    </div>`;
+
+  brancherActionsFiche(d);
+}
+
+// ─── Les actions de la fiche ─────────────────────────────────────────────
+function messageFiche(texte, mauvais) {
+  const bon = $('#fiche-ok'), mal = $('#fiche-erreur');
+  bon.hidden = true; mal.hidden = true;
+  const cible = mauvais ? mal : bon;
+  cible.textContent = texte; cible.hidden = false;
+  $('#fiche').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function brancherActionsFiche(d) {
+  document.querySelectorAll('#photos button').forEach(b =>
+    b.addEventListener('click', () => voirPhoto(b.dataset.chemin, b)));
+
+  $('#enregistrer')?.addEventListener('click', async () => {
+    const b = $('#enregistrer'); b.disabled = true; b.textContent = 'Enregistrement…';
+    const modif = {};
+    const statut = $('#a-statut').value;
+    const cout = $('#a-cout').value.trim();
+
+    if (statut !== d.statut)                              modif.statut = statut;
+    if ($('#a-priorite').value !== d.priorite)            modif.priorite = $('#a-priorite').value;
+    const tech = $('#a-technicien').value || null;
+    if (String(tech) !== String(d.technicien_agent_id ?? '')) modif.technicien_agent_id = tech ? Number(tech) : null;
+    const ref = $('#a-referent').value || null;
+    if (String(ref) !== String(d.referent_agent_id ?? ''))    modif.referent_agent_id = ref ? Number(ref) : null;
+    const domaine = Number($('#a-domaine').value);
+    if (domaine !== d.domaine_id)                          modif.domaine_id = domaine;
+
+    // Un coût nul et un coût inconnu ne sont pas la même chose : c'est ce que
+    // cout_statut distingue, et c'est ce qui empêche des totaux faux.
+    if (cout !== '' && Number(cout) !== Number(d.cout_reel)) {
+      modif.cout_reel = Number(cout);
+      modif.cout_statut = 'renseigne';
+    }
+
+    if (!Object.keys(modif).length) {
+      b.disabled = false; b.textContent = 'Enregistrer';
+      return messageFiche('Rien n’a changé.', false);
+    }
+    try {
+      await api(`demandes?id=eq.${d.id}`, { method: 'PATCH', body: JSON.stringify(modif) });
+      await rafraichirTout();
+      // Le message vient APRÈS le redessin : posé avant, la fiche l'effacerait
+      // en se reconstruisant, et l'agent ne saurait pas si son geste a pris.
+      await ouvrirFiche(d.id);
+      messageFiche('Enregistré.', false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Enregistrer';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#terminer')?.addEventListener('click', async () => {
+    const b = $('#terminer'); b.disabled = true; b.textContent = 'Envoi…';
+    try {
+      // La demande porte son jeton, et la sécurité par ligne ne nous l'a
+      // montrée que parce que nous avions le droit de la voir. Passer par la
+      // même fonction que le lien de l'email évite d'avoir deux chemins pour
+      // un seul geste — donc deux occasions de diverger.
+      const r = await api('rpc/marquer_intervention_terminee', {
+        method: 'POST',
+        body: JSON.stringify({ _jeton: d.token_intervention, _commentaire: $('#a-fait').value.trim() || null })
+      });
+      if (!r || r.ok !== true) throw new Error(r?.motif || 'refus');
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche(`L'école a été prévenue. La demande se refermera quand elle aura confirmé.`, false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Déclarer l’intervention terminée';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#prendre')?.addEventListener('click', async () => {
+    const b = $('#prendre');
+    b.disabled = true; b.textContent = 'Enregistrement…';
+    try {
+      const r = await api('rpc/prendre_en_charge', { method: 'POST',
+        body: JSON.stringify({ _demande_id: d.id }) });
+      if (r?.ok !== true) {
+        messageFiche(r?.motif || "La prise en charge n'a pas abouti.", true);
+        b.disabled = false; b.textContent = 'Je prends cette demande en charge';
+        return;
+      }
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche('Vous avez pris cette demande en charge.', false);
+    } catch (err) {
+      messageFiche("La prise en charge n'a pas abouti. Réessayez.", true);
+      b.disabled = false; b.textContent = 'Je prends cette demande en charge';
+    }
+  });
+
+  $('#ajouter-note')?.addEventListener('click', async () => {
+    const contenu = $('#a-note').value.trim();
+    if (contenu.length < 2) return messageFiche('La note est vide.', true);
+    const b = $('#ajouter-note'); b.disabled = true; b.textContent = 'Ajout…';
+    try {
+      await api('demande_notes', { method: 'POST',
+        body: JSON.stringify({ demande_id: d.id, auteur: moi?.nom || emailDuJeton(), contenu }) });
+      await ouvrirFiche(d.id);
+      messageFiche('Note ajoutée.', false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Ajouter la note';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+}
+
+/** Le message d'un refus, en français. Un « 403 » n'apprend rien à personne. */
+function lireRefus(err) {
+  const t = String(err.message || err);
+  if (t.startsWith('403') || t.includes('row-level security')) {
+    return "Cette demande ne relève pas de vos domaines : la modification a été refusée.";
+  }
+  if (t.startsWith('401')) return "Votre session a expiré. Rechargez la page pour vous reconnecter.";
+  if (t.includes('cout_coherent')) return "Un coût renseigné doit porter un montant.";
+  return "L'enregistrement n'a pas abouti. " + t;
+}
+
+/** Le dépôt de photos est privé : on demande un lien signé, valable une heure. */
+async function voirPhoto(chemin, bouton) {
+  const libelle = bouton.textContent;
+  bouton.disabled = true; bouton.textContent = 'Ouverture…';
+  try {
+    const r = await fetch(API + '/storage/v1/object/sign/photos-demandes/' + chemin, {
+      method: 'POST',
+      headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+                 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expiresIn: 3600 }) });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    window.open(API + '/storage/v1' + j.signedURL, '_blank', 'noopener');
+  } catch (e) {
+    messageFiche("La photo n'a pas pu être ouverte.", true);
+  }
+  bouton.disabled = false; bouton.textContent = libelle;
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  EXPORT
+// ═════════════════════════════════════════════════════════════════════════
+$('#exporter').addEventListener('click', () => {
+  const liste = retenues();
+  if (!liste.length) return erreur("Rien à exporter avec ces filtres.");
+
+  const colonnes = ['Numéro','École','Quartier','Domaine','Type','Localisation','Priorité',
+                    'État','Déposée le','Prise en charge le','Close le','Technicien',
+                    'Service extérieur','Coût réel','Coût','Hors présence','Déclarant','Description'];
+  const ligne = d => [
+    d.numero, nomEcole(d), ecoleDe(d).secteur, domaineDe(d).libelle, typeDe(d).libelle,
+    d.localisation, PRIORITES[d.priorite] || d.priorite, ETATS[d.statut]?.texte || d.statut,
+    jour(d.created_at), d.pris_en_charge_le ? jour(d.pris_en_charge_le) : '',
+    d.cloture_le ? jour(d.cloture_le) : '',
+    REF.agents[d.technicien_agent_id]?.nom || '', REF.services[d.service_externe_id]?.libelle || '',
+    d.cout_reel != null ? String(d.cout_reel).replace('.', ',') : '',
+    { non_applicable:'sans objet', a_renseigner:'à renseigner', renseigne:'renseigné' }[d.cout_statut] || '',
+    d.hors_presence_eleves ? 'oui' : 'non', d.demandeur_nom, d.description
+  ];
+  const cellule = v => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+  // Point-virgule et BOM : c'est ce qu'attend Excel en français. Sans le BOM,
+  // les accents arrivent en charabia, et le fichier est jugé inutilisable.
+  const csv = '\uFEFF' + [colonnes, ...liste.map(ligne)]
+    .map(l => l.map(cellule).join(';')).join('\r\n');
+
+  const lien = document.createElement('a');
+  lien.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  lien.download = 'demandes-' + new Date().toISOString().slice(0, 10) + '.csv';
+  lien.click();
+  URL.revokeObjectURL(lien.href);
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+//  DÉMARRAGE
+// ═════════════════════════════════════════════════════════════════════════
+async function rafraichirTout() {
+  await chargerDemandes();
+  dessinerCompteurs();
+  dessinerListe();
+}
+
+function brancherFiltres() {
+  const lier = (sel, cle) => $(sel).addEventListener('input', () => {
+    filtres[cle] = $(sel).value; dessinerListe();
+  });
+  lier('#f-texte', 'texte'); lier('#f-statut', 'statut'); lier('#f-domaine', 'domaine');
+  lier('#f-secteur', 'secteur'); lier('#f-priorite', 'priorite');
+  $('#raz').addEventListener('click', () => {
+    Object.keys(filtres).forEach(k => filtres[k] = '');
+    ['#f-texte','#f-statut','#f-domaine','#f-secteur','#f-priorite'].forEach(s => $(s).value = '');
+    dessinerCompteurs(); dessinerListe();
+  });
+}
+
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('#bouton-lien'); b.disabled = true; b.textContent = 'Envoi en cours…';
+  effacerErreur();
+  try {
+    const retour = location.origin + location.pathname;
+    const r = await fetch(API + '/auth/v1/otp?redirect_to=' + encodeURIComponent(retour), {
+      method: 'POST', headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('#email').value.trim(), create_user: true }) });
+    if (r.status === 429) erreur("Trop de demandes en peu de temps. Patientez quelques minutes.");
+    else if (!r.ok)       erreur("L'envoi a échoué. Vérifiez l'adresse saisie, puis réessayez.");
+    else { $('#form-connexion').hidden = true; $('#lien-envoye').hidden = false; }
+  } catch (e) { erreur("L'envoi a échoué. Vérifiez votre connexion."); }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
+});
+
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });
+$('#actualiser').addEventListener('click', async () => {
+  const b = $('#actualiser'); b.disabled = true; b.textContent = 'Actualisation…';
+  try { await rafraichirTout(); effacerErreur(); }
+  catch (e) { erreur("Les demandes n'ont pas pu être rechargées."); }
+  b.disabled = false; b.textContent = 'Actualiser';
+});
+
+function montrerConnexion(message) {
+  oublierSession();
+  $('#chargement').hidden = true;
+  $('#ecran-travail').hidden = true;
+  $('#ecran-connexion').hidden = false;
+  if (message) erreur(message);
+}
+
+(async function demarrer() {
+  session = recupererJetonsDuLien() || lireSession();
+  if (session?.expire_le && session.expire_le < Date.now() + 60000) {
+    if (!await rafraichir()) session = null;
+  }
+  if (!session) return montrerConnexion();
+
+  try {
+    await chargerReferentiels();
+  } catch (e) {
+    // Un agent qui n'est pas à l'annuaire n'a droit à rien : les politiques
+    // ne lui rendent aucune ligne. Le dire franchement vaut mieux qu'une
+    // page vide dont il ne comprendrait pas le silence.
+    if (String(e.message).startsWith('401')) return montrerConnexion("Votre session a expiré.");
+    return montrerConnexion("Cette adresse n'est pas celle d'un agent du Pôle Technique. "
+      + "Si vous devez y accéder, demandez à être inscrit à l'annuaire du pôle.");
+  }
+
+  const mail = emailDuJeton();
+  moi = REF.listeAgents.find(a => (a.email || '').toLowerCase() === mail) || null;
+  $('#qui').textContent = moi
+    ? `${moi.nom} — ${moi.fonction.replace('_', ' ')}${REF.cellules[moi.cellule_id]
+        ? ' · ' + REF.cellules[moi.cellule_id].libelle : ''}`
+    : mail;
+  //  Sans cette phrase, un référent qui voit trois demandes croit à une panne
+  //  plutôt qu'à un périmètre.
+  $('#portee').textContent = portee();
+  $('#portee').hidden = !portee();
+
+  try {
+    await chargerDemandes();
+  } catch (e) {
+    return montrerConnexion("Les demandes n'ont pas pu être chargées.");
+  }
+
+  $('#chargement').hidden = true;
+  $('#ecran-travail').hidden = false;
+  ['#actualiser', '#exporter', '#deconnexion'].forEach(s => $(s).hidden = false);
+  //  Le tableau de bord n'a d'usage que pour qui voit plus d'une poignée de
+  //  demandes : un technicien n'y lirait que ses propres chiffres.
+  $('#vers-tableau').hidden = moi?.fonction === 'technicien';
+  remplirFiltres();
+  brancherFiltres();
+  dessinerCompteurs();
+  dessinerListe();
+})();
+</script>
+</body>
+</html>

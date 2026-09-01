@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Démonstration — Demandes des écoles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système.
+
+   Page de démonstration : elle sert en formation et en réunion. Elle rassemble
+   les aperçus, qui tournent sans base et sans réseau — rien de ce qu'on y fait
+   ne part nulle part. C'est ce qui permet de montrer le service à vingt
+   personnes sans créer vingt demandes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ecran{ display: grid; grid-template-columns: 132px 1fr; gap: var(--pas-4);
+        padding: var(--pas-4) 0; border-top: 1px solid var(--trait) }
+.ecran:last-of-type{ border-bottom: 1px solid var(--trait) }
+@media (max-width: 700px){ .ecran{ grid-template-columns: 1fr; gap: var(--pas-2) } }
+.ecran .qui{ font-size: var(--corps-s); font-weight: 600; color: var(--encre-doux);
+             text-transform: uppercase; letter-spacing: .06em; padding-top: 3px }
+.ecran h3{ margin: 0 0 var(--pas-1); font-size: var(--titre-s); font-weight: 600 }
+.ecran p{ margin: 0 0 var(--pas-2); font-size: var(--corps-m); color: var(--encre-doux);
+          max-width: 44em }
+.ecran .montrer{ margin: 0 0 var(--pas-3); font-size: var(--corps-m) }
+.ecran .montrer strong{ font-weight: 600; color: var(--encre) }
+.ecran a.principal{ min-height: 40px; padding: 0 var(--pas-3); font-size: var(--corps-m) }
+
+.parcours{ counter-reset: etape; margin: var(--pas-4) 0 0; padding: 0; list-style: none }
+.parcours li{ counter-increment: etape; position: relative; padding-left: 44px;
+              margin-bottom: var(--pas-4); max-width: 46em }
+.parcours li::before{ content: counter(etape); position: absolute; left: 0; top: -2px;
+   width: 30px; height: 30px; border: 1.5px solid var(--marine); color: var(--marine);
+   border-radius: 50%; display: flex; align-items: center; justify-content: center;
+   font-size: 14px; font-weight: 600 }
+.parcours strong{ display: block; font-weight: 600; margin-bottom: 2px }
+.parcours span{ font-size: var(--corps-m); color: var(--encre-doux) }
+</style>
+</head>
+<body class="publique">
+<header><div class="dedans"><div class="marque">
+  <img class="logo" src="logo-saint-denis.png" alt="" width="27" height="38">
+  <div><h1>Démonstration</h1>
+  <p>Demandes des écoles — Pôle Technique, Ville de Saint-Denis</p></div>
+</div>
+<a class="discret" href="index.html">← Le service</a>
+</div></header>
+
+<main>
+  <section class="bloc">
+    <h2>De quoi il s'agit, <em>en une phrase</em></h2>
+    <p class="aide">Une école signale une panne. La demande part au bon agent ou au bon
+       service, l'école suit son avancement, et rien ne se referme sans qu'elle confirme
+       que c'est réglé.</p>
+
+    <div class="encart info">
+      <strong>Ces écrans ne touchent à rien</strong>
+      Ils tournent sur des données d'exemple, sans base et sans réseau. Vous pouvez
+      cliquer partout, remplir, envoyer&nbsp;: aucun message ne part, aucune demande
+      n'est créée. C'est fait pour être montré à vingt personnes sans conséquence.
+    </div>
+  </section>
+
+  <section class="bloc">
+    <h2>Le parcours d'une demande</h2>
+    <p class="aide">Quatre temps. C'est le fil à suivre en formation&nbsp;: chacun
+       ne voit que le sien, mais comprendre l'ensemble aide à s'y situer.</p>
+    <ol class="parcours">
+      <li><strong>L'école signale</strong>
+        <span>La directrice reçoit un lien par courriel, arrive sur un formulaire déjà
+        rempli au nom de son école, et n'a plus qu'à décrire le problème.</span></li>
+      <li><strong>Le pôle prend en charge</strong>
+        <span>La demande apparaît chez le référent du domaine, le chef de cellule, et le
+        technicien de la zone. L'un d'eux déclare qu'il s'en saisit.</span></li>
+      <li><strong>L'intervention a lieu</strong>
+        <span>Si elle revient à un service extérieur — Travaux, Bâtiments, ERP, élagage —
+        il reçoit un courriel avec un lien. Il n'a pas de compte à créer.</span></li>
+      <li><strong>L'école confirme</strong>
+        <span>Elle reçoit un message lui demandant si c'est réglé. Si oui, la demande se
+        clôt. Sinon, elle se rouvre. Personne ne solde un dossier à sa place.</span></li>
+    </ol>
+  </section>
+
+  <section class="bloc">
+    <h2>Les écrans, <em>et ce qu'il faut montrer</em></h2>
+    <p class="aide">Chaque lien ouvre un écran d'exemple. Prenez-les dans cet ordre en
+       formation&nbsp;: c'est celui du parcours ci-dessus.</p>
+
+    <div class="ecran">
+      <div class="qui">Une école</div>
+      <div>
+        <h3>Signaler une demande</h3>
+        <p>Le formulaire tel qu'une directrice le voit une fois connectée.</p>
+        <p class="montrer"><strong>À montrer&nbsp;:</strong> l'école et l'adresse déjà
+           remplies — elle n'a rien à saisir la concernant. Les douze domaines en cartes.
+           Le message qui prévient si une demande semblable est déjà en cours.</p>
+        <a class="principal" href="formulaire-v3-APERCU.html">Ouvrir l'écran</a>
+      </div>
+    </div>
+
+    <div class="ecran">
+      <div class="qui">Une école</div>
+      <div>
+        <h3>Suivre ses demandes</h3>
+        <p>L'espace de l'école&nbsp;: où en sont ses demandes.</p>
+        <p class="montrer"><strong>À montrer&nbsp;:</strong> les états en clair — « Reçue »,
+           « En cours », « À confirmer par vous ». Une école n'a pas à décoder notre
+           vocabulaire interne.</p>
+        <a class="principal" href="connexion-APERCU.html">Ouvrir l'écran</a>
+      </div>
+    </div>
+
+    <div class="ecran">
+      <div class="qui">Le pôle</div>
+      <div>
+        <h3>Le poste de travail</h3>
+        <p>Ce que voient les agents. <strong>Une barre en bas permet de changer de
+           casquette&nbsp;:</strong> direction, assistante, secrétariat, chef de cellule,
+           référent, technicien.</p>
+        <p class="montrer"><strong>À montrer&nbsp;:</strong> passez de « direction » à
+           « technicien ». Le nombre de demandes change, et la phrase sous le nom dit
+           pourquoi. C'est la base qui trie, pas la page — chacun ne voit que son
+           périmètre, sans réglage à faire.</p>
+        <a class="principal" href="gestion-v3-APERCU.html">Ouvrir l'écran</a>
+      </div>
+    </div>
+
+    <div class="ecran">
+      <div class="qui">Un service extérieur</div>
+      <div>
+        <h3>Signaler une intervention terminée</h3>
+        <p>La page qu'ouvre le lien reçu par courriel. <strong>Sans compte&nbsp;:</strong>
+           c'est le lien qui autorise.</p>
+        <p class="montrer"><strong>À montrer&nbsp;:</strong> son clic ne clôt rien. Il
+           déclenche la demande de confirmation à l'école. C'est le point qui rassure le
+           plus les services extérieurs.</p>
+        <a class="principal" href="intervention-v3-APERCU.html">Ouvrir l'écran</a>
+      </div>
+    </div>
+
+    <div class="ecran">
+      <div class="qui">Une école</div>
+      <div>
+        <h3>Confirmer que c'est réglé</h3>
+        <p>Le dernier temps du circuit.</p>
+        <p class="montrer"><strong>À montrer&nbsp;:</strong> le choix « ce n'est pas
+           réglé », qui rouvre la demande. C'est là que se joue la valeur du service&nbsp;:
+           une demande close est une demande dont l'école a dit qu'elle était close.</p>
+        <a class="principal" href="cloture-v3-APERCU.html">Ouvrir l'écran</a>
+      </div>
+    </div>
+
+    <div class="ecran">
+      <div class="qui">Direction</div>
+      <div>
+        <h3>Le tableau de bord</h3>
+        <p>Volumes, délais, répartition, coûts. Imprimable en PDF.</p>
+        <p class="montrer"><strong>À montrer&nbsp;:</strong> l'écart entre la médiane et
+           la moyenne du délai de réaction. Et le bouton « Enregistrer en PDF » —
+           choisissez « Enregistrer au format PDF » dans la fenêtre d'impression.</p>
+        <a class="principal" href="tableau-de-bord-APERCU.html">Ouvrir l'écran</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <h2>Deux choses à dire, <em>quel que soit le public</em></h2>
+    <div class="encart attention">
+      <strong>Personne ne crée de mot de passe</strong>
+      Ni les écoles, ni les agents, ni les services extérieurs. On saisit son adresse,
+      on reçoit un lien, on est connecté. Le lien ne sert qu'une fois et expire au bout
+      d'une heure — un mot de passe partagé donnerait un accès permanent à tous ceux
+      qui l'ont, ce lien-là donne un accès unique et laisse une trace.
+    </div>
+    <div class="encart info">
+      <strong>Une demande close est une demande que l'école a confirmée</strong>
+      C'est le point le plus important pour la direction. La confirmation de l'école
+      vaut constat du service fait&nbsp;: la pièce que le comptable public réclame avant
+      de payer une facture.
+    </div>
+  </section>
+</main>
+</body>
+</html>

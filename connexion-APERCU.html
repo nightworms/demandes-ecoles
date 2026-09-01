@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APERÇU — Mes demandes — Écoles de Saint-Denis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système :
+   systeme-design/jetons.css · socle.css · composants.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*  L'en-tête porte un bouton de déconnexion à droite : il lui faut donc la
+    disposition en ligne des pages larges, dans une colonne étroite. */
+/*  « header.colonne » du socle pose display:block ; il faut la même
+    spécificité pour la reprendre, sinon la règle du système l'emporte. */
+header.colonne .dedans{ display: flex; justify-content: space-between; align-items: center;
+                        gap: var(--pas-3); flex-wrap: wrap }
+
+/*  La liste des demandes de l'école : une carte par demande, avec un filet
+    de couleur à gauche qui dit d'un coup d'œil où elle en est. */
+.demande{ background: var(--blanc); border: 1px solid var(--trait);
+          border-left: 4px solid var(--trait-champ); border-radius: 5px;
+          padding: 15px 16px; margin-bottom: 11px }
+.demande.a-valider{ border-left-color: var(--agir); background: var(--agir-pale) }
+.demande.close{ border-left-color: var(--fait) }
+.demande .haut{ display: flex; justify-content: space-between; gap: var(--pas-3);
+                align-items: baseline }
+.demande .num{ font-family: var(--mono); font-size: 13px; color: var(--encre-pale);
+               letter-spacing: .02em }
+.demande h3{ margin: 4px 0 2px; font-size: 16px; font-weight: 650 }
+.demande .meta{ font-size: var(--corps-s); color: var(--encre-doux); margin-top: 3px }
+/*  La description est tronquée à trois lignes : la liste doit rester
+    parcourable d'un regard, le détail est dans le mail. */
+.demande .desc{ font-size: var(--corps-m); color: var(--encre-doux); margin-top: 9px;
+                display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+                overflow: hidden }
+
+.ecoles{ font-size: var(--corps-s); color: var(--encre-doux); margin: 0 0 var(--pas-4) }
+.vide{ text-align: center; padding: 34px 20px; color: var(--encre-doux) }
+.lien-bas{ display: block; text-align: center; margin-top: 22px;
+           color: var(--marine); font-weight: 600 }
+</style>
+</head>
+<body class="publique">
+
+<header class="colonne">
+  <div class="dedans">
+    <div>
+      <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
+      <div>
+        <h1>Mes demandes</h1>
+              <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+      </div>
+    </div>
+    </div>
+    <button type="button" class="discret" id="deconnexion" hidden>Se déconnecter</button>
+  </div>
+</header>
+
+<main class="colonne">
+  <div id="erreur" class="encart erreur" role="alert" hidden></div>
+
+  <!-- ─── Demande du lien ─────────────────────────────────────────── -->
+  <section class="bloc saisie" id="ecran-connexion" hidden>
+    <h2>Accéder à l'espace de votre école</h2>
+    <p class="aide">Saisissez l'adresse de votre école. Vous recevrez un lien qui
+       vous connectera directement, sans mot de passe à retenir.<br>
+       Votre adresse académique en @ac-reunion.fr convient, tout comme celle
+       de l'école en @saintdenis.re.</p>
+    <form id="form-connexion" novalidate>
+      <label for="email">Adresse email de l'école</label>
+      <input type="email" id="email" required autocomplete="email" inputmode="email"
+             placeholder="ecole@saintdenis.re">
+      <button type="submit" class="principal pleine" id="bouton-lien">Recevoir mon lien</button>
+    </form>
+    <div id="lien-envoye" class="encart info" role="status" hidden>
+      <strong>Regardez votre boîte mail</strong>
+      Un lien de connexion vient d'être envoyé. Ouvrez-le <strong>depuis cet appareil</strong>.
+      Il est valable une heure et ne sert qu'une fois.
+    </div>
+  </section>
+
+  <!-- ─── Espace de l'école ───────────────────────────────────────── -->
+  <section id="ecran-demandes" hidden>
+    <p class="ecoles" id="mes-ecoles"></p>
+    <div id="liste"></div>
+    <a class="lien-bas" href="formulaire-v3.html">Faire une nouvelle demande</a>
+  </section>
+
+  <p class="vide" id="chargement">Chargement…</p>
+</main>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Configuration
+//  La clé publiable est faite pour partir dans le navigateur : Supabase la
+//  décrit comme sûre dès lors que la sécurité par ligne est active.
+//  Ne jamais placer ici une clé « sb_secret_ ».
+// ─────────────────────────────────────────────────────────────────────────
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'APERCU_AUCUNE_CLE';   // aucun appel réseau dans cet aperçu
+const CLEF_SESSION = 'demandes-ecoles-session';
+
+const $ = s => document.querySelector(s);
+
+// Libellés : l'école n'a pas à décoder notre vocabulaire interne.
+const ETATS = {
+  nouveau:                     { texte: 'Reçue',                         classe: '' },
+  en_cours:                    { texte: 'En cours de traitement',        classe: '' },
+  en_attente_pieces:           { texte: 'En attente de pièces',          classe: '' },
+  en_attente_devis:            { texte: 'En attente de devis',           classe: '' },
+  planifie:                    { texte: 'Intervention planifiée',        classe: '' },
+  transmis_externe:            { texte: 'Transmise à un autre service',  classe: '' },
+  en_attente_validation_ecole: { texte: 'À confirmer par vous',          classe: 'agir' },
+  resolu:                      { texte: 'Résolue',                       classe: 'fait' },
+  cloture:                     { texte: 'Clôturée',                      classe: 'fait' },
+  rouvert:                     { texte: 'Rouverte',                      classe: '' },
+  annule:                      { texte: 'Annulée',                       classe: 'fait' }
+};
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(texte) {
+  const e = $('#erreur'); e.textContent = texte; e.hidden = false;
+  e.scrollIntoView({ block: 'center' });
+}
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); }
+  catch (e) { return null; }
+}
+function ecrireSession(s) { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); }
+function oublierSession() { localStorage.removeItem(CLEF_SESSION); }
+
+// Le lien de connexion renvoie les jetons dans le fragment de l'adresse.
+// On les range, puis on nettoie la barre d'adresse : inutile de laisser
+// traîner un jeton dans l'historique du navigateur.
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.length < 2) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) {
+    if (p.get('error_description')) erreur(decodeURIComponent(p.get('error_description')));
+    history.replaceState(null, '', location.pathname);
+    return null;
+  }
+  const session = {
+    access_token: acces,
+    refresh_token: p.get('refresh_token'),
+    expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000)
+  };
+  ecrireSession(session);
+  history.replaceState(null, '', location.pathname);
+  return session;
+}
+
+async function rafraichir(session) {
+  const r = await fetch(`${API}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: { apikey: CLE, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: session.refresh_token })
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  const nouvelle = {
+    access_token: j.access_token, refresh_token: j.refresh_token,
+    expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000)
+  };
+  ecrireSession(nouvelle);
+  return nouvelle;
+}
+
+// ─── Demande du lien ─────────────────────────────────────────────────────
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('#bouton-lien');
+  b.disabled = true; b.textContent = 'Envoi en cours…';
+  try {
+    const adresse = $('#email').value.trim();
+    const retour = location.origin + location.pathname;
+    const r = await fetch(`${API}/auth/v1/otp?redirect_to=${encodeURIComponent(retour)}`, {
+      method: 'POST',
+      headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: adresse, create_user: true })
+    });
+    if (r.status === 429) {
+      erreur("Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.");
+    } else if (!r.ok) {
+      erreur("L'envoi a échoué. Vérifiez l'adresse saisie, puis réessayez.");
+    } else {
+      $('#form-connexion').hidden = true;
+      $('#lien-envoye').hidden = false;
+      //  L'académie a rejeté nos messages le 25 août, puis les a délivrés le
+      //  31 : la livraison chez eux n'est pas sûre. On ne bloque donc pas —
+      //  une directrice a déposé depuis son adresse académique — mais on donne
+      //  la porte de secours si rien n'arrive.
+      if (/@ac-reunion\.fr$/i.test(adresse)) {
+        $('#lien-envoye').insertAdjacentHTML('beforeend',
+          "<br><br>Si rien ne vous parvient d'ici quelques minutes, réessayez "
+          + "avec l'adresse de votre école en <strong>@saintdenis.re</strong> : "
+          + "les messages vers l'académie sont parfois refusés. "
+          + "En cas de doute, appelez le Pôle Technique au 0262 40 45 11.");
+      }
+    }
+  } catch (e) {
+    erreur("L'envoi a échoué. Vérifiez votre connexion, puis réessayez.");
+  }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
+});
+
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });
+
+// ─── Affichage des demandes ──────────────────────────────────────────────
+async function chargerDemandes(session) {
+  const appel = (jeton) => fetch(
+    `${API}/rest/v1/v_mes_demandes?select=numero,created_at,statut,domaine,type_demande,localisation,description,ecole&order=created_at.desc`,
+    { headers: { apikey: CLE, Authorization: 'Bearer ' + jeton } });
+
+  let r = await appel(session.access_token);
+  if (r.status === 401 && session.refresh_token) {
+    const neuve = await rafraichir(session);
+    if (!neuve) return null;
+    r = await appel(neuve.access_token);
+  }
+  if (!r.ok) return null;
+  return r.json();
+}
+
+function afficher(demandes) {
+  $('#chargement').hidden = true;
+  $('#ecran-demandes').hidden = false;
+  $('#deconnexion').hidden = false;
+
+  const ecoles = [...new Set(demandes.map(d => d.ecole))];
+  $('#mes-ecoles').textContent = ecoles.length
+    ? (ecoles.length > 1 ? 'Vos écoles : ' : 'Votre école : ') + ecoles.join(' · ')
+    : '';
+
+  if (!demandes.length) {
+    $('#liste').innerHTML =
+      `<div class="bloc vide"><strong>Aucune demande en cours</strong>
+       <p>Les demandes que vous déposerez apparaîtront ici.</p></div>`;
+    return;
+  }
+
+  $('#liste').innerHTML = demandes.map(d => {
+    const e = ETATS[d.statut] || { texte: d.statut, classe: '' };
+    const cadre = e.classe === 'agir' ? ' a-valider' : (e.classe === 'fait' ? ' close' : '');
+    const date = new Date(d.created_at).toLocaleDateString('fr-FR',
+      { day: '2-digit', month: 'long', year: 'numeric' });
+    return `<article class="demande${cadre}">
+      <div class="haut">
+        <span class="num">${echapper(d.numero)}</span>
+        <span class="etat ${e.classe}">${echapper(e.texte)}</span>
+      </div>
+      <h3>${echapper(d.type_demande)}</h3>
+      <div class="meta">${echapper(d.domaine)}${d.localisation ? ' · ' + echapper(d.localisation) : ''}
+        · déposée le ${date}${ecoles.length > 1 ? ' · ' + echapper(d.ecole) : ''}</div>
+      <div class="desc">${echapper(d.description)}</div>
+    </article>`;
+  }).join('');
+}// ══════════════ APERÇU — données d'exemple, aucun appel réseau ══════════════
+//  Ce bloc doit rester AVANT le démarrage : une donnée déclarée plus bas
+//  n'existe pas encore quand la page se lance, et l'aperçu resterait bloqué
+//  sur « Chargement… » sans rien afficher ni signaler.
+const _DEMANDES = [{"numero": "DEM-2026-00108", "created_at": "2026-08-18T09:12:00Z", "statut": "en_attente_validation_ecole", "domaine": "Ventilateur / brasseur d'air", "type_demande": "Brasseur d'air en panne", "localisation": "salle B3", "description": "Le brasseur d'air de la salle B3 ne tourne plus depuis lundi. La classe est difficilement tenable l'apres-midi.", "ecole": "Jules Reydellet A"}, {"numero": "DEM-2026-00097", "created_at": "2026-08-14T14:40:00Z", "statut": "en_cours", "domaine": "Mobilier", "type_demande": "Demande de remplacement de mobilier usage", "localisation": "salle A1", "description": "Six chaises cassees, assises fendues. Risque de blessure pour les eleves.", "ecole": "Jules Reydellet B"}, {"numero": "DEM-2026-00081", "created_at": "2026-08-04T08:05:00Z", "statut": "transmis_externe", "domaine": "Batiment", "type_demande": "Etancheite", "localisation": "toiture aile est", "description": "Infiltration au plafond du couloir apres les fortes pluies.", "ecole": "Jules Reydellet A"}, {"numero": "DEM-2026-00062", "created_at": "2026-07-22T10:30:00Z", "statut": "resolu", "domaine": "Informatique", "type_demande": "Photocopieur ou imprimante", "localisation": "secretariat", "description": "Le photocopieur affichait une erreur bourrage permanente. Repare le 28 juillet.", "ecole": "Jules Reydellet A"}];
+function lireSession(){ return { access_token:'apercu', refresh_token:'apercu',
+                                 expire_le: Date.now()+3600000 }; }
+function recupererJetonsDuLien(){ return null; }
+async function chargerDemandes(){ return _DEMANDES; }
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  let session = recupererJetonsDuLien() || lireSession();
+
+  if (session && session.expire_le && session.expire_le < Date.now() + 60000) {
+    session = session.refresh_token ? await rafraichir(session) : null;
+  }
+  if (!session) {
+    oublierSession();
+    $('#chargement').hidden = true;
+    $('#ecran-connexion').hidden = false;
+    return;
+  }
+
+  const demandes = await chargerDemandes(session);
+  if (demandes === null) {
+    oublierSession();
+    $('#chargement').hidden = true;
+    $('#ecran-connexion').hidden = false;
+    erreur("Votre session a expiré. Demandez un nouveau lien.");
+    return;
+  }
+  afficher(demandes);
+})();
+
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  let session = recupererJetonsDuLien() || lireSession();
+
+  if (session && session.expire_le && session.expire_le < Date.now() + 60000) {
+    session = session.refresh_token ? await rafraichir(session) : null;
+  }
+  if (!session) {
+    oublierSession();
+    $('#chargement').hidden = true;
+    $('#ecran-connexion').hidden = false;
+    return;
+  }
+
+  const demandes = await chargerDemandes(session);
+  if (demandes === null) {
+    oublierSession();
+    $('#chargement').hidden = true;
+    $('#ecran-connexion').hidden = false;
+    erreur("Votre session a expiré. Demandez un nouveau lien.");
+    return;
+  }
+  afficher(demandes);
+})();
+</script>
+</body>
+</html>

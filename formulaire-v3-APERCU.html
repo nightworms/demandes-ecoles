@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APERÇU — Signaler une demande — Écoles de Saint-Denis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Propre à cette page. Tout le reste vient du système :
+   systeme-design/jetons.css · socle.css · composants.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*  Les douze domaines, en cartes cliquables. C'est le seul endroit de la
+    plateforme où le cadre est justifié sur une page publique : ces cartes ne
+    décorent pas, elles se cliquent, et il faut voir laquelle est choisie. */
+.domaines{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+           gap: 10px; margin-top: var(--pas-3) }
+.domaine{ position: relative; display: flex; flex-direction: column; justify-content: center;
+          min-height: 104px; padding: 14px 15px; background: var(--blanc);
+          border: 1.5px solid var(--trait); border-radius: var(--rayon); cursor: pointer;
+          text-align: left; font-family: inherit; font-size: var(--corps-m);
+          font-weight: 600; color: var(--encre); line-height: 1.3 }
+.domaine:hover{ border-color: var(--marine) }
+.domaine small{ display: block; font-weight: 400; font-size: 13px;
+                color: var(--encre-pale); margin-top: 3px }
+.domaine[aria-pressed="true"]{ border-color: var(--marine); background: var(--marine-pale);
+                               color: var(--marine-encre) }
+.domaine[aria-pressed="true"]::after{ content: "✓"; position: absolute; top: 8px; right: 10px;
+                                      font-size: 13px; font-weight: 700; color: var(--marine-encre) }
+/*  Une icône par domaine, dessinée au trait. Décorative : c'est le libellé
+    qui porte le sens, un code inconnu ne rend simplement rien. */
+.domaine .ico{ width: 26px; height: 26px; flex: none; align-self: flex-start;
+               margin-bottom: 9px; color: var(--encre-pale) }
+.domaine[aria-pressed="true"] .ico{ color: var(--marine) }
+
+/*  Le compte connecté, et l'école qu'il dessert : ce que l'école n'a plus à
+    saisir. C'est le cœur de l'authentification obligatoire. */
+.compte{ display: flex; align-items: baseline; gap: var(--pas-2); flex-wrap: wrap;
+         margin: 0 0 var(--pas-4); font-size: var(--corps-m) }
+.compte .quoi{ font-weight: 600; color: var(--encre-pale); font-size: 13px }
+.compte .valeur{ color: var(--encre); word-break: break-word }
+.mon-ecole{ margin: 0; padding: 14px 16px; background: var(--marine-pale);
+            color: var(--marine-encre); border-radius: var(--rayon); font-size: var(--corps) }
+.mon-ecole strong{ display: block; font-size: 17px; margin-bottom: 3px }
+.mon-ecole span{ display: block; font-size: var(--corps-s); opacity: .85; margin-top: 2px }
+
+/*  Photos : une vignette carrée, et un carré en pointillé pour en ajouter. */
+.photos{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--pas-3) }
+.vignette{ position: relative; width: 88px; height: 88px; border-radius: var(--rayon);
+           overflow: hidden; border: 1px solid var(--trait) }
+.vignette img{ width: 100%; height: 100%; object-fit: cover; display: block }
+.vignette button{ position: absolute; top: 3px; right: 3px; width: 26px; height: 26px;
+                  border: 0; border-radius: 50%; background: rgba(0,0,0,.62); color: #fff;
+                  font-size: 15px; line-height: 1; cursor: pointer; padding: 0 }
+.ajout-photo{ width: 88px; height: 88px; border: 1.5px dashed var(--trait-champ);
+              border-radius: var(--rayon); background: var(--blanc); cursor: pointer;
+              font-size: 26px; color: var(--encre-pale); display: flex;
+              align-items: center; justify-content: center }
+
+/*  La barre d'envoi reste collée en bas : sur un téléphone, l'action ne doit
+    pas se chercher au bout d'un formulaire de cinq écrans. */
+.envoi{ position: fixed; left: 0; right: 0; bottom: 0; background: var(--blanc);
+        border-top: 1px solid var(--trait); padding: 12px 24px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20 }
+.envoi .dedans{ max-width: 960px; margin: 0 auto; display: flex; gap: 11px; align-items: center }
+.envoi button.principal{ flex: 1 }
+
+/*  L'accusé de réception, une fois la demande partie. */
+.recu{ text-align: center; padding: var(--souffle) 20px }
+.recu h2{ margin: 0 0 var(--pas-3); font-size: var(--titre-l) }
+.recu .numero{ font-size: 30px; font-weight: 700; color: var(--marine-encre);
+               letter-spacing: .02em; background: var(--marine-pale); padding: 12px 22px;
+               border-radius: var(--rayon); display: inline-block; margin: var(--pas-3) 0 }
+
+/*  Le corps du formulaire laisse la place à la barre d'envoi. */
+body{ padding-bottom: 96px }
+</style>
+</head>
+<body class="publique">
+<header class="colonne">
+  <div class="dedans">
+    <div class="marque">
+      <img class="logo" src="logo-saint-denis.png" alt="" width="39" height="56" decoding="async">
+      <div>
+        <h1>Signaler une demande</h1>
+        <p>Pôle Technique — Direction de l'Éducation, Ville de Saint-Denis</p>
+      </div>
+    </div>
+    <button type="button" class="discret" id="deconnexion" hidden>Se déconnecter</button>
+  </div>
+</header>
+<main>
+  <div id="erreur-globale" class="encart erreur" role="alert" hidden></div>
+
+  <p class="attente" id="chargement">Chargement…</p>
+
+  <!-- ─── Connexion ──────────────────────────────────────────────────────
+       Le formulaire n'est plus ouvert à tout venant : c'est le compte qui
+       dit de quelle école on parle, et la base le revérifie de son côté. -->
+  <section class="bloc saisie" id="ecran-connexion" hidden>
+    <h2>Accéder au formulaire</h2>
+    <p class="aide">Saisissez l'adresse email de votre école. Vous recevrez un lien
+       qui vous connectera directement, sans mot de passe à retenir.</p>
+    <form id="form-connexion" novalidate>
+      <div class="champ">
+        <label for="email-connexion">Adresse email de votre école</label>
+        <input type="email" id="email-connexion" required autocomplete="email"
+               inputmode="email" placeholder="ecole@saintdenis.re">
+      </div>
+      <button type="submit" class="principal pleine" id="bouton-lien">Recevoir mon lien</button>
+    </form>
+    <div id="lien-envoye" class="encart info" role="status" hidden>
+      <strong>Regardez votre boîte mail</strong>
+      Un lien de connexion vient d'être envoyé. Ouvrez-le <strong>depuis cet appareil</strong>.
+      Il est valable une heure et ne sert qu'une fois.
+    </div>
+  </section>
+
+  <!-- ─── Adresse connectée, mais rattachée à aucune école ─────────────── -->
+  <section class="bloc" id="ecran-inconnu" hidden>
+    <h2>Cette adresse n'est rattachée à aucune école</h2>
+    <p class="aide">Vous êtes bien connecté, mais nous ne savons pas quelle école
+       vous représentez. Il s'agit sans doute d'une adresse que nous ne connaissons
+       pas encore.</p>
+    <div class="encart attention">
+      <strong>Que faire&nbsp;?</strong>
+      Appelez le Pôle Technique au <b>0262 40 45 11</b> en indiquant l'adresse
+      utilisée&nbsp;: <b id="adresse-inconnue"></b>. Nous la rattacherons à votre école.
+    </div>
+  </section>
+
+  <form id="formulaire" novalidate hidden>
+    <section class="bloc">
+      <h2><span class="num" aria-hidden="true">1</span> Votre école</h2>
+      <div id="ecole-unique" class="mon-ecole" hidden></div>
+      <fieldset id="ecole-choix" hidden style="margin-bottom:0">
+        <legend>Votre adresse dessert plusieurs écoles&nbsp;: laquelle est concernée&nbsp;?</legend>
+        <div id="ecoles-liste"></div>
+      </fieldset>
+    </section>
+    <section class="bloc">
+      <h2><span class="num" aria-hidden="true">2</span> Vous</h2>
+      <p class="aide">Pour que le service puisse vous rappeler si besoin.</p>
+      <div class="compte">
+        <span class="quoi">Connecté avec</span>
+        <span class="valeur" id="adresse-compte"></span>
+      </div>
+      <div class="champ"><label for="nom">Votre nom</label>
+        <input type="text" id="nom" required autocomplete="name" placeholder="Ex : Marie Dupont"></div>
+      <div class="champ"><label for="fonction">Votre fonction <span class="opt">— facultatif</span></label>
+        <input type="text" id="fonction" autocomplete="organization-title" placeholder="Ex : Directrice"></div>
+      <div class="champ"><label for="tel">Téléphone <span class="opt">— facultatif</span></label>
+        <input type="tel" id="tel" autocomplete="tel" inputmode="tel" placeholder="0692 …"></div>
+    </section>
+    <section class="bloc">
+      <h2><span class="num" aria-hidden="true">3</span> Que se passe-t-il&nbsp;?</h2>
+      <p class="aide">Choisissez ce qui correspond le mieux. Nous nous chargeons d'orienter votre demande vers le bon service.</p>
+      <div class="domaines" id="domaines" role="group" aria-label="Nature de la demande"></div>
+    </section>
+    <section class="bloc" id="bloc-type" hidden>
+      <h2><span class="num" aria-hidden="true">4</span> Plus précisément</h2>
+      <fieldset><legend class="masque">Type de demande</legend><div id="types"></div></fieldset>
+      <div id="doublons" class="encart attention" role="status" hidden></div>
+    </section>
+    <section class="bloc" id="bloc-details" hidden>
+      <h2><span class="num" aria-hidden="true">5</span> Décrivez la situation</h2>
+      <div class="champ"><label for="localisation">Où exactement&nbsp;? <span class="opt">— facultatif</span></label>
+        <input type="text" id="localisation" placeholder="Ex : salle B3, cantine, cour côté rue"></div>
+      <div class="champ"><label for="description">Description</label>
+        <textarea id="description" required
+          placeholder="Ce que vous constatez, depuis quand, et ce que cela empêche de faire."></textarea></div>
+      <fieldset><legend>Degré d'urgence</legend>
+        <label class="choix"><input type="radio" name="priorite" value="normale" checked>
+          <span>Normale<small>À traiter dans les délais habituels</small></span></label>
+        <label class="choix"><input type="radio" name="priorite" value="haute">
+          <span>Importante<small>Gêne le fonctionnement de l'école</small></span></label>
+        <label class="choix"><input type="radio" name="priorite" value="urgente">
+          <span>Urgente<small>Danger, ou activité totalement empêchée</small></span></label>
+      </fieldset>
+      <fieldset><legend>Quand l'intervention peut-elle avoir lieu&nbsp;?</legend>
+        <label class="choix"><input type="radio" name="fenetre" value="des_que_possible" checked>
+          <span>Dès que possible</span></label>
+        <label class="choix"><input type="radio" name="fenetre" value="pendant_les_vacances">
+          <span>Pendant les vacances scolaires<small>Travaux impossibles en présence des élèves</small></span></label>
+        <label class="choix"><input type="radio" name="fenetre" value="avant_la_rentree">
+          <span>Avant la prochaine rentrée</span></label>
+      </fieldset>
+      <fieldset><legend>Photos <span class="opt">— facultatif, trois au maximum</span></legend>
+        <p style="margin:0;font-size:14px;color:var(--encre-doux)">
+          Une photo évite souvent une visite de constat.
+          <strong>Cadrez uniquement l'équipement concerné&nbsp;: aucune personne ne doit être visible.</strong></p>
+        <div class="photos" id="photos">
+          <button type="button" class="ajout-photo" id="ajout-photo" aria-label="Ajouter une photo">+</button>
+        </div>
+        <input type="file" id="fichier" accept="image/*" capture="environment" class="masque" multiple>
+        <p id="etat-photos" style="font-size:13px;color:var(--encre-pale);margin:8px 0 0" role="status"></p>
+      </fieldset>
+    </section>
+  </form>
+  <section class="bloc recu" id="confirmation" hidden>
+    <h2>Votre demande est enregistrée</h2>
+    <p>Conservez ce numéro&nbsp;: il vous servira si vous nous en reparlez.</p>
+    <div class="numero" id="numero-recu"></div>
+    <p id="qui-traite"></p>
+    <p style="color:var(--encre-doux);font-size:14.5px">Un accusé de réception vient de partir vers votre adresse.</p>
+    <button type="button" class="secondaire" onclick="location.reload()">Faire une autre demande</button>
+  </section>
+</main>
+<div class="envoi" id="pied" hidden><div class="dedans">
+  <button type="submit" form="formulaire" class="principal pleine" id="bouton-envoi" disabled>Envoyer ma demande</button>
+</div></div>
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Configuration.
+//  La clé « publiable » est faite pour partir dans le navigateur : Supabase la
+//  décrit lui-même comme sûre dès lors que la sécurité par ligne est activée,
+//  ce qui est notre cas. Elle ne donne accès qu'à ce que les politiques
+//  autorisent, et rien de plus. Ne jamais mettre ici une clé « sb_secret_ ».
+// ─────────────────────────────────────────────────────────────────────────
+const API = 'https://ktrtnujbonwqksomgumt.supabase.co';
+const CLE = 'APERCU_AUCUNE_CLE';   // aucun appel réseau dans cet aperçu
+const BUCKET_PHOTOS = 'photos-demandes';
+const MAX_PHOTOS = 3;
+
+//  Même clé que connexion.html : qui s'est connecté là-bas arrive ici déjà
+//  identifié, et inversement. Une seule connexion pour les deux pages.
+const CLEF_SESSION = 'demandes-ecoles-session';
+//  Le nom et la fonction ne sont pas dans la base : l'école les saisit une
+//  fois, ce navigateur s'en souvient. Rien de sensible, rien qui sorte d'ici.
+const CLEF_IDENTITE = 'demandes-ecoles-identite';
+
+const $ = s => document.querySelector(s);
+
+let SESSION = null, ADRESSE = '';
+let ECOLES = [], DOMAINES = [], TYPES = [], photos = [];
+let ecoleChoisie = null, domaineChoisi = null;
+
+function montrerErreur(texte) {
+  const el = $('#erreur-globale'); el.textContent = texte; el.hidden = false;
+  el.scrollIntoView({ block: 'center' });
+}
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); }
+  catch (e) { return null; }
+}
+function ecrireSession(s) {
+  try { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); } catch (e) { /* navigation privée */ }
+}
+function oublierSession() {
+  try { localStorage.removeItem(CLEF_SESSION); } catch (e) { /* idem */ }
+}
+function memoire() {
+  try { return JSON.parse(localStorage.getItem(CLEF_IDENTITE) || '{}'); }
+  catch (e) { return {}; }
+}
+function retenir(identite) {
+  try { localStorage.setItem(CLEF_IDENTITE, JSON.stringify(identite)); } catch (e) { /* idem */ }
+}
+
+// Le lien de connexion renvoie les jetons dans le fragment de l'adresse.
+// On les range, puis on nettoie la barre d'adresse : inutile de laisser
+// traîner un jeton dans l'historique du navigateur.
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.length < 2) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) {
+    if (p.get('error_description')) montrerErreur(decodeURIComponent(p.get('error_description')));
+    history.replaceState(null, '', location.pathname);
+    return null;
+  }
+  const session = {
+    access_token: acces,
+    refresh_token: p.get('refresh_token'),
+    expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000)
+  };
+  ecrireSession(session);
+  history.replaceState(null, '', location.pathname);
+  return session;
+}
+
+async function rafraichir(session) {
+  try {
+    const r = await fetch(`${API}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const neuve = {
+      access_token: j.access_token, refresh_token: j.refresh_token,
+      expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000)
+    };
+    ecrireSession(neuve);
+    return neuve;
+  } catch (e) { return null; }
+}
+
+// L'adresse du compte est inscrite dans le jeton. On la lit ici pour
+// l'AFFICHER, rien de plus : la base ne croit jamais ce que le navigateur
+// lui envoie, elle relit cette même adresse dans le jeton qu'elle a signé.
+function emailDuJeton(jeton) {
+  try {
+    let c = jeton.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (c.length % 4) c += '=';
+    const brut = atob(c);
+    const octets = Uint8Array.from(brut, x => x.charCodeAt(0));
+    return String(JSON.parse(new TextDecoder().decode(octets)).email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+
+// ─── Appels à la base ────────────────────────────────────────────────────
+function entetes() {
+  return {
+    apikey: CLE,
+    Authorization: 'Bearer ' + (SESSION ? SESSION.access_token : CLE),
+    'Content-Type': 'application/json'
+  };
+}
+// Un jeton vaut une heure. Plutôt que de laisser l'école découvrir la panne
+// au moment d'envoyer sa demande, on renouvelle et on retente une fois.
+async function requete(faire) {
+  let r = await faire();
+  if (r.status === 401 && SESSION && SESSION.refresh_token) {
+    const neuve = await rafraichir(SESSION);
+    if (neuve) { SESSION = neuve; r = await faire(); }
+  }
+  return r;
+}
+async function lire(chemin) {
+  const r = await requete(() => fetch(`${API}/rest/v1/${chemin}`, { headers: entetes() }));
+  if (!r.ok) throw new Error('Lecture impossible (' + r.status + ')');
+  return r.json();
+}
+async function appeler(fonction, corps) {
+  const r = await requete(() => fetch(`${API}/rest/v1/rpc/${fonction}`, {
+    method: 'POST', headers: entetes(), body: JSON.stringify(corps) }));
+  if (!r.ok) throw new Error('Envoi impossible (' + r.status + ')');
+  return r.json();
+}
+
+// ─── Écrans ──────────────────────────────────────────────────────────────
+function montrerConnexion() {
+  $('#chargement').hidden = true;
+  $('#formulaire').hidden = true;
+  $('#pied').hidden = true;
+  $('#deconnexion').hidden = true;
+  $('#ecran-connexion').hidden = false;
+}
+
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('#bouton-lien');
+  b.disabled = true; b.textContent = 'Envoi en cours…';
+  try {
+    // On revient sur CETTE page : l'école voulait déposer une demande,
+    // pas consulter une liste.
+    const adresse = $('#email-connexion').value.trim();
+    const retour = location.origin + location.pathname;
+    const r = await fetch(`${API}/auth/v1/otp?redirect_to=${encodeURIComponent(retour)}`, {
+      method: 'POST',
+      headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: adresse, create_user: true })
+    });
+    if (r.status === 429) {
+      montrerErreur("Trop de demandes en peu de temps. Patientez quelques minutes avant de réessayer.");
+    } else if (!r.ok) {
+      montrerErreur("L'envoi a échoué. Vérifiez l'adresse saisie, puis réessayez.");
+    } else {
+      $('#form-connexion').hidden = true;
+      $('#lien-envoye').hidden = false;
+      //  L'académie a rejeté nos messages le 25 août, puis les a délivrés le
+      //  31 : la livraison chez eux n'est pas sûre. On ne bloque donc pas —
+      //  une directrice a déposé depuis son adresse académique — mais on donne
+      //  la porte de secours si rien n'arrive.
+      if (/@ac-reunion\.fr$/i.test(adresse)) {
+        $('#lien-envoye').insertAdjacentHTML('beforeend',
+          "<br><br>Si rien ne vous parvient d'ici quelques minutes, réessayez "
+          + "avec l'adresse de votre école en <strong>@saintdenis.re</strong> : "
+          + "les messages vers l'académie sont parfois refusés. "
+          + "En cas de doute, appelez le Pôle Technique au 0262 40 45 11.");
+      }
+    }
+  } catch (e) {
+    montrerErreur("L'envoi a échoué. Vérifiez votre connexion, puis réessayez.");
+  }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
+});
+
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });// ══════════════ APERÇU — données d'exemple, aucun appel réseau ══════════════
+//  Ce bloc est placé AVANT le démarrage, et c'est essentiel : une donnée
+//  déclarée plus bas n'existe pas encore quand la page se lance. Les deux
+//  aperçus précédents faisaient cette erreur et restaient bloqués sur
+//  « Chargement… », sans rien afficher ni signaler.
+const _ECOLES = [{"id": 1, "nom": "Application Bellepierre", "type_ecole": "Primaire", "adresse": "2, rue des Bougainvilliers - Bellepierre - 97 400 Saint-Denis", "telephone": "0262 21 05 88"}];
+const _DOMAINES = [{"id": 1, "code": "RESTAURATION", "libelle": "Restauration scolaire", "aide": null, "ordre": 1}, {"id": 2, "code": "INFORMATIQUE", "libelle": "Informatique", "aide": null, "ordre": 2}, {"id": 3, "code": "MOBILIER", "libelle": "Mobilier", "aide": null, "ordre": 3}, {"id": 4, "code": "VENTILATION", "libelle": "Ventilateur / brasseur d'air", "aide": null, "ordre": 4}, {"id": 5, "code": "RIDEAUX", "libelle": "Rideaux d'occultation", "aide": null, "ordre": 5}, {"id": 6, "code": "CLES_BIP", "libelle": "Clés et BIP d'accès", "aide": null, "ordre": 6}, {"id": 7, "code": "SECURITE_INCENDIE", "libelle": "Sécurité incendie — alarme et extincteurs", "aide": null, "ordre": 7}, {"id": 8, "code": "TRAVAUX", "libelle": "Travaux et installations", "aide": null, "ordre": 8}, {"id": 9, "code": "BATIMENT", "libelle": "Bâtiment", "aide": null, "ordre": 9}, {"id": 10, "code": "ESPACES_VERTS", "libelle": "Élagage et aménagement paysager", "aide": null, "ordre": 10}, {"id": 11, "code": "TRAITEMENT_3D", "libelle": "Dératisation et traitement 3D", "aide": null, "ordre": 11}, {"id": 12, "code": "TRI", "libelle": "Je ne sais pas / autre sujet", "aide": null, "ordre": 12}];
+const _TYPES = [{"id": 44, "domaine_id": 10, "libelle": "Demande d'élagage"}, {"id": 54, "domaine_id": 12, "libelle": "Demande sans domaine identifié"}, {"id": 8, "domaine_id": 2, "libelle": "Panne sur l'équipement informatique"}, {"id": 15, "domaine_id": 3, "libelle": "Demande de mobilier supplémentaire"}, {"id": 19, "domaine_id": 4, "libelle": "Ventilateur en panne"}, {"id": 23, "domaine_id": 5, "libelle": "Demande de remplacement de rideau"}, {"id": 26, "domaine_id": 6, "libelle": "Demande de double de clé"}, {"id": 29, "domaine_id": 7, "libelle": "Maintenance de l'alarme incendie"}, {"id": 33, "domaine_id": 8, "libelle": "Demande de travaux"}, {"id": 37, "domaine_id": 9, "libelle": "Étanchéité"}, {"id": 49, "domaine_id": 11, "libelle": "Demande de dératisation"}, {"id": 1, "domaine_id": 1, "libelle": "Panne équipement"}, {"id": 24, "domaine_id": 5, "libelle": "Pose d'un rideau neuf"}, {"id": 50, "domaine_id": 11, "libelle": "Demande de désinsectisation"}, {"id": 38, "domaine_id": 9, "libelle": "Ravalement"}, {"id": 27, "domaine_id": 6, "libelle": "Demande de BIP"}, {"id": 9, "domaine_id": 2, "libelle": "Dysfonctionnement logiciel"}, {"id": 34, "domaine_id": 8, "libelle": "Demande de maintenance électrique"}, {"id": 30, "domaine_id": 7, "libelle": "Maintenance d'extincteur"}, {"id": 20, "domaine_id": 4, "libelle": "Brasseur d'air en panne"}, {"id": 16, "domaine_id": 3, "libelle": "Demande de remplacement de mobilier usagé"}, {"id": 2, "domaine_id": 1, "libelle": "Dysfonctionnement réseau gaz"}, {"id": 45, "domaine_id": 10, "libelle": "Demande d'abattage"}, {"id": 3, "domaine_id": 1, "libelle": "Demande de nettoyage de hotte"}, {"id": 35, "domaine_id": 8, "libelle": "Maintenance de l'alarme anti-intrusion"}, {"id": 17, "domaine_id": 3, "libelle": "Demande d'évacuation de mobilier"}, {"id": 21, "domaine_id": 4, "libelle": "Demande d'installation de ventilateur ou de brasseur"}, {"id": 25, "domaine_id": 5, "libelle": "Autres"}, {"id": 28, "domaine_id": 6, "libelle": "Autres"}, {"id": 39, "domaine_id": 9, "libelle": "Réfection de sanitaire"}, {"id": 31, "domaine_id": 7, "libelle": "Fourniture ou remplacement d'extincteur"}, {"id": 46, "domaine_id": 10, "libelle": "Demande de plantation"}, {"id": 10, "domaine_id": 2, "libelle": "Dysfonctionnement téléphonique"}, {"id": 51, "domaine_id": 11, "libelle": "Demande de dératisation et désinsectisation"}, {"id": 47, "domaine_id": 10, "libelle": "Demande d'aménagement paysager"}, {"id": 22, "domaine_id": 4, "libelle": "Autres"}, {"id": 40, "domaine_id": 9, "libelle": "Réfection de sol souple"}, {"id": 52, "domaine_id": 11, "libelle": "Demande d'intervention pour l'entretien des pièges"}, {"id": 36, "domaine_id": 8, "libelle": "Autre"}, {"id": 18, "domaine_id": 3, "libelle": "Autres"}, {"id": 32, "domaine_id": 7, "libelle": "Autre"}, {"id": 4, "domaine_id": 1, "libelle": "Nettoyage (autre que la hotte)"}, {"id": 11, "domaine_id": 2, "libelle": "Photocopieur ou imprimante"}, {"id": 48, "domaine_id": 10, "libelle": "Autre"}, {"id": 5, "domaine_id": 1, "libelle": "Bâti de la cantine (sol, mur, plomberie, porte)"}, {"id": 12, "domaine_id": 2, "libelle": "Télécopieur"}, {"id": 41, "domaine_id": 9, "libelle": "Réfection de sol synthétique"}, {"id": 53, "domaine_id": 11, "libelle": "Autre"}, {"id": 42, "domaine_id": 9, "libelle": "Aménagement"}, {"id": 13, "domaine_id": 2, "libelle": "Dysfonctionnement de la connexion internet"}, {"id": 6, "domaine_id": 1, "libelle": "Fourniture ou remplacement d'équipement de cuisine"}, {"id": 14, "domaine_id": 2, "libelle": "Autres"}, {"id": 7, "domaine_id": 1, "libelle": "Autres"}, {"id": 43, "domaine_id": 9, "libelle": "Autre"}];
+
+//  On fait comme si l'école était déjà connectée : c'est l'écran qu'elle
+//  verra après avoir cliqué sur son lien.
+function lireSession() { return { access_token: 'apercu', refresh_token: null,
+                                  expire_le: Date.now() + 3600000 }; }
+function ecrireSession() {}
+function oublierSession() {}
+function emailDuJeton() { return 'sprimaireappli.bellepierre@saintdenis.re'; }
+
+async function lire(chemin) {
+  if (chemin.indexOf('mes_ecoles') > -1) return _ECOLES;
+  if (chemin.indexOf('domaines')   > -1) return _DOMAINES;
+  return _TYPES;
+}
+async function appeler(fonction, corps) {
+  if (fonction === 'demandes_ouvertes_pour') {
+    return (corps._domaine_id === 3)
+      ? [{ numero: 'DEM-2026-00042', type: 'Remplacement de mobilier usagé',
+           depose_le: '12/08/2026', statut: 'en_cours' }]
+      : [];
+  }
+  if (fonction === 'deposer_demande') {
+    await new Promise(r => setTimeout(r, 600));
+    return { ok: true, numero: 'DEM-2026-00128',
+             id: '00000000-0000-0000-0000-000000000000', traitement: 'interne',
+             destinataires: ['Fabienne BRUNO', 'Habiba ATTOUMANE'] };
+  }
+  return {};
+}
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  SESSION = recupererJetonsDuLien() || lireSession();
+  if (SESSION && SESSION.expire_le && SESSION.expire_le < Date.now() + 60000) {
+    SESSION = SESSION.refresh_token ? await rafraichir(SESSION) : null;
+  }
+  if (!SESSION) { oublierSession(); montrerConnexion(); return; }
+
+  ADRESSE = emailDuJeton(SESSION.access_token);
+
+  let mesEcoles;
+  try {
+    [mesEcoles, DOMAINES, TYPES] = await Promise.all([
+      lire('v_mes_ecoles?select=id,nom,type_ecole,adresse,telephone'),
+      lire('v_domaines_publics?select=id,code,libelle,aide,ordre,photo_obligatoire&order=ordre'),
+      lire('v_types_publics?select=id,domaine_id,libelle,ordre&order=ordre')
+    ]);
+  } catch (e) {
+    oublierSession();
+    montrerConnexion();
+    montrerErreur("Votre session a expiré. Demandez un nouveau lien pour continuer.");
+    return;
+  }
+
+  $('#chargement').hidden = true;
+  $('#deconnexion').hidden = false;
+
+  if (!mesEcoles.length) {
+    $('#adresse-inconnue').textContent = ADRESSE || '(adresse inconnue)';
+    $('#ecran-inconnu').hidden = false;
+    return;
+  }
+
+  ECOLES = mesEcoles;
+  $('#formulaire').hidden = false;
+  $('#pied').hidden = false;
+  $('#adresse-compte').textContent = ADRESSE || '—';
+  installerEcoles();
+  rappelerIdentite();
+  afficherDomaines();
+  verifierComplet();
+})();
+
+// ─── L'école : déduite du compte, jamais choisie librement ───────────────
+function libelle(e) { return (e.type_ecole ? e.type_ecole + ' ' : '') + e.nom; }
+
+function installerEcoles() {
+  if (ECOLES.length === 1) {
+    ecoleChoisie = ECOLES[0];
+    $('#ecole-unique').innerHTML =
+      '<strong>' + echapper(libelle(ecoleChoisie)) + '</strong>' +
+      (ecoleChoisie.adresse ? '<span>' + echapper(ecoleChoisie.adresse) + '</span>' : '') +
+      (ecoleChoisie.telephone ? '<span>' + echapper(ecoleChoisie.telephone) + '</span>' : '');
+    $('#ecole-unique').hidden = false;
+    return;
+  }
+  // Quinze noms d'école sont portés par deux établissements : c'est le type
+  // qui les distingue. « Bouvet » seul ne veut rien dire.
+  $('#ecoles-liste').innerHTML = ECOLES.map(e =>
+    '<label class="choix"><input type="radio" name="ecole" value="' + e.id + '">' +
+    '<span>' + echapper(libelle(e)) +
+    (e.adresse ? '<small>' + echapper(e.adresse) + '</small>' : '') + '</span></label>').join('');
+  $('#ecole-choix').hidden = false;
+  $('#ecoles-liste').querySelectorAll('input').forEach(i => i.addEventListener('change', ev => {
+    ecoleChoisie = ECOLES.find(x => String(x.id) === ev.target.value) || null;
+    if (ecoleChoisie && !$('#tel').value.trim()) $('#tel').value = ecoleChoisie.telephone || '';
+    chercherDoublons();
+    verifierComplet();
+  }));
+}
+
+function rappelerIdentite() {
+  const m = memoire();
+  if (m.nom) $('#nom').value = m.nom;
+  if (m.fonction) $('#fonction').value = m.fonction;
+  // À défaut d'un numéro déjà saisi, celui de l'école vaut mieux que rien.
+  $('#tel').value = m.tel || (ecoleChoisie ? (ecoleChoisie.telephone || '') : '');
+}
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// Une icône par domaine, dessinée au trait — décision 4 de la charte.
+// Décoratives : aria-hidden, c'est le libellé qui porte le sens.
+// Un code inconnu ne rend aucune icône, la carte reste celle d'avant.
+const ICONES = (() => {
+  const svg = p => '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+    + ' stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"'
+    + ' aria-hidden="true" focusable="false">' + p + '</svg>';
+  return {
+    RESTAURATION:      svg('<path d="M3.5 18.5h17"/><path d="M5 18.5a7 7 0 0 1 14 0"/><path d="M12 11.5v-2"/>'),
+    INFORMATIQUE:      svg('<rect x="3" y="4.5" width="18" height="12" rx="1.6"/><path d="M9 20.5h6M12 16.5v4"/>'),
+    MOBILIER:          svg('<rect x="7" y="3.5" width="10" height="6" rx="1"/><path d="M8.5 9.5v3M15.5 9.5v3"/><path d="M5.5 12.5h13"/><path d="M7.5 12.5v7M16.5 12.5v7"/>'),
+    VENTILATION:       svg('<path d="M3 8h10a2.8 2.8 0 1 0-2.8-2.8"/><path d="M3 12h13.5a2.8 2.8 0 1 1-2.8 2.8"/><path d="M3 16h8.5a2.4 2.4 0 1 1-2.4 2.4"/>'),
+    RIDEAUX:           svg('<rect x="3.5" y="3.5" width="17" height="17" rx="1.6"/><path d="M8.5 3.5c1.2 5.7-1.2 11.3 0 17M15.5 3.5c-1.2 5.7 1.2 11.3 0 17"/>'),
+    CLES_BIP:          svg('<circle cx="8" cy="8" r="4.2"/><path d="M11 11l8.5 8.5"/><path d="M16.5 16.5l2-2M18.5 18.5l2-2"/>'),
+    SECURITE_INCENDIE: svg('<path d="M12 21a5.5 5.5 0 0 0 5.5-5.5C17.5 11 12 6.5 12 6.5S6.5 11 6.5 15.5A5.5 5.5 0 0 0 12 21z"/><path d="M12 21a2.5 2.5 0 0 0 2.5-2.5c0-2-2.5-4-2.5-4s-2.5 2-2.5 4A2.5 2.5 0 0 0 12 21z"/>'),
+    TRAVAUX:           svg('<path d="M3.5 18h17"/><path d="M6 18v-3.5a6 6 0 0 1 12 0V18"/><path d="M10 9.2V5.6a1.1 1.1 0 0 1 1.1-1.1h1.8a1.1 1.1 0 0 1 1.1 1.1v3.6"/>'),
+    BATIMENT:          svg('<path d="M4 20.5V8l8-4.5 8 4.5v12.5"/><path d="M3 20.5h18"/><rect x="9.5" y="13" width="5" height="7.5"/>'),
+    ESPACES_VERTS:     svg('<circle cx="12" cy="9" r="6.5"/><path d="M12 15.5v5.5"/>'),
+    TRAITEMENT_3D:     svg('<rect x="7.5" y="8.5" width="7.5" height="12" rx="1.8"/><path d="M9.5 8.5v-2h3.5v2"/><path d="M17 5.5h2.5M19 4v3"/>'),
+    TRI:               svg('<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2.1-2.4 3.8"/><path d="M12 17.6h.01"/>')
+  };
+})();
+function afficherDomaines() {
+  $('#domaines').innerHTML = DOMAINES.map(d =>
+    '<button type="button" class="domaine" data-id="' + d.id + '" aria-pressed="false">' +
+    (ICONES[d.code] || '') +
+    d.libelle + (d.aide ? '<small>' + d.aide + '</small>' : '') + '</button>').join('');
+  $('#domaines').addEventListener('click', ev => {
+    const b = ev.target.closest('.domaine'); if (!b) return;
+    document.querySelectorAll('.domaine').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    domaineChoisi = Number(b.dataset.id);
+    afficherTypes(domaineChoisi);
+    chercherDoublons();
+  });
+}
+function afficherTypes(domaineId) {
+  const liste = TYPES.filter(t => t.domaine_id === domaineId);
+  $('#types').innerHTML = liste.map(t =>
+    '<label class="choix"><input type="radio" name="type" value="' + t.id + '">' +
+    '<span>' + t.libelle + '</span></label>').join('');
+  $('#bloc-type').hidden = false;
+  $('#bloc-details').hidden = false;
+  $('#types').querySelectorAll('input').forEach(i => i.addEventListener('change', verifierComplet));
+  $('#bloc-type').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  verifierComplet();
+}
+
+async function chercherDoublons() {
+  const boite = $('#doublons');
+  if (!ecoleChoisie || !domaineChoisi) { boite.hidden = true; return; }
+  try {
+    const ouvertes = await appeler('demandes_ouvertes_pour',
+      { _ecole_id: ecoleChoisie.id, _domaine_id: domaineChoisi });
+    if (!ouvertes || ouvertes.length === 0) { boite.hidden = true; return; }
+    boite.innerHTML = '<strong>Une demande est déjà en cours sur ce sujet pour votre école</strong>' +
+      "Vérifiez qu'il ne s'agit pas de la même chose avant d'envoyer&nbsp;:<ul>" +
+      ouvertes.map(d => '<li><b>' + echapper(d.numero) + '</b> — ' + echapper(d.type) +
+                        ', déposée le ' + echapper(d.depose_le) + '</li>').join('') +
+      '</ul>';
+    boite.hidden = false;
+  } catch (e) { boite.hidden = true; }
+}
+$('#ajout-photo').addEventListener('click', () => $('#fichier').click());
+$('#fichier').addEventListener('change', async e => {
+  for (const f of [...e.target.files]) {
+    if (photos.length >= MAX_PHOTOS) break;
+    $('#etat-photos').textContent = 'Compression en cours…';
+    try { photos.push(await compresser(f)); } catch (err) { /* image illisible : ignorée */ }
+  }
+  e.target.value = '';
+  dessinerPhotos();
+});
+// Redimensionne et recomprime dans le navigateur : une photo de téléphone passe
+// d'environ 4 Mo à 300 Ko, sans différence visible pour identifier une panne.
+function compresser(fichier, maxCote, qualite) {
+  maxCote = maxCote || 1600; qualite = qualite || 0.8;
+  return new Promise((resoudre, rejeter) => {
+    const img = new Image(), url = URL.createObjectURL(fichier);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let l = img.width, h = img.height;
+      if (Math.max(l, h) > maxCote) { const r = maxCote / Math.max(l, h); l = Math.round(l * r); h = Math.round(h * r); }
+      const c = document.createElement('canvas'); c.width = l; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, l, h);
+      c.toBlob(b => b ? resoudre({ blob: b, apercu: c.toDataURL('image/jpeg', 0.5) })
+                      : rejeter(new Error('compression')), 'image/jpeg', qualite);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rejeter(new Error('lecture')); };
+    img.src = url;
+  });
+}
+function dessinerPhotos() {
+  const zone = $('#photos');
+  zone.querySelectorAll('.vignette').forEach(v => v.remove());
+  photos.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'vignette';
+    d.innerHTML = '<img src="' + p.apercu + '" alt="Photo ' + (i + 1) + ' de la situation signalée">' +
+                  '<button type="button" aria-label="Retirer la photo ' + (i + 1) + '">×</button>';
+    d.querySelector('button').onclick = () => { photos.splice(i, 1); dessinerPhotos(); };
+    zone.insertBefore(d, $('#ajout-photo'));
+  });
+  $('#ajout-photo').style.display = photos.length >= MAX_PHOTOS ? 'none' : 'flex';
+  const poids = photos.reduce((s, p) => s + p.blob.size, 0);
+  $('#etat-photos').textContent = photos.length
+    ? photos.length + ' photo' + (photos.length > 1 ? 's' : '') + ' · ' + Math.round(poids / 1024) + ' Ko après compression'
+    : '';
+}
+
+function verifierComplet() {
+  //  L'adresse ne fait plus partie des conditions : elle vient du compte.
+  const ok = ecoleChoisie && $('#nom').value.trim()
+          && domaineChoisi && document.querySelector('input[name=type]:checked')
+          && $('#description').value.trim().length > 4;
+  $('#bouton-envoi').disabled = !ok;
+}
+['#nom', '#description'].forEach(s => $(s).addEventListener('input', verifierComplet));
+
+$('#formulaire').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const bouton = $('#bouton-envoi');
+  bouton.disabled = true; bouton.textContent = 'Envoi en cours…';
+  try {
+    const fenetre = document.querySelector('input[name=fenetre]:checked').value;
+    const reponse = await appeler('deposer_demande', {
+      _ecole_id: ecoleChoisie.id,
+      _domaine_id: domaineChoisi,
+      _type_demande_id: Number(document.querySelector('input[name=type]:checked').value),
+      _demandeur_nom: $('#nom').value.trim(),
+      //  Transmise pour la forme : la base ignore cette valeur et relit
+      //  l'adresse dans le jeton qu'elle a elle-même signé.
+      _demandeur_email: ADRESSE,
+      _description: $('#description').value.trim(),
+      _demandeur_fonction: $('#fonction').value.trim() || null,
+      _demandeur_tel: $('#tel').value.trim() || null,
+      _localisation: $('#localisation').value.trim() || null,
+      _priorite: document.querySelector('input[name=priorite]:checked').value,
+      _hors_presence: fenetre === 'pendant_les_vacances',
+      _fenetre: fenetre
+    });
+    //  La base peut refuser pour une raison qu'elle sait formuler : école qui
+    //  n'est pas la vôtre, session perdue. On la cite plutôt que d'inventer.
+    if (!reponse || reponse.ok !== true) {
+      montrerErreur((reponse && reponse.motif) ||
+        "Votre demande n'a pas pu être envoyée. Réessayez dans un instant.");
+      bouton.disabled = false; bouton.textContent = 'Envoyer ma demande';
+      return;
+    }
+
+    retenir({ nom: $('#nom').value.trim(), fonction: $('#fonction').value.trim(),
+              tel: $('#tel').value.trim() });
+
+    // Les photos ne doivent jamais bloquer un signalement : si le dépôt échoue,
+    // la demande reste enregistrée et on le dit simplement.
+    let photosOk = true;
+    for (let i = 0; i < photos.length; i++) {
+      try { await deposerPhoto(reponse.id, i, photos[i].blob); } catch (e) { photosOk = false; }
+    }
+    $('#formulaire').hidden = true; $('#pied').hidden = true;
+    $('#numero-recu').textContent = reponse.numero;
+    const qui = reponse.destinataires || [];
+    $('#qui-traite').textContent = qui.length ? "Elle vient d'être transmise à " + qui.join(', ') + '.' : '';
+    if (!photosOk) {
+      $('#qui-traite').textContent +=
+        " Vos photos n'ont pas pu être jointes ; vous pouvez les envoyer par email en citant ce numéro.";
+    }
+    $('#confirmation').hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    montrerErreur("Votre demande n'a pas pu être envoyée. Réessayez dans un instant ; si le problème persiste, appelez le Pôle Technique.");
+    bouton.disabled = false; bouton.textContent = 'Envoyer ma demande';
+  }
+});
+
+async function deposerPhoto(demandeId, index, blob) {
+  const chemin = demandeId + '/' + Date.now() + '-' + index + '.jpg';
+  const r = await requete(() => fetch(API + '/storage/v1/object/' + BUCKET_PHOTOS + '/' + chemin, {
+    method: 'POST',
+    headers: { apikey: CLE, Authorization: 'Bearer ' + SESSION.access_token, 'Content-Type': 'image/jpeg' },
+    body: blob }));
+  if (!r.ok) throw new Error('dépôt photo');
+  await appeler('enregistrer_photo', { _demande_id: demandeId, _url: chemin, _taille: blob.size });
+}
+</script>
+</body>
+</html>
