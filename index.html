@@ -55,6 +55,14 @@ footer{ border-top: 1px solid var(--trait); padding: 36px 24px 56px }
 footer .dedans{ max-width: 960px; margin: 0 auto; font-size: var(--corps-m); color: var(--encre-pale) }
 footer strong{ color: var(--encre); font-weight: 600 }
 footer a{ color: var(--marine) }
+
+/*  Discret, mais visible dès l'arrivée : c'est tout le sujet.  */
+.acces-agents{ margin: 0; font-size: 13.5px; color: var(--encre-doux);
+               text-align: right; align-self: center }
+.acces-agents a{ color: var(--marine); font-weight: 600 }
+header .dedans{ display: flex; align-items: center; justify-content: space-between;
+                gap: 16px; flex-wrap: wrap }
+@media (max-width: 700px){ .acces-agents{ text-align: left; width: 100% } }
 </style>
 </head>
 <body class="publique">
@@ -62,7 +70,12 @@ footer a{ color: var(--marine) }
   <img class="logo" src="logo-saint-denis.png" alt="" width="27" height="38">
   <div><h1>Pôle Technique</h1>
   <p>Direction de l'Éducation — Ville de Saint-Denis</p></div>
-</div></div></header>
+</div>
+  <!--  Un agent qui ne voit pas cette porte prend l'entrée des écoles et se
+        retrouve connecté sans école. Elle était en pied de page.  -->
+  <p class="acces-agents">Agent du Pôle Technique&nbsp;?
+     <a href="gestion-v3.html">Poste de travail</a></p>
+</div></header>
 
 <main>
   <section class="ouverture">
