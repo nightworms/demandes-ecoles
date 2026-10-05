@@ -381,7 +381,12 @@ async function api(chemin, options = {}) {
     const detail = await r.text().catch(() => '');
     throw new Error(r.status + ' ' + detail.slice(0, 200));
   }
-  return r.status === 204 ? null : r.json();
+  //  PostgREST répond 201 avec un corps VIDE après une insertion dans une table.
+  //  r.json() s'y étranglait — « unexpected end of data at line 1 column 1 » — et
+  //  l'agent croyait son ajout perdu alors que la ligne était bien enregistrée.
+  //  On lit le texte d'abord, et on ne décode que s'il y a quelque chose.
+  const corps = await r.text();
+  return corps ? JSON.parse(corps) : null;
 }
 
 function parId(liste) { return Object.fromEntries(liste.map(x => [x.id, x])); }
