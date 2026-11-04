@@ -1,0 +1,218 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   VERRE — l'apparence Relais v4 (RS-14, décisions D22 à D26)
+   Se charge APRÈS jetons.css, socle.css et composants.css, et ne s'applique
+   qu'aux pages dont le <body> porte la classe « verre » : les pages v3 ne
+   changent pas d'un pixel.
+
+   Repris des maquettes validées 08 à 11 (systeme-design/pistes/), avec trois
+   corrections décidées au lot 1 (docs/14-RELAIS-V4.md du projet « Méthode de
+   travail ») :
+
+   1. CONTRASTE DU BANDEAU. Le dégradé des maquettes (marine à 40 → 70 %) ne
+      donnait que 2,6 à 4,0:1 pour le texte blanc. Il part maintenant de
+      l'encre marine (#004961) à 66 % → 86 % : 4,9:1 au plus clair, toujours
+      plus clair vers la gauche comme demandé.
+   2. TEXTE SUR LE VERRE. À 40 % de blanc, devant le bas sombre des montagnes,
+      le gris doux tombait à 2:1 et le marine à 1,9:1. Désormais :
+        - les encadrés qui portent du texte sont à 55 % de blanc ;
+        - les deux montagnes du premier plan sont un peu éclaircies ;
+        - sur le verre, le texte n'emploie que trois encres : --encre (8:1),
+          --sur-verre-doux #3f3d3d (5,3:1), --marine-encre (4,9:1), mesurées
+          dans le pire cas (verre devant la montagne la plus sombre).
+      Le gris pâle et le marine simple ne servent plus au texte sur le verre.
+   3. POLICE. Source Sans 3, déjà chargée par les pages v3 : même famille
+      que le poste de travail, et rendu identique sur tous les postes de la
+      Ville (la police « du système » des maquettes varie d'un poste à l'autre).
+
+   Préférences du système, respectées :
+   - « Réduire la transparence » → encadrés blancs opaques, sans flou ;
+   - « Réduire les animations »  → surbrillance sans mouvement (et socle.css
+     coupe déjà toute animation).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* Teintes ajoutées par les maquettes RS-14 (toutes ≥ 6:1 sous du blanc) */
+  --violet:        #5b3f8f;   --violet-pale:  #ece6f7;
+  --olive:         #5d5a2a;   --olive-pale:   #f1efd9;
+  --sarcelle:      #2d6b66;   --sarcelle-pale:#dcf1ee;
+
+  /* Le verre */
+  --flou:          blur(24px) saturate(170%);
+  --verre:         rgba(255,255,255,.55);   /* encadré qui porte du texte */
+  --verre-leger:   rgba(255,255,255,.45);   /* carte posée SUR un encadré */
+  --verre-bord:    rgba(255,255,255,.80);
+  --sur-verre-doux:#3f3d3d;                  /* le seul gris permis sur le verre */
+  --ombre-verre:   0 1px 0 rgba(255,255,255,.6) inset, 0 18px 40px -18px rgba(30,45,60,.45);
+  --rayon-verre:   20px;
+  --rayon-carte:   14px;
+}
+
+/* ── Page ────────────────────────────────────────────────────────────────── */
+body.verre{
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #dfe3e7;               /* si le fond dessiné ne s'affiche pas */
+  min-height: 100vh;
+}
+body.verre h1, body.verre h2, body.verre h3{ font-family: inherit }
+
+/*  Le fond de montagnes : un dessin vectoriel en donnée CSS, aucune image à
+    charger. Fixe : on le voit défiler flouté derrière les encadrés. */
+body.verre::before{
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: #dfe3e7 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='c' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23cfd3d8'/><stop offset='.55' stop-color='%23e6e1e1'/><stop offset='1' stop-color='%23d9dfe4'/></linearGradient><linearGradient id='a' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23c3d0da'/><stop offset='1' stop-color='%23a9bbc8'/></linearGradient><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23a3b6c4'/><stop offset='1' stop-color='%238aa2b3'/></linearGradient><linearGradient id='d' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%237f98aa'/><stop offset='1' stop-color='%236a8597'/></linearGradient><linearGradient id='e' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23627d8f'/><stop offset='1' stop-color='%23526d7f'/></linearGradient><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%2352697a'/><stop offset='1' stop-color='%2346606f'/></linearGradient></defs><rect width='1440' height='900' fill='url(%23c)'/><path fill='url(%23a)' d='M0 560 L260 470 L470 380 L640 250 L720 300 L800 270 L960 380 L1150 430 L1440 400 L1440 900 L0 900Z'/><path fill='url(%23b)' d='M0 600 L180 540 L360 560 L560 470 L760 360 L860 420 L1000 470 L1200 500 L1440 470 L1440 900 L0 900Z'/><path fill='url(%23d)' d='M0 650 L220 590 L420 640 L640 600 L860 560 L1060 610 L1260 580 L1440 610 L1440 900 L0 900Z'/><path fill='url(%23e)' d='M0 720 L260 660 L520 700 L760 690 L1000 720 L1240 680 L1440 700 L1440 900 L0 900Z'/><path fill='url(%23f)' d='M0 800 L300 740 L600 790 L900 770 L1200 810 L1440 780 L1440 900 L0 900Z'/><path d='M520 330 l6 -4 l6 4 M545 345 l5 -3 l5 3' stroke='%235f7b8f' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>") center / cover no-repeat;
+}
+
+/* ── Bandeau d'en-tête ───────────────────────────────────────────────────── */
+body.verre header{
+  background: var(--marine-encre);   /* navigateur sans color-mix : aplat sûr */
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--marine-encre) 66%, transparent),
+    color-mix(in srgb, var(--marine-encre) 86%, transparent));
+  -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+  border-bottom: 1px solid rgba(255,255,255,.35);
+  color: #fff; padding: 18px 16px;
+}
+body.verre header h1{ color: #fff; font-size: 22px; font-weight: 700; letter-spacing: 0 }
+body.verre header p, body.verre header .qui{ color: #fff; opacity: 1; font-size: 14px }
+body.verre header h1, body.verre header p{ text-shadow: 0 1px 2px rgba(0,0,0,.35) }
+/*  Le logo de la Ville garde un fond blanc : il est dessiné pour le blanc. */
+body.verre header .logo{ height: 48px; background: #fff; border-radius: 10px; padding: 4px 6px }
+body.verre header button.discret, body.verre header a.discret{
+  color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.55);
+  border-radius: 999px; padding: 0 14px; min-height: 36px; text-decoration: none;
+}
+body.verre header button.discret:hover{ background: rgba(255,255,255,.28) }
+
+/* ── Encadrés de verre ───────────────────────────────────────────────────── */
+.carte-verre{
+  background: var(--verre);
+  -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+  border: 1px solid var(--verre-bord); border-radius: var(--rayon-verre);
+  box-shadow: var(--ombre-verre);
+  padding: 24px 22px; margin-bottom: 18px;
+}
+@media (max-width: 640px){ .carte-verre{ padding: 18px 15px; border-radius: 16px } }
+
+/*  Sur le verre, pas de gris pâle ni de marine simple pour le texte (voir 2.). */
+body.verre .carte-verre :is(.aide, small, .opt, p){ color: var(--sur-verre-doux) }
+body.verre .carte-verre a{ color: var(--marine-encre) }
+body.verre .bloc > p.aide{ font-size: var(--corps-m); margin-bottom: var(--pas-4) }
+body.verre .bloc > h2{ font-size: 24px; font-weight: 700; display: flex; align-items: center }
+body.verre .bloc > h2 .num{ background: var(--marine-encre); color: #fff }
+/*  Les encadrés se suivent de près : c'est le verre qui sépare, plus le vide
+    (socle.css donnait 104 px entre sections publiques). */
+body.verre .bloc, body.verre main > section{ margin-bottom: 18px }
+
+/* ── Champs et choix posés sur le verre ──────────────────────────────────── */
+body.verre :is(input[type=text], input[type=email], input[type=tel], input[type=search],
+  input[type=number], input[type=date], select, textarea){
+  border-radius: 10px; background: rgba(255,255,255,.92);
+}
+body.verre .choix{
+  background: rgba(255,255,255,.70); border: 1px solid var(--verre-bord);
+  border-radius: 12px; box-shadow: 0 1px 2px rgba(30,45,60,.08);
+}
+body.verre .choix:has(input:checked){
+  background: linear-gradient(90deg, rgba(255,255,255,.85), color-mix(in srgb, var(--marine-pale) 85%, transparent));
+  border-color: var(--marine-encre);
+}
+body.verre .encart{ border-radius: 12px }
+body.verre button.principal, body.verre a.principal{ border-radius: 12px }
+body.verre button.secondaire, body.verre a.secondaire{ border-radius: 12px; background: rgba(255,255,255,.85) }
+
+/* ── Cartes de domaine (formulaire des écoles) ───────────────────────────── */
+.domaines{ display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px }
+body.verre .domaine{
+  --c: var(--marine-encre); --p: var(--marine-pale);
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  min-height: 132px; padding: 16px;
+  background: var(--verre-leger); border: 1px solid rgba(255,255,255,.85); border-radius: var(--rayon-carte);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  font: inherit; font-size: var(--corps-m); font-weight: 650; color: var(--encre);
+  text-align: left; cursor: pointer; line-height: 1.3;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+body.verre .domaine small{ display: block; font-weight: 400; font-size: 13px; color: var(--sur-verre-doux); margin-top: 3px }
+.pique{ width: 52px; height: 52px; border-radius: 14px; flex: none; display: grid; place-items: center;
+        background: var(--p); color: var(--c);
+        transition: background .18s ease, color .18s ease, box-shadow .18s ease }
+.pique svg{ width: 30px; height: 30px; overflow: visible }
+
+/*  Surbrillance : survol à la souris, focus au clavier, carte choisie. */
+body.verre .domaine:is(:hover, :focus-visible, [aria-pressed="true"]){
+  border-color: var(--c);
+  background: linear-gradient(90deg, rgba(255,255,255,.75), color-mix(in srgb, var(--p) 85%, transparent));
+  box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--c), transparent 45%);
+}
+body.verre .domaine:focus-visible{ outline: 3px solid var(--c); outline-offset: 3px }
+.domaine:is(:hover, :focus-visible, [aria-pressed="true"]) .pique{
+  background: var(--c); color: #fff; box-shadow: 0 0 0 6px color-mix(in srgb, var(--c), transparent 82%);
+}
+body.verre .domaine[aria-pressed="true"]::after{
+  content: "✓"; position: absolute; top: 10px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--c); color: #fff; display: grid; place-items: center; font-size: 14px; font-weight: 700;
+}
+@media (max-width: 520px){
+  .domaines{ grid-template-columns: 1fr 1fr; gap: 10px }
+  body.verre .domaine{ min-height: 120px; padding: 13px }
+}
+
+/* ── Animations des icônes ────────────────────────────────────────────────
+   L'élément animé porte la classe « a » ; chaque carte donne son animation
+   (--anim) et sa durée (--duree). Seulement au survol ou au focus, et
+   seulement si le système ne demande pas de réduire les animations. */
+.pique .a{ transform-box: fill-box; transform-origin: center }
+@media (prefers-reduced-motion: no-preference){
+  .domaine:hover .pique .a, .domaine:focus-visible .pique .a{
+    animation: var(--anim) var(--duree, .9s) ease-in-out infinite }
+  .domaine:hover, .domaine:focus-visible{ transform: translateY(-3px) }
+}
+@keyframes tourne{ to{ transform: rotate(360deg) } }
+@keyframes balance{ 0%,100%{ transform: rotate(0) } 25%{ transform: rotate(-12deg) } 75%{ transform: rotate(12deg) } }
+@keyframes rebond{ 0%,100%{ transform: translateY(0) } 40%,60%{ transform: translateY(-4px) } }
+@keyframes flamme{ 0%,100%{ transform: scale(1,1) } 30%{ transform: scale(.92,1.1) } 60%{ transform: scale(1.06,.94) } }
+@keyframes clignote{ 0%,100%{ opacity: 1 } 50%{ opacity: .25 } }
+@keyframes tape{ 0%,100%{ transform: rotate(0) } 50%{ transform: rotate(-28deg) } }
+@keyframes rideau{ 0%,100%{ transform: scaleX(1) } 50%{ transform: scaleX(.55) } }
+@keyframes cle{ 0%,100%{ transform: rotate(0) } 50%{ transform: rotate(-40deg) } }
+@keyframes brume{ 0%{ opacity: 0; transform: translate(0,0) } 30%{ opacity: 1 } 100%{ opacity: 0; transform: translate(4px,-4px) } }
+@keyframes tremble{ 0%,100%{ transform: rotate(0) } 20%{ transform: rotate(-8deg) } 40%{ transform: rotate(8deg) } 60%{ transform: rotate(-5deg) } 80%{ transform: rotate(5deg) } }
+
+/* ── Barre d'action collée en bas ────────────────────────────────────────── */
+body.verre .envoi{
+  background: rgba(255,255,255,.72);
+  -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+  border-top: 1px solid var(--verre-bord);
+}
+
+/* ── Bandeaux en dégradé (poste de travail, lot 5) ────────────────────────
+   --teinte = la couleur du bandeau. Plus clair à gauche, comme validé (D22),
+   mais jamais en dessous de 78 % de la teinte : avec les teintes du système
+   (toutes ≥ 6:1 sous du blanc), le texte blanc reste au-dessus de 4,5:1.
+   À revérifier pour chaque teinte au lot 5. */
+.degrade{
+  background: var(--teinte);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--teinte) 78%, transparent),
+    color-mix(in srgb, var(--teinte) 96%, transparent));
+  color: #fff;
+}
+
+/* ── Préférences du système ──────────────────────────────────────────────── */
+@media (prefers-reduced-transparency: reduce){
+  .carte-verre, body.verre .domaine, body.verre .envoi, body.verre .choix{
+    background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none }
+  body.verre header{ background: var(--marine-encre); -webkit-backdrop-filter: none; backdrop-filter: none }
+}
+/*  Navigateur trop ancien pour le flou : le verre redevient blanc, plutôt
+    qu'un voile transparent illisible sur les montagnes. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .carte-verre, body.verre .domaine, body.verre .envoi{ background: rgba(255,255,255,.92) }
+  body.verre header{ background: var(--marine-encre) }
+}
+@media print{
+  body.verre::before{ display: none }
+  .carte-verre{ background: #fff; box-shadow: none; backdrop-filter: none }
+  body.verre header{ background: none; color: var(--encre) }
+  body.verre header h1, body.verre header p{ color: var(--encre); text-shadow: none }
+}
