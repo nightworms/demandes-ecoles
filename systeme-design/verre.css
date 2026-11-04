@@ -185,16 +185,16 @@ body.verre .envoi{
   border-top: 1px solid var(--verre-bord);
 }
 
-/* ── Bandeaux en dégradé (poste de travail, lot 5) ────────────────────────
-   --teinte = la couleur du bandeau. Plus clair à gauche, comme validé (D22),
-   mais jamais en dessous de 78 % de la teinte : avec les teintes du système
-   (toutes ≥ 6:1 sous du blanc), le texte blanc reste au-dessus de 4,5:1.
-   À revérifier pour chaque teinte au lot 5. */
+/* ── Bandeaux en dégradé (poste de travail) ───────────────────────────────
+   --teinte = la couleur du bandeau. Plus clair à gauche, comme validé (D22).
+   Mesuré au lot 5 sur les neuf teintes, dans le pire cas (fond blanc) : à
+   78 % le texte blanc tombait à 3,7:1 sur l'ocre ; 90 % → 100 % le garde
+   au-dessus de 4,7:1 partout (ocre, le plus clair). Ne pas éclaircir. */
 .degrade{
   background: var(--teinte);
   background: linear-gradient(90deg,
-    color-mix(in srgb, var(--teinte) 78%, transparent),
-    color-mix(in srgb, var(--teinte) 96%, transparent));
+    color-mix(in srgb, var(--teinte) 90%, #fff),
+    var(--teinte));
   color: #fff;
 }
 

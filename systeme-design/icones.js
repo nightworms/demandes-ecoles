@@ -55,5 +55,11 @@
     };
   }
 
-  window.RelaisIcones = { domaine: domaine, codes: Object.keys(DOMAINES) };
+  // La couleur d'un domaine seule (barres, puces) : { c, p }, ou une teinte neutre.
+  function couleur(code) {
+    var d = DOMAINES[code];
+    return d ? { c: d.c, p: d.p } : { c: 'var(--encre-doux)', p: '#ebe9e9' };
+  }
+
+  window.RelaisIcones = { domaine: domaine, couleur: couleur, codes: Object.keys(DOMAINES) };
 })();

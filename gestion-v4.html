@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Demandes des écoles — Pôle Technique</title>
+<!--
+  RELAIS v4 — poste de travail du pôle, apparence « verre » (RS-14, maquette 08 validée ; D22, D23, D27).
+  Mêmes appels à la base que gestion-v3.html, plus une seule lecture : le code de chaque domaine
+  (domaines.code), pour afficher son icône. Les gestes (prendre en charge, traiter, clore, noter)
+  sont ceux du v3, à l'identique. gestion-v3.html reste intact.
+  Les tableaux et graphiques sont calculés dans le navigateur à partir des demandes déjà chargées.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<link rel="stylesheet" href="systeme-design/verre.css">
+<script src="relais-config.js"></script>
+<script src="systeme-design/icones.js"></script>
+<style>
+/* Propre à cette page. Le reste : jetons, socle, composants, puis verre.css. */
+body.verre{ font-size: 15px; line-height: 1.45 }
+.appli{ display: grid; grid-template-columns: 228px minmax(0, 1fr); min-height: 100vh }
+
+/* ── Menu latéral (verre sombre) ─────────────────────────────────────────── */
+.menu{ position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px;
+       padding: 18px 12px; color: #eef1f4;
+       background: rgba(30,40,50,.62); -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+       border-right: 1px solid rgba(255,255,255,.12) }
+.menu .marque{ display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; color: #fff; font-weight: 700; font-size: 17px; line-height: 1.2 }
+.menu .marque img{ height: 42px; width: auto; background: #fff; border-radius: 9px; padding: 3px 5px }
+.menu .marque small{ display: block; font-weight: 400; font-size: 12.5px; color: #e3e7ec }
+.menu a, .menu button{ display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 9px;
+       color: #eef1f4; text-decoration: none; font: inherit; font-size: 14.5px; background: none; border: 0; cursor: pointer; text-align: left; width: 100% }
+.menu a svg, .menu button svg{ width: 19px; height: 19px; flex: none }
+.menu a:hover, .menu button:hover{ background: rgba(255,255,255,.14); color: #fff }
+.menu a.actif{ background: var(--marine); color: #fff; font-weight: 600 }
+.menu .compte{ margin-left: auto; background: var(--magenta); color: #fff; font-size: 12px; font-weight: 700; border-radius: 99px; padding: 1px 8px }
+.menu .bas{ margin-top: auto; display: flex; flex-direction: column; gap: 4px }
+
+/* ── Barre du haut (verre clair) ─────────────────────────────────────────── */
+body.verre header.haut{ position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+       padding: 12px 24px; color: var(--encre); text-shadow: none;
+       background: rgba(255,255,255,.62); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border-bottom: 1px solid var(--verre-bord) }
+body.verre header.haut h1{ color: var(--encre); font-size: 19px; text-shadow: none; white-space: nowrap; margin: 0 }
+.haut .portee{ font-size: 12.5px; color: var(--sur-verre-doux); margin: 1px 0 0 }
+.recherche{ flex: 1 1 260px; max-width: 460px; display: flex; align-items: center; gap: 8px;
+       background: rgba(255,255,255,.75); border: 1px solid var(--verre-bord); border-radius: 10px; padding: 0 12px }
+.recherche svg{ width: 18px; height: 18px; color: var(--sur-verre-doux); flex: none }
+.recherche input{ border: 0 !important; background: none !important; min-height: 40px !important; padding: 0 !important; font-size: 15px !important; box-shadow: none }
+.recherche input:focus{ outline: none }
+.recherche:focus-within{ outline: 3px solid var(--marine-clair); outline-offset: 2px }
+.icones-haut{ display: flex; gap: 8px; margin-left: auto }
+.icone-btn{ position: relative; width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+       background: rgba(255,255,255,.75); border: 1px solid var(--verre-bord); color: var(--encre) }
+.icone-btn svg{ width: 20px; height: 20px }
+.icone-btn[aria-pressed="true"]{ outline: 2px solid var(--encre); outline-offset: 2px }
+.pastille{ position: absolute; top: -7px; right: -7px; min-width: 21px; height: 21px; border-radius: 99px; padding: 0 5px;
+       font-size: 11.5px; font-weight: 700; color: #fff; display: grid; place-items: center; border: 2px solid #fff }
+.pastille.rouge{ background: var(--alerte) } .pastille.ocre{ background: var(--agir) }
+.moi{ display: flex; align-items: center; gap: 10px; font-size: 14px; min-width: 0 }
+.avatar{ width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700;
+       background: var(--magenta-pale); color: var(--magenta) }
+.moi .nom{ font-weight: 600; line-height: 1.2 }
+.moi .qui{ font-size: 12.5px; color: var(--sur-verre-doux); margin: 0 }
+
+/* ── Contenu ─────────────────────────────────────────────────────────────── */
+.contenu{ padding: 22px 24px 48px; display: flex; flex-direction: column; gap: 20px; max-width: 1500px }
+.panneau{ background: var(--verre); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border: 1px solid var(--verre-bord); border-radius: 16px; box-shadow: var(--ombre-verre); overflow: hidden; min-width: 0 }
+.panneau-tete{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 13px 18px; border-bottom: 1px solid rgba(32,30,29,.08) }
+.panneau-tete h2{ font-size: 16px; margin: 0 }
+.panneau-tete.degrade{ border: 0 } .panneau-tete.degrade h2{ color: #fff }
+.panneau .vide-court{ padding: 18px; color: var(--sur-verre-doux); font-size: 14px; margin: 0 }
+
+/* Cartes-compteurs : le chiffre ET le filtre, comme au v3 */
+.cartes{ display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 14px }
+.carte-chiffre{ padding: 0; text-align: left; font: inherit; color: var(--encre); cursor: pointer; overflow: hidden;
+       background: var(--verre); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border: 1px solid var(--verre-bord); border-radius: 14px; box-shadow: var(--ombre-verre);
+       transition: transform .15s ease }
+.carte-chiffre:hover{ transform: translateY(-2px) }
+.carte-chiffre[aria-pressed="true"]{ outline: 3px solid var(--encre); outline-offset: 2px }
+.carte-chiffre .bandeau{ display: flex; align-items: center; justify-content: space-between; gap: 8px;
+       padding: 9px 13px; font-weight: 700; font-size: 14px; line-height: 1.25 }
+.carte-chiffre .bandeau svg{ width: 19px; height: 19px; flex: none }
+.carte-chiffre .corps{ display: block; padding: 10px 13px 13px; min-height: 76px }
+.carte-chiffre .petit{ font-size: 13px; color: var(--sur-verre-doux) }
+.carte-chiffre .grand{ font-size: 32px; font-weight: 700; line-height: 1.1 }
+
+/* Liste + colonne de droite */
+.grille{ display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 20px; align-items: start }
+.filtres{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 18px; border-bottom: 1px solid rgba(32,30,29,.08) }
+.filtres select{ min-height: 36px !important; padding: 5px 30px 5px 10px !important; font-size: 14px !important; width: auto !important;
+       border-radius: 9px !important; border: 1px solid var(--verre-bord) !important; background-color: rgba(255,255,255,.8) !important;
+       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%23201e1d' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>");
+       background-repeat: no-repeat; background-position: right 10px center }
+.lien-effacer{ background: none; border: 0; color: var(--marine-encre); text-decoration: underline; font: inherit; font-size: 13.5px; cursor: pointer; padding: 4px }
+.resume{ margin-left: auto; font-size: 13px; color: var(--sur-verre-doux) }
+.entetes, .ligne{ display: grid; grid-template-columns: 128px minmax(0, 1.5fr) minmax(0, 1.1fr) 84px 140px; gap: 12px; align-items: center }
+.entetes{ padding: 9px 18px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sur-verre-doux);
+       background: rgba(255,255,255,.25); border-bottom: 1px solid rgba(32,30,29,.08) }
+.ligne{ width: 100%; padding: 11px 18px; border: 0; border-bottom: 1px solid rgba(32,30,29,.08); background: none;
+       font: inherit; font-size: 14px; color: var(--encre); text-align: left; cursor: pointer }
+.ligne:hover{ background: rgba(255,255,255,.5) }
+.ligne:focus-visible{ outline: 3px solid var(--marine-clair); outline-offset: -3px }
+.ligne.close{ opacity: .78 }
+.ligne .num{ white-space: nowrap; font-weight: 700; color: var(--marine-encre); font-size: 13px; font-variant-numeric: tabular-nums }
+.ligne .ecole{ font-weight: 600; min-width: 0 }
+.ligne .ecole small{ display: block; font-weight: 400; color: var(--sur-verre-doux); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.dom{ display: inline-flex; align-items: center; gap: 8px; min-width: 0 }
+.dom .nom-dom{ overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25 }
+.pique.mini{ width: 30px; height: 30px; border-radius: 9px }
+.pique.mini svg{ width: 17px; height: 17px }
+.prio{ font-size: 13px; font-weight: 700; color: var(--sur-verre-doux) }
+.prio.urgente{ color: var(--alerte) } .prio.haute{ color: var(--agir) }
+.etat-col{ display: flex; flex-direction: column; gap: 3px; align-items: flex-start }
+.age{ font-size: 12.5px; color: var(--sur-verre-doux) } .age.retard{ color: var(--alerte); font-weight: 700 }
+body.verre .etat{ border: 0; padding: 4px 10px; font-size: 12.5px; font-weight: 700 }
+.e-nouvelle{ background: var(--alerte-pale) !important; color: var(--alerte) !important }
+.e-rouverte{ background: var(--magenta-pale) !important; color: var(--magenta) !important }
+.e-cours{ background: var(--agir-pale) !important; color: var(--agir) !important }
+.e-planif{ background: var(--marine-pale) !important; color: var(--marine-encre) !important }
+.e-dehors{ background: var(--olive-pale) !important; color: var(--olive) !important }
+.e-ecole{ background: var(--violet-pale) !important; color: var(--violet) !important }
+.e-close{ background: var(--fait-pale) !important; color: var(--fait) !important }
+.vide{ padding: 30px 18px; text-align: center; color: var(--sur-verre-doux) }
+
+/* Agenda */
+.onglets{ display: flex; gap: 4px; margin-left: auto; padding: 3px; border-radius: 9px; background: rgba(255,255,255,.18) }
+.onglets button{ border: 0; background: none; color: #fff; padding: 5px 11px; border-radius: 7px; font: inherit; font-size: 13.5px; cursor: pointer }
+.onglets button[aria-selected="true"]{ background: #fff; color: var(--magenta); font-weight: 700 }
+.calendrier{ padding: 12px 18px 4px }
+.calendrier .mois{ display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 8px }
+.calendrier .mois span:last-child{ font-weight: 400; font-size: 13px; color: var(--sur-verre-doux) }
+.jours{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 13px }
+.jours span{ padding: 5px 0; border-radius: 8px }
+.jours .entete{ color: var(--sur-verre-doux); font-size: 11.5px; font-weight: 700 }
+.jours .aujourdhui{ background: var(--magenta); color: #fff; font-weight: 700 }
+.jours .rdv{ background: var(--marine-pale); color: var(--marine-encre); font-weight: 700 }
+.agenda{ list-style: none; margin: 0; padding: 4px 18px 14px }
+.agenda li{ border-bottom: 1px solid rgba(32,30,29,.08) }
+.agenda li:last-child{ border: 0 }
+.agenda button{ display: flex; gap: 12px; align-items: center; width: 100%; padding: 9px 0; border: 0; background: none; font: inherit; color: var(--encre); text-align: left; cursor: pointer }
+.agenda button:hover .quoi{ text-decoration: underline }
+.date-bloc{ width: 48px; flex: none; text-align: center; border-radius: 10px; padding: 4px 0; color: #fff; font-weight: 700; line-height: 1.1; background: var(--marine) }
+.date-bloc small{ display: block; font-size: 11px; font-weight: 600 }
+.agenda .quoi{ font-weight: 600; font-size: 14px }
+.agenda .qui{ display: block; font-size: 12.5px; color: var(--sur-verre-doux) }
+
+/* Graphiques */
+.graphiques{ display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .8fr); gap: 20px }
+.bascule{ display: inline-flex; margin-left: auto; border: 1px solid #fff; border-radius: 8px; overflow: hidden }
+.bascule button{ border: 0; background: rgba(255,255,255,.9); color: var(--marine-encre); padding: 5px 11px; font: inherit; font-size: 13px; cursor: pointer }
+.bascule button[aria-pressed="true"]{ background: var(--marine-encre); color: #fff; font-weight: 700 }
+.graph{ padding: 10px 16px 14px }
+svg.courbe{ width: 100%; height: 190px; display: block; overflow: visible }
+.barres{ display: flex; flex-direction: column; gap: 9px; padding: 16px 18px }
+.barre-dom{ display: grid; grid-template-columns: minmax(0, 150px) 1fr 34px; align-items: center; gap: 10px; font-size: 13px }
+.barre-dom span{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.barre-dom .rail{ height: 12px; background: rgba(32,30,29,.09); border-radius: 99px; overflow: hidden }
+.barre-dom .plein{ height: 100%; border-radius: 99px }
+.barre-dom b{ text-align: right }
+.anneau-boite{ display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 18px }
+.anneau-boite p{ margin: 0; text-align: center; font-size: 13.5px; color: var(--sur-verre-doux) }
+
+/* Connexion et chargement */
+.connexion{ max-width: 440px; margin: 60px auto }
+.connexion h2{ margin: 0 0 6px; font-size: 20px }
+.connexion p{ margin: 0 0 16px; color: var(--sur-verre-doux) }
+.connexion button{ width: 100%; min-height: 50px; margin-top: 12px; background: var(--marine); color: #fff; border: 0;
+       border-radius: 12px; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer }
+.chargement{ text-align: center; padding: 44px 20px; color: var(--sur-verre-doux) }
+
+/* ── La fiche, en panneau de verre à droite ──────────────────────────────── */
+.voile{ position: fixed; inset: 0; z-index: 40; display: flex; justify-content: flex-end; background: rgba(20,30,40,.35) }
+.fiche{ width: min(640px, 100%); height: 100%; overflow-y: auto; box-shadow: -8px 0 30px rgba(0,0,0,.2);
+       background: rgba(243,242,242,.82); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou) }
+.fiche .barre{ position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+       background: rgba(255,255,255,.85); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); border-bottom: 1px solid var(--verre-bord) }
+.fiche .barre > div{ flex: 1; min-width: 0 }
+.fiche .barre h2{ margin: 0; font-size: 18px }
+.fiche .barre .num{ display: block; font-size: 13px; font-weight: 700; color: var(--marine-encre) }
+.fiche .barre button{ width: 40px; height: 40px; flex: none; border-radius: 10px; font-size: 20px; line-height: 1; cursor: pointer;
+       background: #fff; color: var(--encre); border: 1px solid var(--trait-champ) }
+.fiche .corps{ padding: 16px }
+.carte{ background: rgba(255,255,255,.78); border: 1px solid var(--verre-bord); border-radius: 14px; padding: 15px 16px; margin-bottom: 12px }
+.carte h3{ margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sur-verre-doux) }
+.paires{ display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; font-size: 14.5px; margin: 0 }
+.paires dt{ color: var(--sur-verre-doux); white-space: nowrap }
+.paires dd{ margin: 0; min-width: 0; overflow-wrap: anywhere }
+.texte{ background: rgba(243,242,242,.9); border-radius: 10px; padding: 11px 13px; font-size: 14.5px; white-space: pre-wrap; margin-top: 8px }
+.fiche .champ{ margin-bottom: 12px }
+.fiche .champ label{ font-size: 13px; color: var(--sur-verre-doux) }
+.fiche .champ select, .fiche .champ input, .fiche .champ textarea{ min-height: 42px; padding: 9px 11px; font-size: 15px }
+.fiche .champ textarea{ min-height: 78px }
+.deux{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.fiche button.principal{ width: 100%; min-height: 46px }
+.journal{ font-size: 13.5px }
+.journal li{ list-style: none; padding: 7px 0; border-bottom: 1px solid rgba(32,30,29,.08) }
+.journal li:last-child{ border-bottom: 0 }
+.journal .quand, .note .qui{ color: var(--sur-verre-doux); font-size: 13px }
+.note{ padding: 9px 0; border-bottom: 1px solid rgba(32,30,29,.08); font-size: 14.5px; white-space: pre-wrap }
+.note:last-child{ border-bottom: 0 }
+.note .qui{ display: block; margin-bottom: 2px; white-space: normal }
+
+body.verre header.haut p{ color: var(--sur-verre-doux); text-shadow: none; opacity: 1 }
+.fiche .barre{ height: auto; min-height: 64px }
+@media (max-width: 1250px){ .graphiques{ grid-template-columns: 1fr 1fr } .graphiques > :last-child{ grid-column: span 2 } }
+@media (max-width: 1080px){ .grille{ grid-template-columns: 1fr } }
+@media (max-width: 860px){
+  .appli{ grid-template-columns: 1fr }
+  .menu{ position: static; height: auto; flex-direction: row; overflow-x: auto; padding: 8px 10px; gap: 2px }
+  .menu .marque{ padding: 0 8px 0 0 } .menu .marque span{ display: none }
+  .menu a, .menu button{ width: auto; white-space: nowrap } .menu .lib{ display: none } .menu .bas{ margin: 0 0 0 auto; flex-direction: row }
+  body.verre header.haut{ padding: 10px 14px; position: static } .recherche{ order: 3; max-width: none; flex-basis: 100% }
+  .moi .texte-moi{ display: none }
+  .contenu{ padding: 14px }
+  .cartes{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+  .entetes{ display: none }
+  .ligne{ grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ecole etat" "dom etat"; row-gap: 6px }
+  .ligne .num, .ligne .prio{ display: none } .ligne .ecole{ grid-area: ecole } .ligne .dom{ grid-area: dom } .ligne .etat-col{ grid-area: etat; align-items: flex-end; max-width: 128px; text-align: right }
+  .graphiques{ grid-template-columns: 1fr } .graphiques > :last-child{ grid-column: auto }
+  .deux{ grid-template-columns: 1fr }
+}
+@media (prefers-reduced-transparency: reduce){
+  .panneau, .carte-chiffre, body.verre header.haut, .fiche, .fiche .barre{ background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none }
+  .menu{ background: #24262b; -webkit-backdrop-filter: none; backdrop-filter: none }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .panneau, .carte-chiffre, .fiche{ background: rgba(255,255,255,.94) } .menu{ background: #24262b }
+}
+</style>
+</head>
+<body class="verre">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-bord" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+    <symbol id="i-liste" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.3"/><circle cx="4" cy="12" r="1.3"/><circle cx="4" cy="18" r="1.3"/></symbol>
+    <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-cloche" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-relance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+    <symbol id="i-loupe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 10"/></symbol>
+    <symbol id="i-alerte" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+    <symbol id="i-boite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></symbol>
+    <symbol id="i-cle-plate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L3 18l3 3 6.2-6.2a4 4 0 0 0 5.3-5.3l-2.5 2.5-2.5-.5-.5-2.5z"/></symbol>
+    <symbol id="i-chrono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-ecole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-euro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 6.5A7 7 0 1 0 17 17.5"/><path d="M4 10h9M4 14h9"/></symbol>
+    <symbol id="i-tout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></symbol>
+    <symbol id="i-export" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></symbol>
+    <symbol id="i-sortie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></symbol>
+  </defs>
+</svg>
+
+<div id="erreur" class="encart erreur" role="alert" hidden style="position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;max-width:min(640px,92vw)"></div>
+<div id="arret" class="encart erreur carte-verre" role="alert" hidden style="max-width:560px;margin:60px auto"></div>
+<p class="chargement carte-verre" id="chargement" style="max-width:420px;margin:60px auto">Chargement…</p>
+
+<!-- ─── Connexion ─────────────────────────────────────────── -->
+<section class="connexion carte-verre" id="ecran-connexion" hidden>
+  <h2>Accès du Pôle Technique</h2>
+  <p>Saisissez votre adresse professionnelle. Vous recevrez un lien qui vous
+     connecte directement, sans mot de passe.</p>
+  <form id="form-connexion" novalidate>
+    <label for="email" class="masque">Adresse email</label>
+    <input type="email" id="email" required autocomplete="email" inputmode="email"
+           placeholder="prenom.nom@saintdenis.re">
+    <button type="submit" id="bouton-lien">Recevoir mon lien</button>
+  </form>
+  <div id="lien-envoye" class="encart info" role="status" hidden>
+    <strong>Regardez votre boîte mail</strong>
+    Ouvrez le lien <strong>depuis cet appareil</strong>. Il ne sert qu'une fois.
+  </div>
+</section>
+
+<!-- ─── Poste de travail ──────────────────────────────────── -->
+<div class="appli" id="ecran-travail" hidden>
+  <nav class="menu" aria-label="Menu du poste de travail">
+    <div class="marque"><img src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="29" height="42" decoding="async"><span>Relais<small>Pôle Technique</small></span></div>
+    <a href="#haut-de-page" class="actif" aria-current="page"><svg aria-hidden="true"><use href="#i-bord"/></svg><span class="lib">Poste de travail</span></a>
+    <a href="#t-liste"><svg aria-hidden="true"><use href="#i-liste"/></svg><span class="lib">Demandes</span><span class="compte" id="menu-a-prendre" title="À prendre en charge" hidden></span></a>
+    <a href="tableau-de-bord.html" id="vers-tableau" hidden><svg aria-hidden="true"><use href="#i-graph"/></svg><span class="lib">Tableau de bord</span></a>
+    <div class="bas">
+      <button type="button" id="exporter"><svg aria-hidden="true"><use href="#i-export"/></svg><span class="lib">Exporter</span></button>
+      <button type="button" id="deconnexion"><svg aria-hidden="true"><use href="#i-sortie"/></svg><span class="lib">Se déconnecter</span></button>
+    </div>
+  </nav>
+
+  <div class="principal-col" style="min-width:0">
+    <header class="haut" id="haut-de-page">
+      <div>
+        <h1 id="bonjour">Demandes des écoles</h1>
+        <p class="portee" id="portee" hidden></p>
+      </div>
+      <label class="recherche"><svg aria-hidden="true"><use href="#i-loupe"/></svg>
+        <span class="masque">Rechercher</span>
+        <input type="search" id="f-texte" placeholder="Numéro, école, description, localisation…"></label>
+      <div class="icones-haut">
+        <button type="button" class="icone-btn" id="cloche" data-cle="a_prendre" aria-pressed="false" title="À prendre en charge">
+          <svg aria-hidden="true"><use href="#i-cloche"/></svg><span class="masque">À prendre en charge</span><span class="pastille rouge" id="n-cloche" hidden></span></button>
+        <button type="button" class="icone-btn" id="relances" data-cle="sans_nouv" aria-pressed="false" title="Sans nouvelles du service extérieur">
+          <svg aria-hidden="true"><use href="#i-relance"/></svg><span class="masque">Sans nouvelles</span><span class="pastille ocre" id="n-relances" hidden></span></button>
+        <button type="button" class="icone-btn" id="actualiser" title="Actualiser"><svg aria-hidden="true"><use href="#i-relance" style="transform:scaleX(-1);transform-origin:center"/></svg><span class="masque">Actualiser</span></button>
+      </div>
+      <div class="moi"><div class="avatar" id="avatar" aria-hidden="true">?</div>
+        <div class="texte-moi"><div class="nom" id="moi-nom"></div><p class="qui" id="qui">Pôle Technique — Direction de l'Éducation</p></div></div>
+    </header>
+
+    <main class="contenu">
+      <section class="cartes" id="compteurs" aria-label="Compteurs (cliquer pour filtrer la liste)"></section>
+
+      <div class="grille">
+        <section class="panneau" aria-labelledby="t-liste">
+          <div class="panneau-tete"><h2 id="t-liste">Demandes</h2><span class="resume" id="resume"></span></div>
+          <div class="filtres">
+            <label class="masque" for="f-statut">État</label><select id="f-statut"></select>
+            <label class="masque" for="f-domaine">Domaine</label><select id="f-domaine"></select>
+            <label class="masque" for="f-secteur">Quartier</label><select id="f-secteur"></select>
+            <label class="masque" for="f-priorite">Priorité</label><select id="f-priorite"></select>
+            <button type="button" class="lien-effacer" id="raz">Tout effacer</button>
+          </div>
+          <div class="entetes" aria-hidden="true"><span>N°</span><span>École</span><span>Domaine</span><span>Priorité</span><span>État</span></div>
+          <div id="liste"></div>
+        </section>
+
+        <section class="panneau" aria-labelledby="t-agenda">
+          <div class="panneau-tete degrade" style="--teinte:var(--magenta)"><h2 id="t-agenda">Dates à venir</h2>
+            <div class="onglets" role="tablist" aria-label="Agenda">
+              <button type="button" role="tab" aria-selected="true" data-onglet="venir">À venir</button>
+              <button type="button" role="tab" aria-selected="false" data-onglet="recentes">Récemment déposées</button>
+            </div></div>
+          <div class="calendrier" id="calendrier"></div>
+          <ul class="agenda" id="agenda"></ul>
+        </section>
+      </div>
+
+      <div class="graphiques">
+        <section class="panneau" aria-labelledby="t-courbe">
+          <div class="panneau-tete degrade" style="--teinte:var(--marine-encre)"><h2 id="t-courbe">Demandes reçues</h2>
+            <div class="bascule" id="bascule" role="group" aria-label="Période">
+              <button type="button" aria-pressed="true" data-p="semaine">Semaines</button><button type="button" aria-pressed="false" data-p="mois">Mois</button><button type="button" aria-pressed="false" data-p="annee">Années</button>
+            </div></div>
+          <div class="graph"><svg class="courbe" id="courbe" viewBox="0 0 520 190" role="img" aria-label="Courbe des demandes reçues"></svg></div>
+        </section>
+        <section class="panneau" aria-labelledby="t-barres">
+          <div class="panneau-tete"><h2 id="t-barres">Par domaine (30 jours)</h2></div>
+          <div class="barres" id="barres"></div>
+        </section>
+        <section class="panneau" aria-labelledby="t-anneau">
+          <div class="panneau-tete"><h2 id="t-anneau">Dans les délais</h2></div>
+          <div class="anneau-boite" id="anneau"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="voile" id="voile" hidden>
+  <section class="fiche" id="fiche" role="dialog" aria-modal="true" aria-labelledby="fiche-titre"></section>
+</div>
+<script>
+// ═════════════════════════════════════════════════════════════════════════
+//  Poste de travail du Pôle Technique.
+//
+//  Tout passe par PostgREST avec le jeton de la session : la page ne décide
+//  jamais de ce qu'elle a le droit de voir. C'est la sécurité par ligne qui
+//  tranche, à la ligne près — un référent ne reçoit que ses domaines, un chef
+//  de cellule les siens, la direction tout. La page se contente d'afficher
+//  ce qui lui revient, et les boutons qu'elle propose ne sont qu'un confort :
+//  une action interdite serait de toute façon refusée par la base.
+//
+//  La clé publiable est faite pour partir dans le navigateur. Ne jamais
+//  placer ici une clé « sb_secret_ ».
+// ═════════════════════════════════════════════════════════════════════════
+//  v4 : la base et la clé viennent de relais-config.js (garde-fou : la base en
+//  service n'est acceptée que si une décision écrite l'autorise, ici D27).
+const CONFIG = window.RELAIS_CONFIG || { pret: false, motif: 'relais-config.js introuvable.' };
+const API = CONFIG.API;
+const CLE = CONFIG.CLE;
+//  Même clé que gestion-v3.html quand la base est la même : un agent connecté
+//  sur l'un l'est sur l'autre.
+const CLEF_SESSION = 'demandes-ecoles-pole' + (CONFIG.suffixeSession || '');
+
+// Seuils repris de l'ancienne plateforme (config.js). ⚠️ À confirmer avec le
+// pôle : ce sont eux qui décident ce que « en retard » veut dire.
+const RETARD_JOURS = 7;
+const RETARD_URGENT_JOURS = 3;
+//  Une demande confiée à un autre service — DTP, DSB, ERP, élagage — sort du
+//  compteur « En retard » : son retard n'est pas opposable au pôle. Mais la
+//  relancer l'est. Ces seuils sont plus larges que ceux de l'interne : on ne
+//  maîtrise pas la charge d'un autre service. Arrêtés par Anthony le 31/08.
+const EXTERNE_JOURS = 15;
+const EXTERNE_URGENT_JOURS = 5;
+
+const $ = s => document.querySelector(s);
+
+const ETATS = {
+  nouveau:                     { texte: 'Nouvelle',              classe: 'alerte' },
+  en_cours:                    { texte: 'En cours',              classe: '' },
+  en_attente_pieces:           { texte: 'Attente de pièces',     classe: '' },
+  en_attente_devis:            { texte: 'Attente de devis',      classe: '' },
+  planifie:                    { texte: 'Planifiée',             classe: '' },
+  transmis_externe:            { texte: 'Transmise au dehors',   classe: '' },
+  en_attente_validation_ecole: { texte: 'Attente de l’école',    classe: 'agir' },
+  resolu:                      { texte: 'Résolue',               classe: 'fait' },
+  cloture:                     { texte: 'Clôturée',              classe: 'fait' },
+  rouvert:                     { texte: 'Rouverte',              classe: 'alerte' },
+  annule:                      { texte: 'Annulée',               classe: 'fait' },
+  archive:                     { texte: 'Archivée',              classe: 'fait' }
+};
+// Ceux que le pôle pose lui-même. Les deux autres — « attente de l'école » et
+// « résolue » — sont posés par le circuit de clôture : les proposer ici
+// laisserait croire qu'on peut clore une demande sans l'accord de l'école.
+const STATUTS_MANUELS = ['nouveau','en_cours','en_attente_pieces','en_attente_devis',
+                         'planifie','transmis_externe','rouvert','annule'];
+//  « cloture » n'est PAS dans cette liste : ce statut n'existe pas. La
+//  contrainte de la table ne l'admet pas, et cloturer_demande() pose
+//  'resolu' ou 'rouvert'. L'y laisser laissait croire à un état réel.
+const CLOS = ['resolu','annule','archive'];
+//  v4 : une couleur par famille d'état (pastilles de la maquette 08).
+function classeEtat(s) {
+  if (s === 'nouveau') return 'e-nouvelle';
+  if (s === 'rouvert') return 'e-rouverte';
+  if (s === 'planifie') return 'e-planif';
+  if (s === 'transmis_externe') return 'e-dehors';
+  if (s === 'en_attente_validation_ecole') return 'e-ecole';
+  if (CLOS.includes(s)) return 'e-close';
+  return 'e-cours';
+}
+const PRIORITES = { urgente:'Urgente', haute:'Haute', normale:'Normale', basse:'Basse' };
+const FENETRES = { des_que_possible:'Dès que possible', avant_la_rentree:'Avant la rentrée',
+                   pendant_les_vacances:'Pendant les vacances', date_precise:'À une date précise' };
+
+let session = null, moi = null;
+let REF = { ecoles:{}, domaines:{}, types:{}, cellules:{}, agents:{}, services:{}, secteurs:[] };
+let DEMANDES = [], DELAIS = {}, ouverte = null;
+const filtres = { texte:'', statut:'', domaine:'', secteur:'', priorite:'', compteur:'' };
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(texte) {
+  const e = $('#erreur'); e.textContent = texte; e.hidden = false;
+  window.scrollTo({ top: 0 });
+}
+function effacerErreur() { $('#erreur').hidden = true; }
+function jour(v) {
+  return v ? new Date(v).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+}
+function jourHeure(v) {
+  return v ? new Date(v).toLocaleString('fr-FR',
+    { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+}
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); } catch (e) { return null; }
+}
+function ecrireSession(s) { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); }
+function oublierSession() { localStorage.removeItem(CLEF_SESSION); }
+
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.length < 2) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) {
+    if (p.get('error_description')) erreur(decodeURIComponent(p.get('error_description')));
+    history.replaceState(null, '', location.pathname);
+    return null;
+  }
+  const s = { access_token: acces, refresh_token: p.get('refresh_token'),
+              expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000) };
+  ecrireSession(s);
+  history.replaceState(null, '', location.pathname);
+  return s;
+}
+
+async function rafraichir() {
+  if (!session?.refresh_token) return false;
+  const r = await fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+    method:'POST', headers:{ apikey: CLE, 'Content-Type':'application/json' },
+    body: JSON.stringify({ refresh_token: session.refresh_token }) });
+  if (!r.ok) return false;
+  const j = await r.json();
+  session = { access_token: j.access_token, refresh_token: j.refresh_token,
+              expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000) };
+  ecrireSession(session);
+  return true;
+}
+
+/** L'adresse vérifiée, lue dans le jeton. Sert à savoir qui l'on est ; la
+ *  base, elle, la relit de son côté — nous ne lui faisons rien croire. */
+function emailDuJeton() {
+  try {
+    const brut = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(brut + '==='.slice((brut.length + 3) % 4));
+    const charge = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+    return (charge.email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+
+// ─── Accès aux données ───────────────────────────────────────────────────
+async function api(chemin, options = {}) {
+  const lancer = () => fetch(API + '/rest/v1/' + chemin, {
+    ...options,
+    headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+               'Content-Type': 'application/json', ...(options.headers || {}) } });
+
+  let r = await lancer();
+  if (r.status === 401 && await rafraichir()) r = await lancer();
+  if (!r.ok) {
+    const detail = await r.text().catch(() => '');
+    throw new Error(r.status + ' ' + detail.slice(0, 200));
+  }
+  //  PostgREST répond 201 avec un corps VIDE après une insertion dans une table.
+  //  r.json() s'y étranglait — « unexpected end of data at line 1 column 1 » — et
+  //  l'agent croyait son ajout perdu alors que la ligne était bien enregistrée.
+  //  On lit le texte d'abord, et on ne décode que s'il y a quelque chose.
+  const corps = await r.text();
+  return corps ? JSON.parse(corps) : null;
+}
+
+function parId(liste) { return Object.fromEntries(liste.map(x => [x.id, x])); }
+
+async function chargerReferentiels() {
+  const [ecoles, domaines, types, cellules, agents, services, secteurs] = await Promise.all([
+    api('ecoles?select=id,nom,type_ecole,secteur,zone,adresse,telephone,email_directeur,email_secretariat&order=nom'),
+    api('domaines?select=id,code,libelle,traitement,cellule_id,service_externe_id&order=ordre'),
+    api('types_demande?select=id,domaine_id,libelle&order=ordre'),
+    api('cellules?select=id,libelle'),
+    api('agents?select=id,nom,fonction,cellule_id,zone,email,actif&order=nom'),
+    api('services_externes?select=id,libelle,contact_nom,contact_email'),
+    api('secteurs_intervention?select=code,libelle&order=code')
+  ]);
+  REF = { ecoles: parId(ecoles), domaines: parId(domaines), types: parId(types),
+          cellules: parId(cellules), agents: parId(agents), services: parId(services),
+          secteurs, listeAgents: agents, listeDomaines: domaines };
+}
+
+async function chargerDemandes() {
+  const [d, del] = await Promise.all([
+    api('demandes?select=*&order=created_at.desc'),
+    api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,a_planifier_pour,'
+      + 'delai_hors_perimetre,jours_chez_service,service_externe,service_contact,'
+      + 'service_email,service_injoignable,dernier_cran_relance')
+  ]);
+  DEMANDES = d;
+  DELAIS = parId(del);
+}
+
+// ─── Lecture d'une demande ───────────────────────────────────────────────
+function ecoleDe(d)   { return REF.ecoles[d.ecole_id] || {}; }
+function domaineDe(d) { return REF.domaines[d.domaine_id] || {}; }
+function typeDe(d)    { return REF.types[d.type_demande_id] || {}; }
+function nomEcole(d)  { const e = ecoleDe(d); return [e.type_ecole, e.nom].filter(Boolean).join(' '); }
+
+/** En retard quand la réaction tarde et que personne n'a encore pris la main.
+ *  Une demande confiée à un service extérieur n'y entre pas : son délai n'est
+ *  pas opposable au pôle, et la compter serait s'accuser du retard d'autrui. */
+function enRetard(d) {
+  if (CLOS.includes(d.statut) || d.pris_en_charge_le) return false;
+  const del = DELAIS[d.id];
+  if (!del || del.delai_hors_perimetre) return false;
+  const seuil = d.priorite === 'urgente' ? RETARD_URGENT_JOURS : RETARD_JOURS;
+  return (del.delai_reaction_jours || 0) > seuil;
+}
+//  Sans nouvelles du service à qui on l'a confiée. L'horloge est calculée en
+//  base (v_demandes_delais.jours_chez_service) et s'arrête d'elle-même dès
+//  que le service a répondu : ici on ne fait que comparer au seuil.
+function sansNouvelles(d) {
+  const j = DELAIS[d.id]?.jours_chez_service;
+  if (j == null) return false;
+  return j > (d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS);
+}
+function aPlanifier(d) {
+  return !CLOS.includes(d.statut) && !!DELAIS[d.id]?.a_planifier_pour;
+}
+
+// ─── Compteurs ───────────────────────────────────────────────────────────
+// ─── Ce que chacun voit, et ce qu'il peut faire ──────────────────────────
+//
+//  La sécurité par ligne fait déjà le tri : un technicien ne reçoit que les
+//  demandes qui lui sont affectées, un référent que ses domaines, un chef que
+//  sa cellule. La page n'a donc rien à filtrer — mais elle doit DIRE à
+//  l'agent ce qu'il regarde, sinon une liste courte ressemble à une panne.
+//
+//  Elle doit aussi ne proposer que les gestes qui aboutiront : les politiques
+//  d'écriture sont plus étroites que celles de lecture. Le secrétariat lit
+//  tout et ne modifie rien ; un technicien non plus. Leur montrer un
+//  formulaire « Traiter » qui échouerait serait une promesse en l'air.
+const PEUT_MODIFIER = ['direction', 'assistante', 'chef_cellule', 'referent'];
+
+function portee() {
+  switch (moi?.fonction) {
+    case 'technicien':   return 'Vous voyez les demandes qui vous sont affectées.';
+    case 'referent':     return 'Vous voyez les demandes de vos domaines.';
+    case 'chef_cellule': return 'Vous voyez les demandes de votre cellule.';
+    case 'direction':
+    case 'assistante':
+    case 'secretariat':  return 'Vous voyez toutes les demandes.';
+    default:             return '';
+  }
+}
+function peutModifier() { return PEUT_MODIFIER.includes(moi?.fonction); }
+
+//  Prendre en charge arrête l'horloge du délai de réaction. Le secrétariat
+//  lit tout mais ne traite rien : lui laisser ce geste flatterait l'indicateur
+//  sans que personne n'ait touché la demande.
+function peutPrendre() {
+  return ['direction', 'assistante', 'chef_cellule', 'referent', 'technicien']
+    .includes(moi?.fonction);
+}
+
+//  Un technicien n'a que faire du coût, de la planification ou de l'attente
+//  d'une école : ce ne sont pas ses gestes. On ne lui montre que sa file.
+const COMPTEURS_TECHNICIEN = ['', 'a_prendre', 'en_cours', 'en_retard', 'closes'];
+
+function compteursVisibles() {
+  return moi?.fonction === 'technicien'
+    ? COMPTEURS.filter(c => COMPTEURS_TECHNICIEN.includes(c.cle))
+    : COMPTEURS;
+}
+
+const COMPTEURS = [
+  { cle:'',           libelle:'Toutes',            classe:'',       test: () => true },
+  //  « Nouvelles » a disparu : elle comptait exactement « À prendre en charge »
+  //  moins « Rouvertes », soit trois compteurs pour deux informations.
+  { cle:'a_prendre',  libelle:'À prendre en charge',classe:'agir',
+    test: d => ['nouveau', 'rouvert'].includes(d.statut) },
+  { cle:'en_cours',   libelle:'En cours',           classe:'',
+    test: d => !CLOS.includes(d.statut) && !['nouveau', 'rouvert'].includes(d.statut) },
+  { cle:'en_retard',  libelle:'En retard',         classe:'retard', test: enRetard },
+  { cle:'ecole',      libelle:'Attente de l’école',classe:'agir',   test: d => d.statut === 'en_attente_validation_ecole' },
+  { cle:'rouvert',    libelle:'Rouvertes',         classe:'retard', test: d => d.statut === 'rouvert' },
+  { cle:'planifier',  libelle:'À planifier',       classe:'agir',   test: aPlanifier },
+  { cle:'sans_nouv',  libelle:'Sans nouvelles',     classe:'retard', test: sansNouvelles },
+  { cle:'cout',       libelle:'Coût à saisir',     classe:'',       test: d => d.cout_statut === 'a_renseigner' && CLOS.includes(d.statut) },
+  { cle:'closes',     libelle:'Closes',            classe:'fait',   test: d => CLOS.includes(d.statut) }
+];
+
+//  Apparence v4 de chaque compteur : teinte du bandeau et pictogramme.
+const ALLURE = {
+  '':          { teinte: 'var(--marine-encre)', ico: 'i-tout' },
+  a_prendre:   { teinte: 'var(--marine)',       ico: 'i-alerte' },
+  en_cours:    { teinte: 'var(--agir)',         ico: 'i-cle-plate' },
+  en_retard:   { teinte: 'var(--alerte)',       ico: 'i-chrono' },
+  ecole:       { teinte: 'var(--violet)',       ico: 'i-ecole' },
+  rouvert:     { teinte: 'var(--magenta)',      ico: 'i-relance' },
+  planifier:   { teinte: 'var(--sarcelle)',     ico: 'i-cal' },
+  sans_nouv:   { teinte: 'var(--olive)',        ico: 'i-relance' },
+  cout:        { teinte: 'var(--encre-doux)',   ico: 'i-euro' },
+  closes:      { teinte: 'var(--fait)',         ico: 'i-boite' }
+};
+
+function dessinerCompteurs() {
+  $('#compteurs').innerHTML = compteursVisibles().map(c => {
+    const lot = DEMANDES.filter(c.test), n = lot.length;
+    const urgentes = lot.filter(d => d.priorite === 'urgente').length;
+    const al = ALLURE[c.cle] || ALLURE[''];
+    const detail = ['closes', '', 'cout'].includes(c.cle) || !urgentes ? '' :
+      `<span class="petit">dont ${urgentes} urgente${urgentes > 1 ? 's' : ''}</span>`;
+    return `<button type="button" class="carte-chiffre" data-cle="${c.cle}"
+              aria-pressed="${filtres.compteur === c.cle}">
+              <span class="bandeau degrade" style="--teinte:${al.teinte}">${echapper(c.libelle)}
+                <svg aria-hidden="true"><use href="#${al.ico}"/></svg></span>
+              <span class="corps"><span class="grand">${n}</span>${detail ? '<br>' + detail : ''}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.carte-chiffre').forEach(b => b.addEventListener('click', () => {
+    choisirCompteur(b.dataset.cle);
+  }));
+  // Les deux pastilles du haut et le chiffre du menu : les mêmes compteurs.
+  const compte = cle => DEMANDES.filter(COMPTEURS.find(x => x.cle === cle).test).length;
+  const poser = (sel, n) => { $(sel).textContent = n; $(sel).hidden = !n; };
+  poser('#n-cloche', compte('a_prendre'));
+  poser('#menu-a-prendre', compte('a_prendre'));
+  poser('#n-relances', compte('sans_nouv'));
+  //  Un technicien ne suit pas les services extérieurs : pas de pastille.
+  $('#relances').hidden = moi?.fonction === 'technicien';
+  document.querySelectorAll('.icone-btn[data-cle]').forEach(b =>
+    b.setAttribute('aria-pressed', String(filtres.compteur === b.dataset.cle)));
+}
+
+function choisirCompteur(cle) {
+  filtres.compteur = cle === filtres.compteur ? '' : cle;
+  dessinerCompteurs(); dessinerListe();
+}
+
+// ─── Filtres ─────────────────────────────────────────────────────────────
+function remplirFiltres() {
+  const opt = (v, t) => `<option value="${echapper(v)}">${echapper(t)}</option>`;
+  $('#f-statut').innerHTML = opt('', 'Tous les états')
+    + Object.entries(ETATS).map(([k, v]) => opt(k, v.texte)).join('');
+  $('#f-domaine').innerHTML = opt('', 'Tous les domaines')
+    + REF.listeDomaines.map(d => opt(d.id, d.libelle)).join('');
+  const quartiers = [...new Set(Object.values(REF.ecoles).map(e => e.secteur).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'fr'));
+  $('#f-secteur').innerHTML = opt('', 'Tous les quartiers') + quartiers.map(s => opt(s, s)).join('');
+  $('#f-priorite').innerHTML = opt('', 'Toutes priorités')
+    + Object.entries(PRIORITES).map(([k, v]) => opt(k, v)).join('');
+}
+
+function retenues() {
+  const c = COMPTEURS.find(x => x.cle === filtres.compteur);
+  const mots = filtres.texte.trim().toLowerCase();
+  return DEMANDES.filter(d => {
+    if (c && !c.test(d)) return false;
+    if (filtres.statut   && d.statut !== filtres.statut) return false;
+    if (filtres.domaine  && String(d.domaine_id) !== filtres.domaine) return false;
+    if (filtres.priorite && d.priorite !== filtres.priorite) return false;
+    if (filtres.secteur  && ecoleDe(d).secteur !== filtres.secteur) return false;
+    if (mots) {
+      const paille = [d.numero, nomEcole(d), d.description, d.localisation,
+                      d.demandeur_nom, domaineDe(d).libelle, typeDe(d).libelle]
+                     .join(' ').toLowerCase();
+      if (!paille.includes(mots)) return false;
+    }
+    return true;
+  });
+}
+
+// ─── Liste ───────────────────────────────────────────────────────────────
+function dessinerListe() {
+  const liste = retenues();
+  $('#resume').textContent = liste.length === 0 ? ''
+    : `${liste.length} demande${liste.length > 1 ? 's' : ''} sur ${DEMANDES.length}`;
+
+  if (!liste.length) {
+    $('#liste').innerHTML = `<div class="vide"><strong>Aucune demande ne correspond</strong>
+      <p>Modifiez les filtres, ou effacez-les.</p></div>`;
+    return;
+  }
+
+  $('#liste').innerHTML = liste.map(d => {
+    const e = ETATS[d.statut] || { texte: d.statut, classe: '' };
+    const del = DELAIS[d.id] || {};
+    const retard = enRetard(d);
+    const tech = REF.agents[d.technicien_agent_id];
+    const age = CLOS.includes(d.statut)
+      ? 'close le ' + jour(d.cloture_le || d.updated_at)
+      : (d.pris_en_charge_le
+          ? (del.delai_realisation_jours != null ? del.delai_realisation_jours + ' j de travail' : 'à planifier')
+          : (del.jours_chez_service != null
+            ? 'chez ' + (del.service_externe || 'un autre service')
+              + ' depuis ' + del.jours_chez_service + ' j'
+            : (del.delai_reaction_jours || 0) + ' j sans réponse'));
+    const dom = domaineDe(d);
+    const ico = window.RelaisIcones ? RelaisIcones.domaine(dom.code) : { html: '', style: '' };
+    const detail = [typeDe(d).libelle, d.localisation, ecoleDe(d).secteur, tech ? tech.nom : '',
+                    d.hors_presence_eleves ? 'hors présence' : ''].filter(Boolean).join(' · ');
+    return `<button type="button" class="ligne demande${CLOS.includes(d.statut) ? ' close' : ''}" data-id="${d.id}">
+      <span class="num">${echapper(d.numero)}</span>
+      <span class="ecole">${echapper(nomEcole(d))}<small>${echapper(detail)}</small></span>
+      <span class="dom" ${ico.style ? 'style="' + ico.style + '"' : ''}>${ico.html.replace('class="pique"', 'class="pique mini"')}
+        <span class="nom-dom">${echapper(dom.libelle || '—')}</span></span>
+      <span class="prio ${echapper(d.priorite)}">${d.priorite === 'urgente' || d.priorite === 'haute' ? '● ' : ''}${echapper(PRIORITES[d.priorite] || d.priorite)}</span>
+      <span class="etat-col"><span class="etat ${classeEtat(d.statut)}">${echapper(e.texte)}</span>
+        <span class="age${retard ? ' retard' : ''}">${echapper(age)}</span></span>
+    </button>`;
+  }).join('');
+
+  document.querySelectorAll('.demande').forEach(b =>
+    b.addEventListener('click', () => ouvrirFiche(b.dataset.id)));
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  LA FICHE — tout ce qu'on sait d'une demande, et tout ce qu'on peut y faire
+// ═════════════════════════════════════════════════════════════════════════
+
+async function ouvrirFiche(id) {
+  const d = DEMANDES.find(x => x.id === id);
+  if (!d) return;
+  ouverte = d;
+  $('#voile').hidden = false;
+  document.body.style.overflow = 'hidden';
+  const icoF = window.RelaisIcones ? RelaisIcones.domaine(domaineDe(d).code) : { html: '', style: '' };
+  $('#fiche').innerHTML = `<div class="barre">
+      ${icoF.html ? '<span ' + 'style="' + icoF.style + '">' + icoF.html.replace('class="pique"', 'class="pique mini"') + '</span>' : ''}
+      <div><span class="num">${echapper(d.numero)}</span>
+        <h2 id="fiche-titre">${echapper(typeDe(d).libelle || '—')}</h2></div>
+      <button type="button" id="fermer" aria-label="Fermer">×</button>
+    </div>
+    <div class="corps"><p class="chargement">Chargement…</p></div>`;
+  $('#fermer').addEventListener('click', fermerFiche);
+
+  let notes = [], journal = [], photos = [];
+  try {
+    [notes, journal, photos] = await Promise.all([
+      api(`demande_notes?select=auteur,contenu,created_at&demande_id=eq.${d.id}&order=created_at.desc`),
+      api(`demande_historique?select=champ,avant,apres,auteur,changed_at&demande_id=eq.${d.id}&order=changed_at.desc`),
+      api(`demande_photos?select=id,url,created_at&demande_id=eq.${d.id}&order=created_at`)
+    ]);
+  } catch (e) { /* la fiche reste lisible sans ses pièces */ }
+
+  dessinerFiche(d, notes, journal, photos);
+}
+
+function fermerFiche() {
+  ouverte = null;
+  $('#voile').hidden = true;
+  document.body.style.overflow = '';
+}
+$('#voile').addEventListener('click', ev => { if (ev.target === $('#voile')) fermerFiche(); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && ouverte) fermerFiche(); });
+
+function dessinerFiche(d, notes, journal, photos) {
+  const e = ecoleDe(d), dom = domaineDe(d);
+  const del = DELAIS[d.id] || {};
+  const etat = ETATS[d.statut] || { texte: d.statut, classe: '' };
+  const clos = CLOS.includes(d.statut);
+  const attenteEcole = d.statut === 'en_attente_validation_ecole';
+  const service = REF.services[d.service_externe_id];
+
+  const paire = (t, v) => v ? `<dt>${t}</dt><dd>${v}</dd>` : '';
+  const opt = (v, t, sel) => `<option value="${echapper(v)}"${String(sel) === String(v) ? ' selected' : ''}>${echapper(t)}</option>`;
+
+  const techniciens = REF.listeAgents.filter(a => a.actif && a.fonction === 'technicien');
+  const referents   = REF.listeAgents.filter(a => a.actif && a.fonction !== 'technicien');
+
+  $('#fiche .corps').innerHTML = `
+    <div id="fiche-erreur" class="encart erreur" role="alert" hidden></div>
+    <div id="fiche-ok" class="encart info" role="status" hidden></div>
+
+    ${enRetard(d) ? `<div class="encart erreur"><strong>Sans réponse depuis
+      ${del.delai_reaction_jours} jours ouvrés</strong>
+      Personne n'a encore pris cette demande en charge.</div>` : ''}
+    ${aPlanifier(d) ? `<div class="encart attention"><strong>À faire hors présence des élèves</strong>
+      Prochaine fenêtre possible : ${echapper(jour(del.a_planifier_pour))}. L'horloge de
+      réalisation est en pause jusque-là.</div>` : ''}
+    ${attenteEcole ? `<div class="encart attention"><strong>En attente de l'école</strong>
+      L'intervention a été déclarée terminée le ${echapper(jour(d.intervention_finie_le))}.
+      La demande se refermera quand l'école aura confirmé.</div>` : ''}
+
+    <div class="carte">
+      <h3>La demande</h3>
+      <dl class="paires">
+        ${paire('État', `<span class="etat ${classeEtat(d.statut)}">${echapper(etat.texte)}</span>`)}
+        ${paire('École', echapper(nomEcole(d)))}
+        ${paire('Quartier', echapper(e.secteur))}
+        ${paire('Adresse', echapper(e.adresse))}
+        ${paire('Téléphone', echapper(e.telephone))}
+        ${paire('Domaine', echapper(dom.libelle))}
+        ${paire('Type', echapper(typeDe(d).libelle))}
+        ${paire('Localisation', echapper(d.localisation))}
+        ${paire('Priorité', echapper(PRIORITES[d.priorite] || d.priorite))}
+        ${paire('Fenêtre', echapper(FENETRES[d.fenetre_souhaitee] || ''))}
+        ${d.date_souhaitee ? paire('Date souhaitée', echapper(jour(d.date_souhaitee))) : ''}
+        ${d.hors_presence_eleves ? paire('Contrainte', 'Hors présence des élèves') : ''}
+        ${paire('Déposée le', echapper(jourHeure(d.created_at)))}
+        ${paire('Prise en charge', d.pris_en_charge_le ? echapper(jourHeure(d.pris_en_charge_le))
+                                                       : '<em>pas encore</em>')}
+        ${d.transmis_le ? paire('Transmise le', echapper(jourHeure(d.transmis_le))) : ''}
+        ${del.jours_chez_service != null
+          ? paire('Attente dehors', del.jours_chez_service + ' jours ouvrés'
+              + (sansNouvelles(d) ? ' — sans nouvelles' : '')) : ''}
+        ${d.cloture_le ? paire('Close le', echapper(jourHeure(d.cloture_le))) : ''}
+        ${service ? paire('Service extérieur',
+            echapper(service.libelle) + (service.contact_nom ? ' — ' + echapper(service.contact_nom) : '')
+            + (service.contact_email ? '<br><a href="mailto:' + echapper(service.contact_email)
+                 + '?subject=' + encodeURIComponent('Relance ' + d.numero + ' — ' + nomEcole(d))
+                 + '">' + echapper(service.contact_email) + '</a>' : '')) : ''}
+      </dl>
+
+      ${del.service_injoignable ? `<div class="encart attention" style="margin:12px 0 0">
+        <strong>Ce service n'a pas d'adresse enregistrée</strong>
+        La demande lui a été attribuée, mais aucun message n'a pu partir : elle
+        est partie sur le papier et nulle part en réalité. Ajoutez un contact
+        à ce service, puis prévenez-le.</div>` : ''}
+
+      ${sansNouvelles(d) ? `<div class="encart attention" style="margin:12px 0 0">
+        <strong>Sans nouvelles depuis ${del.jours_chez_service} jours ouvrés</strong>
+        Le seuil est de ${d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS} jours
+        pour une demande ${d.priorite === 'urgente' ? 'urgente' : 'ordinaire'}.
+        Ce retard n'est pas le vôtre, mais la relance l'est.</div>` : ''}
+    </div>
+
+    <div class="carte">
+      <h3>Qui a signalé</h3>
+      <dl class="paires">
+        ${paire('Nom', echapper(d.demandeur_nom))}
+        ${paire('Fonction', echapper(d.demandeur_fonction))}
+        ${paire('Email', d.demandeur_email
+            ? `<a href="mailto:${echapper(d.demandeur_email)}">${echapper(d.demandeur_email)}</a>` : '')}
+        ${paire('Téléphone', d.demandeur_tel
+            ? `<a href="tel:${echapper(d.demandeur_tel)}">${echapper(d.demandeur_tel)}</a>` : '')}
+      </dl>
+      <div class="texte">${echapper(d.description)}</div>
+      ${d.observation_initiale ? `<div class="texte">${echapper(d.observation_initiale)}</div>` : ''}
+    </div>
+
+    ${photos.length ? `<div class="carte">
+      <h3>Photos (${photos.length})</h3>
+      <div id="photos">${photos.map(p =>
+        `<button type="button" class="discret" data-chemin="${echapper(p.url)}"
+                 style="margin:4px 6px 4px 0">Voir la photo du ${echapper(jour(p.created_at))}</button>`
+      ).join('')}</div>
+      <p style="font-size:13px;color:var(--encre-pale);margin:8px 0 0">
+        Le dépôt est privé : chaque ouverture crée un lien valable une heure.</p>
+    </div>` : ''}
+
+    ${clos || !peutPrendre() || !['nouveau', 'rouvert'].includes(d.statut) ? '' : `<div class="carte">
+      <h3>Prendre en charge</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        Dites que vous vous en saisissez. L'école n'en est pas avertie ; c'est
+        l'horloge du délai de réaction qui s'arrête.</p>
+      <button type="button" class="principal" id="prendre">Je prends cette demande en charge</button>
+    </div>`}
+
+    ${clos || !peutModifier() ? '' : `<div class="carte">
+      <h3>Traiter</h3>
+      <div class="deux">
+        <div class="champ"><label for="a-statut">État</label>
+          <select id="a-statut">${STATUTS_MANUELS.map(s => opt(s, ETATS[s].texte, d.statut)).join('')}
+            ${STATUTS_MANUELS.includes(d.statut) ? '' : opt(d.statut, ETATS[d.statut]?.texte || d.statut, d.statut)}
+          </select></div>
+        <div class="champ"><label for="a-priorite">Priorité</label>
+          <select id="a-priorite">${Object.entries(PRIORITES).map(([k, v]) => opt(k, v, d.priorite)).join('')}</select></div>
+        <div class="champ"><label for="a-technicien">Technicien</label>
+          <select id="a-technicien">${opt('', '— aucun —', d.technicien_agent_id || '')
+            + techniciens.map(a => opt(a.id, a.nom + (a.zone ? ' (' + a.zone + ')' : ''), d.technicien_agent_id)).join('')}</select></div>
+        <div class="champ"><label for="a-referent">Référent qui suit</label>
+          <select id="a-referent">${opt('', '— aucun —', d.referent_agent_id || '')
+            + referents.map(a => opt(a.id, a.nom, d.referent_agent_id)).join('')}</select></div>
+      </div>
+      <div class="champ"><label for="a-domaine">Domaine — le changer réoriente la demande</label>
+        <select id="a-domaine">${REF.listeDomaines.map(x => opt(x.id, x.libelle, d.domaine_id)).join('')}</select></div>
+      <div class="champ"><label for="a-cout">Coût réel constaté, en euros
+          <span style="font-weight:400;color:var(--encre-pale)">— le prix payé, jamais une estimation</span></label>
+        <input type="number" id="a-cout" step="0.01" min="0"
+               value="${d.cout_reel != null ? d.cout_reel : ''}"
+               placeholder="${d.cout_statut === 'non_applicable' ? 'sans objet ici' : 'à renseigner'}"></div>
+      <button type="button" class="principal" id="enregistrer">Enregistrer</button>
+    </div>`}
+
+    ${clos || attenteEcole ? '' : `<div class="carte">
+      <h3>Clore la demande</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        L'école recevra un message lui demandant de confirmer. Rien ne se referme
+        sans sa réponse.</p>
+      <div class="champ"><label for="a-fait">Ce qui a été fait
+          <span style="font-weight:400;color:var(--encre-pale)">— facultatif, mais utile à l'école</span></label>
+        <textarea id="a-fait" maxlength="1500"
+                  placeholder="Ex : résistance changée, appareil remis en service."></textarea></div>
+      <button type="button" class="principal" id="terminer">Déclarer l'intervention terminée</button>
+    </div>`}
+
+    <div class="carte">
+      <h3>Notes de suivi</h3>
+      <div class="champ"><label for="a-note" class="masque">Nouvelle note</label>
+        <textarea id="a-note" maxlength="1500" placeholder="Ajouter une note…"></textarea></div>
+      <button type="button" class="discret" id="ajouter-note">Ajouter la note</button>
+      <div id="notes" style="margin-top:12px">${notes.length
+        ? notes.map(n => `<div class="note"><span class="qui">${echapper(n.auteur)} ·
+            ${echapper(jourHeure(n.created_at))}</span>${echapper(n.contenu)}</div>`).join('')
+        : '<p style="color:var(--encre-pale);font-size:14px;margin:0">Aucune note.</p>'}</div>
+    </div>
+
+    <div class="carte">
+      <h3>Journal</h3>
+      <ul class="journal" style="margin:0;padding:0">
+        ${journal.length ? journal.map(h => `<li>
+            <strong>${echapper(h.champ)}</strong> :
+            ${echapper(h.avant || '—')} → ${echapper(h.apres || '—')}
+            <span class="quand">${echapper(h.auteur || '')} · ${echapper(jourHeure(h.changed_at))}</span>
+          </li>`).join('')
+        : '<li style="color:var(--encre-pale)">Rien depuis le dépôt.</li>'}
+        <li><strong>dépôt</strong> par ${echapper(d.demandeur_nom || '—')}
+          <span class="quand">${echapper(jourHeure(d.created_at))}</span></li>
+      </ul>
+    </div>`;
+
+  brancherActionsFiche(d);
+}
+
+// ─── Les actions de la fiche ─────────────────────────────────────────────
+function messageFiche(texte, mauvais) {
+  const bon = $('#fiche-ok'), mal = $('#fiche-erreur');
+  bon.hidden = true; mal.hidden = true;
+  const cible = mauvais ? mal : bon;
+  cible.textContent = texte; cible.hidden = false;
+  $('#fiche').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function brancherActionsFiche(d) {
+  document.querySelectorAll('#photos button').forEach(b =>
+    b.addEventListener('click', () => voirPhoto(b.dataset.chemin, b)));
+
+  $('#enregistrer')?.addEventListener('click', async () => {
+    const b = $('#enregistrer'); b.disabled = true; b.textContent = 'Enregistrement…';
+    const modif = {};
+    const statut = $('#a-statut').value;
+    const cout = $('#a-cout').value.trim();
+
+    if (statut !== d.statut)                              modif.statut = statut;
+    if ($('#a-priorite').value !== d.priorite)            modif.priorite = $('#a-priorite').value;
+    const tech = $('#a-technicien').value || null;
+    if (String(tech) !== String(d.technicien_agent_id ?? '')) modif.technicien_agent_id = tech ? Number(tech) : null;
+    const ref = $('#a-referent').value || null;
+    if (String(ref) !== String(d.referent_agent_id ?? ''))    modif.referent_agent_id = ref ? Number(ref) : null;
+    const domaine = Number($('#a-domaine').value);
+    if (domaine !== d.domaine_id)                          modif.domaine_id = domaine;
+
+    // Un coût nul et un coût inconnu ne sont pas la même chose : c'est ce que
+    // cout_statut distingue, et c'est ce qui empêche des totaux faux.
+    if (cout !== '' && Number(cout) !== Number(d.cout_reel)) {
+      modif.cout_reel = Number(cout);
+      modif.cout_statut = 'renseigne';
+    }
+
+    if (!Object.keys(modif).length) {
+      b.disabled = false; b.textContent = 'Enregistrer';
+      return messageFiche('Rien n’a changé.', false);
+    }
+    try {
+      await api(`demandes?id=eq.${d.id}`, { method: 'PATCH', body: JSON.stringify(modif) });
+      await rafraichirTout();
+      // Le message vient APRÈS le redessin : posé avant, la fiche l'effacerait
+      // en se reconstruisant, et l'agent ne saurait pas si son geste a pris.
+      await ouvrirFiche(d.id);
+      messageFiche('Enregistré.', false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Enregistrer';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#terminer')?.addEventListener('click', async () => {
+    const b = $('#terminer'); b.disabled = true; b.textContent = 'Envoi…';
+    try {
+      // La demande porte son jeton, et la sécurité par ligne ne nous l'a
+      // montrée que parce que nous avions le droit de la voir. Passer par la
+      // même fonction que le lien de l'email évite d'avoir deux chemins pour
+      // un seul geste — donc deux occasions de diverger.
+      const r = await api('rpc/marquer_intervention_terminee', {
+        method: 'POST',
+        body: JSON.stringify({ _jeton: d.token_intervention, _commentaire: $('#a-fait').value.trim() || null })
+      });
+      if (!r || r.ok !== true) throw new Error(r?.motif || 'refus');
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche(`L'école a été prévenue. La demande se refermera quand elle aura confirmé.`, false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Déclarer l’intervention terminée';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+
+  $('#prendre')?.addEventListener('click', async () => {
+    const b = $('#prendre');
+    b.disabled = true; b.textContent = 'Enregistrement…';
+    try {
+      const r = await api('rpc/prendre_en_charge', { method: 'POST',
+        body: JSON.stringify({ _demande_id: d.id }) });
+      if (r?.ok !== true) {
+        messageFiche(r?.motif || "La prise en charge n'a pas abouti.", true);
+        b.disabled = false; b.textContent = 'Je prends cette demande en charge';
+        return;
+      }
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche('Vous avez pris cette demande en charge.', false);
+    } catch (err) {
+      messageFiche("La prise en charge n'a pas abouti. Réessayez.", true);
+      b.disabled = false; b.textContent = 'Je prends cette demande en charge';
+    }
+  });
+
+  $('#ajouter-note')?.addEventListener('click', async () => {
+    const contenu = $('#a-note').value.trim();
+    if (contenu.length < 2) return messageFiche('La note est vide.', true);
+    const b = $('#ajouter-note'); b.disabled = true; b.textContent = 'Ajout…';
+    try {
+      await api('demande_notes', { method: 'POST',
+        body: JSON.stringify({ demande_id: d.id, auteur: moi?.nom || emailDuJeton(), contenu }) });
+      await ouvrirFiche(d.id);
+      messageFiche('Note ajoutée.', false);
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Ajouter la note';
+      messageFiche(lireRefus(err), true);
+    }
+  });
+}
+
+/** Le message d'un refus, en français. Un « 403 » n'apprend rien à personne. */
+function lireRefus(err) {
+  const t = String(err.message || err);
+  if (t.startsWith('403') || t.includes('row-level security')) {
+    return "Cette demande ne relève pas de vos domaines : la modification a été refusée.";
+  }
+  if (t.startsWith('401')) return "Votre session a expiré. Rechargez la page pour vous reconnecter.";
+  if (t.includes('cout_coherent')) return "Un coût renseigné doit porter un montant.";
+  return "L'enregistrement n'a pas abouti. " + t;
+}
+
+/** Le dépôt de photos est privé : on demande un lien signé, valable une heure. */
+async function voirPhoto(chemin, bouton) {
+  const libelle = bouton.textContent;
+  bouton.disabled = true; bouton.textContent = 'Ouverture…';
+  try {
+    const r = await fetch(API + '/storage/v1/object/sign/photos-demandes/' + chemin, {
+      method: 'POST',
+      headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+                 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expiresIn: 3600 }) });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    window.open(API + '/storage/v1' + j.signedURL, '_blank', 'noopener');
+  } catch (e) {
+    messageFiche("La photo n'a pas pu être ouverte.", true);
+  }
+  bouton.disabled = false; bouton.textContent = libelle;
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  EXPORT
+// ═════════════════════════════════════════════════════════════════════════
+$('#exporter').addEventListener('click', () => {
+  const liste = retenues();
+  if (!liste.length) return erreur("Rien à exporter avec ces filtres.");
+
+  const colonnes = ['Numéro','École','Quartier','Domaine','Type','Localisation','Priorité',
+                    'État','Déposée le','Prise en charge le','Close le','Technicien',
+                    'Service extérieur','Coût réel','Coût','Hors présence','Déclarant','Description'];
+  const ligne = d => [
+    d.numero, nomEcole(d), ecoleDe(d).secteur, domaineDe(d).libelle, typeDe(d).libelle,
+    d.localisation, PRIORITES[d.priorite] || d.priorite, ETATS[d.statut]?.texte || d.statut,
+    jour(d.created_at), d.pris_en_charge_le ? jour(d.pris_en_charge_le) : '',
+    d.cloture_le ? jour(d.cloture_le) : '',
+    REF.agents[d.technicien_agent_id]?.nom || '', REF.services[d.service_externe_id]?.libelle || '',
+    d.cout_reel != null ? String(d.cout_reel).replace('.', ',') : '',
+    { non_applicable:'sans objet', a_renseigner:'à renseigner', renseigne:'renseigné' }[d.cout_statut] || '',
+    d.hors_presence_eleves ? 'oui' : 'non', d.demandeur_nom, d.description
+  ];
+  const cellule = v => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+  // Point-virgule et BOM : c'est ce qu'attend Excel en français. Sans le BOM,
+  // les accents arrivent en charabia, et le fichier est jugé inutilisable.
+  const csv = '\uFEFF' + [colonnes, ...liste.map(ligne)]
+    .map(l => l.map(cellule).join(';')).join('\r\n');
+
+  const lien = document.createElement('a');
+  lien.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  lien.download = 'demandes-' + new Date().toISOString().slice(0, 10) + '.csv';
+  lien.click();
+  URL.revokeObjectURL(lien.href);
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+//  TABLEAU DE BORD v4 — calculé ici, à partir des demandes déjà chargées.
+//  Rien n'est écrit en base ; chaque chiffre suit la règle des compteurs.
+// ═════════════════════════════════════════════════════════════════════════
+let onglet = 'venir', periode = 'semaine';
+const JOUR_MS = 86400000;
+function debutJour(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); return d; }
+
+/** Ce qui a une date devant soi : prochaine fenêtre hors présence des élèves
+ *  (calculée en base) ou date souhaitée par l'école. */
+function datesAVenir() {
+  const auj = debutJour(Date.now()).getTime();
+  return DEMANDES.filter(d => !CLOS.includes(d.statut)).map(d => {
+    const fen = DELAIS[d.id]?.a_planifier_pour, souh = d.date_souhaitee;
+    const quand = fen || souh;
+    return quand ? { d, quand: new Date(quand), motif: fen ? 'fenêtre hors élèves' : 'date souhaitée' } : null;
+  }).filter(x => x && x.quand.getTime() >= auj).sort((a, b) => a.quand - b.quand);
+}
+
+function dessinerAgenda() {
+  const venir = datesAVenir();
+  const auj = new Date(), an = auj.getFullYear(), mo = auj.getMonth();
+  const premier = new Date(an, mo, 1), nbJours = new Date(an, mo + 1, 0).getDate();
+  const decal = (premier.getDay() + 6) % 7;      // lundi en premier
+  const marques = new Set(venir.filter(x => x.quand.getMonth() === mo && x.quand.getFullYear() === an)
+                               .map(x => x.quand.getDate()));
+  const cases = ['L','M','M','J','V','S','D'].map(j => `<span class="entete">${j}</span>`)
+    .concat(Array.from({ length: decal }, () => '<span></span>'))
+    .concat(Array.from({ length: nbJours }, (_, i) => {
+      const n = i + 1, cl = n === auj.getDate() ? 'aujourdhui' : (marques.has(n) ? 'rdv' : '');
+      return `<span class="${cl}">${n}</span>`;
+    }));
+  const nomMois = premier.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  $('#calendrier').innerHTML = `<div class="mois"><span>${nomMois.charAt(0).toUpperCase() + nomMois.slice(1)}</span>
+    <span>${marques.size} jour${marques.size > 1 ? 's' : ''} marqué${marques.size > 1 ? 's' : ''}</span></div>
+    <div class="jours" aria-hidden="true">${cases.join('')}</div>`;
+
+  const elements = onglet === 'venir'
+    ? venir.slice(0, 6).map(x => ({ d: x.d, quand: x.quand, sous: x.motif }))
+    : [...DEMANDES].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6)
+        .map(d => ({ d, quand: new Date(d.created_at), sous: 'déposée' }));
+  $('#agenda').innerHTML = elements.length ? elements.map(({ d, quand, sous }) => {
+    const c = window.RelaisIcones ? RelaisIcones.couleur(domaineDe(d).code).c : 'var(--marine)';
+    return `<li><button type="button" data-id="${d.id}">
+      <span class="date-bloc" style="background:${c}">${quand.getDate()}<small>${echapper(quand.toLocaleDateString('fr-FR', { month: 'short' }))}</small></span>
+      <span><span class="quoi">${echapper(typeDe(d).libelle || domaineDe(d).libelle || '—')}</span>
+        <span class="qui">${echapper(nomEcole(d))} · ${echapper(sous)} · ${echapper(d.numero)}</span></span></button></li>`;
+  }).join('') : `<li><p class="vide-court">${onglet === 'venir'
+      ? 'Aucune date à venir : ni fenêtre hors présence des élèves, ni date souhaitée.' : 'Aucune demande.'}</p></li>`;
+  document.querySelectorAll('#agenda button').forEach(b => b.addEventListener('click', () => ouvrirFiche(b.dataset.id)));
+}
+
+function dessinerCourbe() {
+  const auj = debutJour(Date.now());
+  let tranches = [];
+  if (periode === 'semaine') {
+    const lundi = new Date(auj); lundi.setDate(lundi.getDate() - ((lundi.getDay() + 6) % 7));
+    for (let i = 11; i >= 0; i--) { const deb = new Date(lundi.getTime() - i * 7 * JOUR_MS);
+      tranches.push({ deb, fin: new Date(deb.getTime() + 7 * JOUR_MS), lib: deb.getDate() + '/' + (deb.getMonth() + 1) }); }
+  } else if (periode === 'mois') {
+    for (let i = 11; i >= 0; i--) { const deb = new Date(auj.getFullYear(), auj.getMonth() - i, 1);
+      tranches.push({ deb, fin: new Date(deb.getFullYear(), deb.getMonth() + 1, 1),
+                      lib: deb.toLocaleDateString('fr-FR', { month: 'short' }) }); }
+  } else {
+    const premiere = Math.min(auj.getFullYear(), ...DEMANDES.map(d => new Date(d.created_at).getFullYear()));
+    for (let a = Math.max(premiere, auj.getFullYear() - 4); a <= auj.getFullYear(); a++)
+      tranches.push({ deb: new Date(a, 0, 1), fin: new Date(a + 1, 0, 1), lib: String(a) });
+  }
+  const valeurs = tranches.map(t => DEMANDES.filter(d => { const c = new Date(d.created_at); return c >= t.deb && c < t.fin; }).length);
+  const max = Math.max(1, ...valeurs), L = 520, H = 190, g = 34, b = 24, hUtile = H - b - 14;
+  const x = i => tranches.length === 1 ? L / 2 : g + i * (L - g - 8) / (tranches.length - 1);
+  const y = v => 10 + hUtile - (v / max) * hUtile;
+  const points = valeurs.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const pas = Math.ceil(tranches.length / 6);
+  $('#courbe').innerHTML = `
+    <line x1="${g}" x2="${L}" y1="${y(0)}" y2="${y(0)}" stroke="rgba(32,30,29,.25)"/>
+    <line x1="${g}" x2="${L}" y1="${y(max)}" y2="${y(max)}" stroke="rgba(32,30,29,.12)" stroke-dasharray="4 4"/>
+    <text x="${g - 6}" y="${y(max) + 4}" text-anchor="end" font-size="11" fill="#3f3d3d">${max}</text>
+    <text x="${g - 6}" y="${y(0) + 4}" text-anchor="end" font-size="11" fill="#3f3d3d">0</text>
+    <polygon points="${x(0)},${y(0)} ${points} ${x(valeurs.length - 1)},${y(0)}" fill="rgba(0,73,97,.14)"/>
+    <polyline points="${points}" fill="none" stroke="var(--marine-encre)" stroke-width="2.5" stroke-linejoin="round"/>
+    ${valeurs.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="var(--marine-encre)"><title>${tranches[i].lib} : ${v}</title></circle>`).join('')}
+    ${tranches.map((t, i) => i % pas === 0 || i === tranches.length - 1
+        ? `<text x="${x(i)}" y="${H - 4}" text-anchor="middle" font-size="11" fill="#3f3d3d">${echapper(t.lib)}</text>` : '').join('')}`;
+  const total = valeurs.reduce((s, v) => s + v, 0);
+  $('#courbe').setAttribute('aria-label', `Demandes reçues par ${periode === 'semaine' ? 'semaine' : periode === 'mois' ? 'mois' : 'année'} : `
+    + tranches.map((t, i) => t.lib + ' ' + valeurs[i]).join(', ') + ` ; ${total} au total.`);
+}
+
+function dessinerBarres() {
+  const depuis = Date.now() - 30 * JOUR_MS;
+  const parDom = {};
+  DEMANDES.filter(d => new Date(d.created_at).getTime() >= depuis)
+    .forEach(d => { parDom[d.domaine_id] = (parDom[d.domaine_id] || 0) + 1; });
+  const lignes = Object.entries(parDom).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const max = Math.max(1, ...lignes.map(l => l[1]));
+  $('#barres').innerHTML = lignes.length ? lignes.map(([id, n]) => {
+    const dom = REF.domaines[id] || {};
+    const c = window.RelaisIcones ? RelaisIcones.couleur(dom.code).c : 'var(--marine)';
+    return `<div class="barre-dom"><span title="${echapper(dom.libelle || '—')}">${echapper(dom.libelle || '—')}</span>
+      <span class="rail"><span class="plein" style="display:block;width:${Math.round(n / max * 100)}%;background:${c}"></span></span><b>${n}</b></div>`;
+  }).join('') : '<p class="vide-court" style="padding:0">Aucune demande déposée ces 30 derniers jours.</p>';
+}
+
+function dessinerAnneau() {
+  const ouvertes = DEMANDES.filter(d => !CLOS.includes(d.statut));
+  if (!ouvertes.length) { $('#anneau').innerHTML = '<p>Aucune demande ouverte.</p>'; return; }
+  const bien = ouvertes.filter(d => !enRetard(d)).length;
+  const pct = Math.round(bien / ouvertes.length * 100);
+  const tour = 2 * Math.PI * 48, c = pct >= 80 ? 'var(--fait)' : 'var(--agir)';
+  $('#anneau').innerHTML = `<svg width="150" height="150" viewBox="0 0 120 120" role="img" aria-label="${pct} % des demandes ouvertes dans les délais">
+      <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(32,30,29,.09)" stroke-width="14"/>
+      <circle cx="60" cy="60" r="48" fill="none" stroke="${c}" stroke-width="14" stroke-linecap="round"
+        stroke-dasharray="${(tour * pct / 100).toFixed(1)} ${tour.toFixed(1)}" transform="rotate(-90 60 60)"/>
+      <text x="60" y="66" text-anchor="middle" font-size="26" font-weight="700" fill="#201e1d">${pct} %</text></svg>
+    <p>${bien} demande${bien > 1 ? 's' : ''} ouverte${bien > 1 ? 's' : ''} sur ${ouvertes.length} ne ${bien > 1 ? 'sont' : 'est'} pas en retard
+       (même règle que le compteur « En retard » : ${RETARD_JOURS} jours sans prise en charge, ${RETARD_URGENT_JOURS} si urgente).</p>`;
+}
+
+function dessinerTableau() { dessinerAgenda(); dessinerCourbe(); dessinerBarres(); dessinerAnneau(); }
+
+function brancherTableau() {
+  document.querySelectorAll('.icone-btn[data-cle]').forEach(b =>
+    b.addEventListener('click', () => { choisirCompteur(b.dataset.cle); $('#t-liste').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  document.querySelectorAll('.onglets button').forEach(b => b.addEventListener('click', () => {
+    onglet = b.dataset.onglet;
+    document.querySelectorAll('.onglets button').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    dessinerAgenda();
+  }));
+  document.querySelectorAll('#bascule button').forEach(b => b.addEventListener('click', () => {
+    periode = b.dataset.p;
+    document.querySelectorAll('#bascule button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    dessinerCourbe();
+  }));
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+//  DÉMARRAGE
+// ═════════════════════════════════════════════════════════════════════════
+async function rafraichirTout() {
+  await chargerDemandes();
+  dessinerCompteurs();
+  dessinerListe();
+  dessinerTableau();
+}
+
+function brancherFiltres() {
+  const lier = (sel, cle) => $(sel).addEventListener('input', () => {
+    filtres[cle] = $(sel).value; dessinerListe();
+  });
+  lier('#f-texte', 'texte'); lier('#f-statut', 'statut'); lier('#f-domaine', 'domaine');
+  lier('#f-secteur', 'secteur'); lier('#f-priorite', 'priorite');
+  $('#raz').addEventListener('click', () => {
+    Object.keys(filtres).forEach(k => filtres[k] = '');
+    ['#f-texte','#f-statut','#f-domaine','#f-secteur','#f-priorite'].forEach(s => $(s).value = '');
+    dessinerCompteurs(); dessinerListe();
+  });
+}
+
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const b = $('#bouton-lien'); b.disabled = true; b.textContent = 'Envoi en cours…';
+  effacerErreur();
+  try {
+    const retour = location.origin + location.pathname;
+    const r = await fetch(API + '/auth/v1/otp?redirect_to=' + encodeURIComponent(retour), {
+      method: 'POST', headers: { apikey: CLE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('#email').value.trim(), create_user: true }) });
+    if (r.status === 429) erreur("Trop de demandes en peu de temps. Patientez quelques minutes.");
+    else if (!r.ok)       erreur("L'envoi a échoué. Vérifiez l'adresse saisie, puis réessayez.");
+    else { $('#form-connexion').hidden = true; $('#lien-envoye').hidden = false; }
+  } catch (e) { erreur("L'envoi a échoué. Vérifiez votre connexion."); }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
+});
+
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });
+$('#actualiser').addEventListener('click', async () => {
+  const b = $('#actualiser'); b.disabled = true; b.textContent = 'Actualisation…';
+  try { await rafraichirTout(); effacerErreur(); }
+  catch (e) { erreur("Les demandes n'ont pas pu être rechargées."); }
+  b.disabled = false; b.textContent = 'Actualiser';
+});
+
+function montrerConnexion(message) {
+  oublierSession();
+  $('#chargement').hidden = true;
+  $('#ecran-travail').hidden = true;
+  $('#ecran-connexion').hidden = false;
+  if (message) erreur(message);
+}
+
+(async function demarrer() {
+  if (!CONFIG.pret) {
+    $('#chargement').hidden = true;
+    $('#arret').textContent = CONFIG.motif;
+    $('#arret').hidden = false;
+    return;
+  }
+  session = recupererJetonsDuLien() || lireSession();
+  if (session?.expire_le && session.expire_le < Date.now() + 60000) {
+    if (!await rafraichir()) session = null;
+  }
+  if (!session) return montrerConnexion();
+
+  try {
+    await chargerReferentiels();
+  } catch (e) {
+    // Un agent qui n'est pas à l'annuaire n'a droit à rien : les politiques
+    // ne lui rendent aucune ligne. Le dire franchement vaut mieux qu'une
+    // page vide dont il ne comprendrait pas le silence.
+    if (String(e.message).startsWith('401')) return montrerConnexion("Votre session a expiré.");
+    return montrerConnexion("Cette adresse n'est pas celle d'un agent du Pôle Technique. "
+      + "Si vous devez y accéder, demandez à être inscrit à l'annuaire du pôle.");
+  }
+
+  const mail = emailDuJeton();
+  moi = REF.listeAgents.find(a => (a.email || '').toLowerCase() === mail) || null;
+  $('#qui').textContent = moi
+    ? `${moi.nom} — ${moi.fonction.replace('_', ' ')}${REF.cellules[moi.cellule_id]
+        ? ' · ' + REF.cellules[moi.cellule_id].libelle : ''}`
+    : mail;
+  //  Sans cette phrase, un référent qui voit trois demandes croit à une panne
+  //  plutôt qu'à un périmètre.
+  $('#portee').textContent = portee();
+  $('#portee').hidden = !portee();
+  //  v4 : la salutation et l'avatar, tirés de l'annuaire du pôle.
+  const nom = moi?.nom || mail;
+  $('#moi-nom').textContent = nom;
+  //  Le nom est déjà au-dessus : on ne garde dessous que la fonction et la cellule.
+  if (moi) $('#qui').textContent = moi.fonction.replace('_', ' ')
+    + (REF.cellules[moi.cellule_id] ? ' · ' + REF.cellules[moi.cellule_id].libelle : '');
+  $('#bonjour').textContent = moi?.nom ? 'Bonjour, ' + moi.nom.split(' ')[0] : 'Demandes des écoles';
+  $('#avatar').textContent = nom.split(/[\s.@-]+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
+
+  try {
+    await chargerDemandes();
+  } catch (e) {
+    return montrerConnexion("Les demandes n'ont pas pu être chargées.");
+  }
+
+  $('#chargement').hidden = true;
+  $('#ecran-travail').hidden = false;
+  ['#actualiser', '#exporter', '#deconnexion'].forEach(s => $(s).hidden = false);
+  //  Le tableau de bord n'a d'usage que pour qui voit plus d'une poignée de
+  //  demandes : un technicien n'y lirait que ses propres chiffres.
+  $('#vers-tableau').hidden = moi?.fonction === 'technicien';
+  remplirFiltres();
+  brancherFiltres();
+  dessinerCompteurs();
+  dessinerListe();
+  brancherTableau();
+  dessinerTableau();
+})();
+</script>
+</body>
+</html>
