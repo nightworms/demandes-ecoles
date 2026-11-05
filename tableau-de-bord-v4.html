@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Tableau de bord — Pôle Technique</title>
+<!--
+  RELAIS v4 — tableau de bord du pôle, apparence « verre » (D22, D23, D27).
+  Mêmes lectures que tableau-de-bord.html, plus le code de chaque domaine (domaines.code)
+  pour son icône et sa couleur. Aucune écriture. Mêmes calculs, mêmes seuils.
+  tableau-de-bord.html reste intact.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<link rel="stylesheet" href="systeme-design/verre.css">
+<script src="relais-config.js"></script>
+<script src="systeme-design/icones.js"></script>
+<style>
+/* Propre à cette page. Menu, barre du haut et cartes : les mêmes que gestion-v4.html. */
+body.verre{ font-size: 15px; line-height: 1.45 }
+.appli{ display: grid; grid-template-columns: 228px minmax(0, 1fr); min-height: 100vh }
+
+/* ── Menu latéral (verre sombre) ─────────────────────────────────────────── */
+.menu{ position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px;
+       padding: 18px 12px; color: #eef1f4;
+       background: rgba(30,40,50,.62); -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+       border-right: 1px solid rgba(255,255,255,.12) }
+.menu .marque{ display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; color: #fff; font-weight: 700; font-size: 17px; line-height: 1.2 }
+.menu .marque img{ height: 42px; width: auto; background: #fff; border-radius: 9px; padding: 3px 5px }
+.menu .marque small{ display: block; font-weight: 400; font-size: 12.5px; color: #e3e7ec }
+.menu a, .menu button{ display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 9px;
+       color: #eef1f4; text-decoration: none; font: inherit; font-size: 14.5px; background: none; border: 0; cursor: pointer; text-align: left; width: 100% }
+.menu a svg, .menu button svg{ width: 19px; height: 19px; flex: none }
+.menu a:hover, .menu button:hover{ background: rgba(255,255,255,.14); color: #fff }
+.menu a.actif{ background: var(--marine); color: #fff; font-weight: 600 }
+.menu .bas{ margin-top: auto; display: flex; flex-direction: column; gap: 4px }
+
+/* ── Barre du haut (verre clair) ─────────────────────────────────────────── */
+body.verre header.haut{ position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+       padding: 12px 24px; color: var(--encre); text-shadow: none;
+       background: rgba(255,255,255,.62); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border-bottom: 1px solid var(--verre-bord) }
+body.verre header.haut h1{ color: var(--encre); font-size: 19px; text-shadow: none; white-space: nowrap; margin: 0 }
+body.verre header.haut p{ color: var(--sur-verre-doux); text-shadow: none; opacity: 1 }
+.haut .portee{ font-size: 12.5px; margin: 1px 0 0 }
+.reglages{ display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-left: auto }
+.reglages .champ{ display: flex; flex-direction: column; gap: 3px; margin: 0 }
+.reglages label{ font-size: 12.5px; margin: 0; color: var(--sur-verre-doux) }
+.reglages select, .reglages input[type=date]{ min-height: 40px !important; padding: 6px 10px !important; font-size: 14.5px !important; width: auto !important;
+       border-radius: 10px !important; border: 1px solid var(--verre-bord) !important; background-color: rgba(255,255,255,.8) !important }
+.moi{ display: flex; align-items: center; gap: 10px; font-size: 14px; min-width: 0 }
+.avatar{ width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700;
+       background: var(--magenta-pale); color: var(--magenta) }
+.moi .nom{ font-weight: 600; line-height: 1.2 }
+.moi .qui{ font-size: 12.5px; color: var(--sur-verre-doux); margin: 0 }
+
+/* ── Contenu ─────────────────────────────────────────────────────────────── */
+.contenu{ padding: 22px 24px 48px; display: flex; flex-direction: column; gap: 20px; max-width: 1500px }
+.titre-bloc{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 4px 0 -6px }
+.titre-bloc h2{ font-size: 18px; margin: 0; color: var(--encre) }
+.titre-bloc p{ margin: 0; font-size: 13.5px; color: var(--sur-verre-doux) }
+.panneau{ background: var(--verre); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border: 1px solid var(--verre-bord); border-radius: 16px; box-shadow: var(--ombre-verre); overflow: hidden; min-width: 0 }
+.panneau-tete{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 13px 18px; border-bottom: 1px solid rgba(32,30,29,.08) }
+.panneau-tete h2{ font-size: 16px; margin: 0 }
+.panneau-tete.degrade{ border: 0 } .panneau-tete.degrade h2{ color: #fff }
+.panneau .aide{ padding: 10px 18px 0; margin: 0; font-size: 13.5px; color: var(--sur-verre-doux) }
+.vide-court{ padding: 18px; color: var(--sur-verre-doux); font-size: 14px; margin: 0 }
+
+/* Cartes-chiffres : ici de simples chiffres, pas des filtres */
+.cartes{ display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px }
+.carte-chiffre{ color: var(--encre); overflow: hidden;
+       background: var(--verre); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border: 1px solid var(--verre-bord); border-radius: 14px; box-shadow: var(--ombre-verre) }
+.carte-chiffre .bandeau{ display: flex; align-items: center; justify-content: space-between; gap: 8px;
+       padding: 9px 13px; font-weight: 700; font-size: 14px; line-height: 1.25 }
+.carte-chiffre .bandeau svg{ width: 19px; height: 19px; flex: none }
+.carte-chiffre .corps{ display: block; padding: 10px 13px 13px; min-height: 76px }
+.carte-chiffre .petit{ display: block; font-size: 13px; color: var(--sur-verre-doux) }
+.carte-chiffre .grand{ display: block; font-size: 30px; font-weight: 700; line-height: 1.15 }
+.cartes.six{ grid-template-columns: repeat(3, minmax(0, 1fr)) }
+@media (min-width: 1380px){ .cartes.six{ grid-template-columns: repeat(6, minmax(0, 1fr)) } }
+.carte-chiffre.signal{ outline: 2px solid var(--alerte); outline-offset: -2px }
+
+/* Répartitions */
+.duo{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start }
+.barres{ display: flex; flex-direction: column; gap: 10px; padding: 16px 18px }
+.rang{ display: grid; grid-template-columns: minmax(0, 210px) 1fr 42px 56px; align-items: center; gap: 10px; font-size: 14px }
+.rang .lib{ display: flex; align-items: center; gap: 8px; min-width: 0 }
+.rang .lib span{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.rang .rail{ height: 12px; background: rgba(32,30,29,.09); border-radius: 99px; overflow: hidden }
+.rang .plein{ display: block; height: 100%; border-radius: 99px; background: var(--marine) }
+.rang b{ text-align: right; font-variant-numeric: tabular-nums }
+.rang .part{ text-align: right; font-size: 13px; color: var(--sur-verre-doux); font-variant-numeric: tabular-nums }
+.pique.mini{ width: 28px; height: 28px; border-radius: 8px; flex: none }
+.pique.mini svg{ width: 16px; height: 16px }
+table.services{ width: 100%; border-collapse: collapse; font-size: 14px }
+table.services th{ text-align: left; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sur-verre-doux);
+       padding: 9px 18px; background: rgba(255,255,255,.25); border-bottom: 1px solid rgba(32,30,29,.08) }
+table.services td{ padding: 10px 18px; border-bottom: 1px solid rgba(32,30,29,.08) }
+table.services tr:last-child td{ border-bottom: 0 }
+table.services .n{ text-align: right; font-variant-numeric: tabular-nums }
+.alerte-encart{ margin: 0 18px 16px }
+
+.chargement{ text-align: center; padding: 44px 20px; color: var(--sur-verre-doux) }
+.pied{ padding: 0 24px 36px; font-size: 12.5px; color: var(--sur-verre-doux); max-width: 1500px }
+
+@media (max-width: 1080px){ .duo{ grid-template-columns: 1fr } }
+@media (max-width: 860px){
+  .appli{ grid-template-columns: 1fr }
+  .menu{ position: static; height: auto; flex-direction: row; overflow-x: auto; padding: 8px 10px; gap: 2px }
+  .menu .marque{ padding: 0 8px 0 0 } .menu .marque span{ display: none }
+  .menu a, .menu button{ width: auto; white-space: nowrap } .menu .lib{ display: none } .menu .bas{ margin: 0 0 0 auto; flex-direction: row }
+  body.verre header.haut{ padding: 10px 14px; position: static }
+  .reglages{ margin-left: 0; width: 100% } .moi{ display: none }
+  .contenu{ padding: 14px } .pied{ padding: 0 14px 28px }
+  .cartes{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+  .carte-chiffre .grand{ font-size: 25px } .cartes.six{ grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .rang{ grid-template-columns: minmax(0, 1fr) 38px 50px; row-gap: 4px } .rang .rail{ grid-column: 1 / -1; grid-row: 2 }
+  table.services th, table.services td{ padding: 8px 12px }
+}
+@media (prefers-reduced-transparency: reduce){
+  .panneau, .carte-chiffre, body.verre header.haut{ background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none }
+  .menu{ background: #24262b; -webkit-backdrop-filter: none; backdrop-filter: none }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .panneau, .carte-chiffre{ background: rgba(255,255,255,.94) } .menu{ background: #24262b }
+}
+/* ── Impression (« Enregistrer en PDF ») : un document blanc, sans l'outil ── */
+@media print{
+  body.verre{ background: #fff !important }
+  .appli{ display: block } .menu, .reglages, .avatar{ display: none !important }
+  body.verre header.haut{ position: static; background: none; border: 0; padding: 0 0 8px; backdrop-filter: none }
+  .contenu{ padding: 0; gap: 12px }
+  .panneau, .carte-chiffre{ background: #fff; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: #ccc; break-inside: avoid }
+  .degrade{ -webkit-print-color-adjust: exact; print-color-adjust: exact }
+  .pique{ -webkit-print-color-adjust: exact; print-color-adjust: exact }
+  .rang .plein{ -webkit-print-color-adjust: exact; print-color-adjust: exact }
+  .duo{ grid-template-columns: 1fr 1fr } .cartes{ grid-template-columns: repeat(3, 1fr) }
+  .pied{ padding: 8px 0 0; border-top: 1px solid #ccc }
+}
+</style>
+</head>
+<body class="verre">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-bord" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+    <symbol id="i-liste" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.3"/><circle cx="4" cy="12" r="1.3"/><circle cx="4" cy="18" r="1.3"/></symbol>
+    <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-relance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 10"/></symbol>
+    <symbol id="i-alerte" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+    <symbol id="i-boite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></symbol>
+    <symbol id="i-chrono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></symbol>
+    <symbol id="i-euro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 6.5A7 7 0 1 0 17 17.5"/><path d="M4 10h9M4 14h9"/></symbol>
+    <symbol id="i-tout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></symbol>
+    <symbol id="i-cle-plate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L3 18l3 3 6.2-6.2a4 4 0 0 0 5.3-5.3l-2.5 2.5-2.5-.5-.5-2.5z"/></symbol>
+    <symbol id="i-sortie-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-courrier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></symbol>
+    <symbol id="i-sortie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></symbol>
+  </defs>
+</svg>
+
+<div id="erreur" class="encart erreur carte-verre" role="alert" hidden style="max-width:560px;margin:60px auto"></div>
+<div id="arret" class="encart erreur carte-verre" role="alert" hidden style="max-width:560px;margin:60px auto"></div>
+<p class="chargement carte-verre" id="chargement" style="max-width:420px;margin:60px auto">Chargement…</p>
+
+<div class="appli" id="tout" hidden>
+  <nav class="menu" aria-label="Menu du poste de travail">
+    <div class="marque"><img src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="29" height="42" decoding="async"><span>Relais<small>Pôle Technique</small></span></div>
+    <a href="gestion-v4.html"><svg aria-hidden="true"><use href="#i-bord"/></svg><span class="lib">Poste de travail</span></a>
+    <a href="gestion-v4.html#t-liste"><svg aria-hidden="true"><use href="#i-liste"/></svg><span class="lib">Demandes</span></a>
+    <a href="#haut-de-page" class="actif" aria-current="page"><svg aria-hidden="true"><use href="#i-graph"/></svg><span class="lib">Tableau de bord</span></a>
+    <div class="bas">
+      <button type="button" id="imprimer"><svg aria-hidden="true"><use href="#i-pdf"/></svg><span class="lib">Enregistrer en PDF</span></button>
+      <button type="button" id="deconnexion"><svg aria-hidden="true"><use href="#i-sortie"/></svg><span class="lib">Se déconnecter</span></button>
+    </div>
+  </nav>
+
+  <div style="min-width:0">
+    <header class="haut" id="haut-de-page">
+      <div>
+        <h1>Tableau de bord</h1>
+        <p class="portee" id="portee" hidden></p>
+      </div>
+      <div class="reglages">
+        <div class="champ"><label for="periode">Période</label>
+          <select id="periode">
+            <option value="30">Les 30 derniers jours</option>
+            <option value="90">Les 3 derniers mois</option>
+            <option value="annee" selected>Année scolaire en cours</option>
+            <option value="tout">Depuis le début</option>
+            <option value="perso">Dates choisies…</option>
+          </select></div>
+        <div class="champ" id="champ-du" hidden><label for="du">Du</label><input type="date" id="du"></div>
+        <div class="champ" id="champ-au" hidden><label for="au">Au</label><input type="date" id="au"></div>
+      </div>
+      <div class="moi"><div class="avatar" id="avatar" aria-hidden="true">?</div>
+        <div class="texte-moi"><div class="nom" id="moi-nom"></div><p class="qui" id="qui">Pôle Technique — Direction de l'Éducation</p></div></div>
+    </header>
+
+    <main class="contenu" id="corps"></main>
+    <div class="pied" id="pied" hidden></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+//  Tableau de bord du Pôle Technique — v4.
+//
+//  Aucune donnée n'est agrégée en base : tout est calculé ici, à partir de
+//  ce que la sécurité par ligne rend à l'agent connecté. La même page sert
+//  à la direction (tout), à un chef de cellule (la sienne) et à un référent
+//  (ses domaines). Les calculs sont ceux de tableau-de-bord.html, à l'identique.
+//
+//  v4 : la base et la clé viennent de relais-config.js (garde-fou D27).
+// ─────────────────────────────────────────────────────────────────────────
+const CONFIG = window.RELAIS_CONFIG || { pret: false, motif: 'relais-config.js introuvable.' };
+const API = CONFIG.API;
+const CLE = CONFIG.CLE;
+const CLEF_SESSION = 'demandes-ecoles-pole' + (CONFIG.suffixeSession || '');
+const POSTE = 'gestion-v4.html';
+
+//  Mêmes seuils que le poste de travail. Arrêtés par Anthony le 31/08/2026.
+const RETARD_JOURS = 7, RETARD_URGENT_JOURS = 3;
+const EXTERNE_JOURS = 15, EXTERNE_URGENT_JOURS = 5;
+
+const CLOS = ['resolu', 'annule', 'archive'];
+const $ = s => document.querySelector(s);
+
+let session = null, moi = null;
+let REF = {}, DEMANDES = [], DELAIS = {};
+
+function echapper(t) {
+  return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function erreur(t) { const e = $('#erreur'); e.textContent = t; e.hidden = false; }
+
+// ─── Session ─────────────────────────────────────────────────────────────
+function lireSession() {
+  try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); } catch (e) { return null; }
+}
+function ecrireSession(s) { try { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); } catch (e) {} }
+function oublierSession() { try { localStorage.removeItem(CLEF_SESSION); } catch (e) {} }
+
+function emailDuJeton() {
+  try {
+    const brut = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(brut + '==='.slice((brut.length + 3) % 4));
+    const charge = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+    return (charge.email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+async function rafraichir() {
+  if (!session?.refresh_token) return false;
+  const r = await fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+    method:'POST', headers:{ apikey: CLE, 'Content-Type':'application/json' },
+    body: JSON.stringify({ refresh_token: session.refresh_token }) });
+  if (!r.ok) return false;
+  const j = await r.json();
+  session = { access_token: j.access_token, refresh_token: j.refresh_token,
+              expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000) };
+  ecrireSession(session);
+  return true;
+}
+async function api(chemin) {
+  const lancer = () => fetch(API + '/rest/v1/' + chemin, {
+    headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token,
+               'Content-Type': 'application/json' } });
+  let r = await lancer();
+  if (r.status === 401 && await rafraichir()) r = await lancer();
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text().catch(() => '')).slice(0, 160));
+  return r.json();
+}
+
+// ─── Périmètre, en écho au poste de travail ──────────────────────────────
+function portee() {
+  switch (moi?.fonction) {
+    case 'technicien':   return 'Ces chiffres ne portent que sur les demandes qui vous sont affectées.';
+    case 'referent':     return 'Ces chiffres ne portent que sur vos domaines.';
+    case 'chef_cellule': return 'Ces chiffres ne portent que sur votre cellule.';
+    case 'direction':
+    case 'assistante':
+    case 'secretariat':  return 'Ces chiffres portent sur toutes les demandes.';
+    default:             return '';
+  }
+}
+
+// ─── La période ──────────────────────────────────────────────────────────
+//  L'année scolaire à La Réunion court de janvier à décembre.
+function bornes() {
+  const choix = $('#periode').value;
+  const fin = new Date(); fin.setHours(23, 59, 59, 999);
+  if (choix === 'perso') {
+    const d = $('#du').value ? new Date($('#du').value + 'T00:00:00') : null;
+    const a = $('#au').value ? new Date($('#au').value + 'T23:59:59') : fin;
+    return { debut: d, fin: a, libelle: (d ? 'du ' + jour(d) : 'depuis le début') + ' au ' + jour(a) };
+  }
+  if (choix === 'tout')  return { debut: null, fin, libelle: 'depuis le début' };
+  if (choix === 'annee') {
+    const d = new Date(fin.getFullYear(), 0, 1);
+    return { debut: d, fin, libelle: 'année ' + fin.getFullYear() };
+  }
+  const n = Number(choix);
+  const d = new Date(fin); d.setDate(d.getDate() - n); d.setHours(0, 0, 0, 0);
+  return { debut: d, fin, libelle: 'du ' + jour(d) + ' au ' + jour(fin) };
+}
+function jour(d) {
+  return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+}
+function dansLaPeriode(d, b) {
+  const t = new Date(d.created_at);
+  return (!b.debut || t >= b.debut) && t <= b.fin;
+}
+
+// ─── Les mêmes règles de retard que le poste de travail ──────────────────
+function enRetard(d) {
+  if (CLOS.includes(d.statut) || d.pris_en_charge_le) return false;
+  const del = DELAIS[d.id];
+  if (!del || del.delai_hors_perimetre) return false;
+  return (del.delai_reaction_jours || 0) > (d.priorite === 'urgente' ? RETARD_URGENT_JOURS : RETARD_JOURS);
+}
+function sansNouvelles(d) {
+  const j = DELAIS[d.id]?.jours_chez_service;
+  if (j == null) return false;
+  return j > (d.priorite === 'urgente' ? EXTERNE_URGENT_JOURS : EXTERNE_JOURS);
+}
+
+// ─── Petits calculs ──────────────────────────────────────────────────────
+function nombre(x) {
+  return x == null ? '—' : Number(x).toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+}
+function moyenne(liste) {
+  const v = liste.filter(x => x != null && !Number.isNaN(x));
+  return v.length ? Math.round((v.reduce((s, x) => s + x, 0) / v.length) * 10) / 10 : null;
+}
+function mediane(liste) {
+  const v = liste.filter(x => x != null && !Number.isNaN(x)).sort((a, b) => a - b);
+  if (!v.length) return null;
+  const m = Math.floor(v.length / 2);
+  return v.length % 2 ? v[m] : Math.round(((v[m - 1] + v[m]) / 2) * 10) / 10;
+}
+function grouper(liste, cle) {
+  const m = new Map();
+  liste.forEach(d => { const k = cle(d) || '—'; m.set(k, (m.get(k) || 0) + 1); });
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+//  v4 : des barres de verre. « habiller(k) » donne, si besoin, l'icône et la
+//  couleur d'une ligne (les domaines) ; sinon barre marine sans icône.
+function barres(paires, total, habiller) {
+  if (!paires.length) return '<p class="vide-court">Rien sur cette période.</p>';
+  const max = Math.max(1, ...paires.map(p => p[1]));
+  return '<div class="barres">' + paires.map(([k, n]) => {
+    const part = total ? Math.round((n / total) * 1000) / 10 : 0;
+    const h = habiller ? habiller(k) : null;
+    return `<div class="rang"><span class="lib">${h?.html || ''}<span title="${echapper(k)}">${echapper(k)}</span></span>
+      <span class="rail"><span class="plein" style="width:${Math.round(n / max * 100)}%${h?.couleur ? ';background:' + h.couleur : ''}"></span></span>
+      <b>${n}</b><span class="part">${part.toLocaleString('fr-FR')} %</span></div>`;
+  }).join('') + '</div>';
+}
+function nomEcole(d) {
+  const e = REF.ecoles[d.ecole_id] || {};
+  return [e.type_ecole, e.nom].filter(Boolean).join(' ');
+}
+//  Le libellé d'un domaine → son icône et sa couleur (icones.js).
+function habillerDomaine(libelle) {
+  const dom = Object.values(REF.domaines).find(x => x.libelle === libelle);
+  if (!dom || !window.RelaisIcones) return null;
+  const i = RelaisIcones.domaine(dom.code);
+  return { html: i.html ? `<span style="${i.style}">${i.html.replace('class="pique"', 'class="pique mini"')}</span>` : '',
+           couleur: RelaisIcones.couleur(dom.code).c };
+}
+
+// ─── Le tableau de bord ──────────────────────────────────────────────────
+function dessiner() {
+  const b = bornes();
+  const dans = DEMANDES.filter(d => dansLaPeriode(d, b));
+  const total = dans.length;
+
+  //  « Closes sur la période » compte celles CLOSES pendant la période, même
+  //  déposées avant : c'est l'activité du service, pas le sort d'une cohorte.
+  const closes = DEMANDES.filter(d => {
+    const q = d.cloture_le || (CLOS.includes(d.statut) ? d.updated_at : null);
+    return q && (!b.debut || new Date(q) >= b.debut) && new Date(q) <= b.fin;
+  });
+  const ouvertes  = dans.filter(d => !CLOS.includes(d.statut));
+  const retards   = DEMANDES.filter(enRetard);
+  const dehors    = DEMANDES.filter(d => DELAIS[d.id]?.jours_chez_service != null);
+  const muettes   = dehors.filter(sansNouvelles);
+  const injoign   = DEMANDES.filter(d => DELAIS[d.id]?.service_injoignable
+                                      && !CLOS.includes(d.statut));
+
+  const reaction  = dans.map(d => DELAIS[d.id]?.delai_reaction_jours);
+  const urgentes  = dans.filter(d => d.priorite === 'urgente');
+
+  //  Une carte : bandeau de couleur + chiffre + précision.
+  const carte = (n, l, p, teinte, ico, signal) => `<div class="carte-chiffre${signal ? ' signal' : ''}">
+      <span class="bandeau degrade" style="--teinte:${teinte}">${echapper(l)}
+        <svg aria-hidden="true"><use href="#${ico}"/></svg></span>
+      <span class="corps"><span class="grand">${n}</span>${p ? `<span class="petit">${echapper(p)}</span>` : ''}</span></div>`;
+
+  const coutsRenseignes = dans.filter(d => d.cout_reel != null);
+  const totalCout = coutsRenseignes.reduce((s, d) => s + Number(d.cout_reel), 0);
+  const aChiffrer = DEMANDES.filter(d => d.cout_statut === 'a_renseigner' && CLOS.includes(d.statut));
+
+  const services = (() => {
+    const parService = new Map();
+    dehors.forEach(d => {
+      const s = DELAIS[d.id].service_externe || 'Service non identifié';
+      const e = parService.get(s) || { n: 0, jours: [], muettes: 0 };
+      e.n++; e.jours.push(DELAIS[d.id].jours_chez_service);
+      if (sansNouvelles(d)) e.muettes++;
+      parService.set(s, e);
+    });
+    if (!parService.size) return '<p class="vide-court">Aucune demande en attente chez un service extérieur.</p>';
+    return `<table class="services"><thead><tr><th>Service</th><th class="n">En attente</th>
+      <th class="n">Attente médiane</th><th class="n">Sans nouvelles</th></tr></thead><tbody>`
+      + [...parService.entries()].sort((a, b2) => b2[1].n - a[1].n).map(([s, e]) =>
+          `<tr><td>${echapper(s)}</td><td class="n">${e.n}</td>
+           <td class="n">${nombre(mediane(e.jours))} j</td>
+           <td class="n">${e.muettes || '—'}</td></tr>`).join('')
+      + '</tbody></table>';
+  })();
+
+  $('#corps').innerHTML = `
+    <div class="titre-bloc"><h2>Vue d'ensemble</h2><p>Demandes déposées ${echapper(b.libelle)}.</p></div>
+    <section class="cartes six" aria-label="Vue d'ensemble">
+      ${carte(nombre(total), 'Demandes déposées', b.libelle, 'var(--marine-encre)', 'i-tout')}
+      ${carte(closes.length, 'Demandes closes', 'sur la même période', 'var(--fait)', 'i-ok')}
+      ${carte(ouvertes.length, 'Encore ouvertes', 'parmi les déposées', 'var(--agir)', 'i-cle-plate')}
+      ${carte(urgentes.length, 'Urgentes', total ? Math.round(urgentes.length / total * 100) + ' % du total' : '', 'var(--alerte)', 'i-alerte')}
+      ${carte(nombre(mediane(reaction)), 'Délai de réaction', 'jours ouvrés, médiane', 'var(--sarcelle)', 'i-chrono')}
+      ${carte(nombre(moyenne(reaction)), 'Délai de réaction', 'jours ouvrés, moyenne', 'var(--sarcelle)', 'i-chrono')}
+    </section>
+
+    <div class="titre-bloc"><h2>Ce qui demande une action aujourd'hui</h2><p>Ces chiffres ne dépendent pas de la période : ils décrivent l'instant présent.</p></div>
+    <section class="cartes" aria-label="Ce qui demande une action aujourd'hui">
+      ${carte(retards.length, 'En retard',
+              `plus de ${RETARD_JOURS} j ouvrés sans réponse (${RETARD_URGENT_JOURS} si urgente)`,
+              'var(--alerte)', 'i-chrono', retards.length > 0)}
+      ${carte(dehors.length, 'Chez un autre service', 'en attente de leur réponse', 'var(--olive)', 'i-sortie-ext')}
+      ${carte(muettes.length, 'Sans nouvelles',
+              `plus de ${EXTERNE_JOURS} j ouvrés dehors (${EXTERNE_URGENT_JOURS} si urgente)`,
+              'var(--agir)', 'i-relance', muettes.length > 0)}
+      ${carte(injoign.length, 'Service sans adresse', 'aucun message n’a pu partir', 'var(--magenta)', 'i-courrier', injoign.length > 0)}
+    </section>
+    ${injoign.length ? `<div class="encart erreur">
+      <strong>${injoign.length} demande${injoign.length > 1 ? 's ont' : ' a'} été attribuée${injoign.length > 1 ? 's' : ''} à un service sans adresse</strong>
+      Elle${injoign.length > 1 ? 's sont parties' : ' est partie'} sur le papier et nulle part en réalité.
+      Ajoutez un contact à ce service, puis prévenez-le.</div>` : ''}
+
+    <div class="duo">
+      <section class="panneau" aria-labelledby="t-dom">
+        <div class="panneau-tete degrade" style="--teinte:var(--marine-encre)"><h2 id="t-dom">Par domaine</h2></div>
+        <p class="aide">Ce qui occupe le pôle, ${echapper(b.libelle)}.</p>
+        ${barres(grouper(dans, d => REF.domaines[d.domaine_id]?.libelle), total, habillerDomaine)}
+      </section>
+      <section class="panneau" aria-labelledby="t-quartier">
+        <div class="panneau-tete degrade" style="--teinte:var(--violet)"><h2 id="t-quartier">Par quartier</h2></div>
+        ${barres(grouper(dans, d => REF.ecoles[d.ecole_id]?.secteur), total)}
+      </section>
+    </div>
+
+    <div class="duo">
+      <section class="panneau" aria-labelledby="t-ecoles">
+        <div class="panneau-tete degrade" style="--teinte:var(--magenta)"><h2 id="t-ecoles">Les écoles qui sollicitent le plus</h2></div>
+        <p class="aide">Les dix premières. Un volume élevé n'est pas un reproche&nbsp;: il signale souvent un bâtiment vieillissant.</p>
+        ${barres(grouper(dans, nomEcole).slice(0, 10), total)}
+      </section>
+      <section class="panneau" aria-labelledby="t-services">
+        <div class="panneau-tete degrade" style="--teinte:var(--olive)"><h2 id="t-services">Les services extérieurs</h2></div>
+        <p class="aide">Ce qui leur a été confié et n'est pas revenu. Leur retard n'est pas le vôtre&nbsp;; la relance l'est.</p>
+        <div style="padding-top:8px">${services}</div>
+      </section>
+    </div>
+
+    <div class="titre-bloc"><h2>Coûts</h2><p>Seuls les coûts réellement saisis sont comptés&nbsp;: aucune estimation.</p></div>
+    <section class="cartes" aria-label="Coûts">
+      ${carte(totalCout.toLocaleString('fr-FR', { style:'currency', currency:'EUR', maximumFractionDigits:0 }),
+              'Dépense constatée', `sur ${coutsRenseignes.length} demande${coutsRenseignes.length > 1 ? 's' : ''} chiffrée${coutsRenseignes.length > 1 ? 's' : ''}`,
+              'var(--encre-doux)', 'i-euro')}
+      ${carte(aChiffrer.length, 'Restent à chiffrer', 'demandes closes sans coût saisi', 'var(--agir)', 'i-euro', aChiffrer.length > 0)}
+    </section>`;
+
+  $('#pied').innerHTML = `Tableau de bord édité le ${jour(new Date())}
+    ${moi ? '— ' + echapper(moi.nom) + ', ' + echapper(moi.fonction.replace('_', ' ')) : ''}
+    · Pôle Technique, Direction de l'Éducation, Ville de Saint-Denis
+    · ${echapper(portee())}`;
+  $('#pied').hidden = false;
+}
+
+// ─── Commandes ───────────────────────────────────────────────────────────
+$('#periode').addEventListener('change', () => {
+  const perso = $('#periode').value === 'perso';
+  $('#champ-du').hidden = !perso;
+  $('#champ-au').hidden = !perso;
+  dessiner();
+});
+['#du', '#au'].forEach(s => $(s).addEventListener('change', dessiner));
+$('#imprimer').addEventListener('click', () => window.print());
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.href = POSTE; });
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+(async function demarrer() {
+  if (!CONFIG.pret) {
+    $('#chargement').hidden = true;
+    $('#arret').textContent = CONFIG.motif;
+    $('#arret').hidden = false;
+    return;
+  }
+  session = lireSession();
+  if (session && session.expire_le && session.expire_le < Date.now() + 60000) {
+    if (!await rafraichir()) session = null;
+  }
+  if (!session) {
+    //  Pas d'écran de connexion propre : celui du poste de travail suffit.
+    location.href = POSTE;
+    return;
+  }
+
+  try {
+    const [ecoles, domaines, agents, d, del] = await Promise.all([
+      api('ecoles?select=id,nom,type_ecole,secteur,zone&order=nom'),
+      api('domaines?select=id,code,libelle,traitement,cellule_id&order=ordre'),
+      api('agents?select=id,nom,fonction,cellule_id,email,actif&order=nom'),
+      api('demandes?select=id,created_at,updated_at,statut,priorite,domaine_id,ecole_id,'
+        + 'pris_en_charge_le,cloture_le,cout_reel,cout_statut&order=created_at.desc'),
+      api('v_demandes_delais?select=id,delai_reaction_jours,delai_realisation_jours,'
+        + 'delai_hors_perimetre,jours_chez_service,service_externe,service_injoignable')
+    ]);
+    const parId = l => Object.fromEntries(l.map(x => [x.id, x]));
+    REF = { ecoles: parId(ecoles), domaines: parId(domaines) };
+    DEMANDES = d;
+    DELAIS = parId(del);
+    moi = agents.find(a => (a.email || '').toLowerCase() === emailDuJeton()) || null;
+  } catch (e) {
+    if (String(e.message).startsWith('401')) { oublierSession(); location.href = POSTE; return; }
+    $('#chargement').hidden = true;
+    erreur("Les données n'ont pas pu être chargées. Réessayez dans un instant ; "
+         + "si le problème persiste, c'est peut-être que cette adresse n'est pas "
+         + "celle d'un agent du Pôle Technique.");
+    return;
+  }
+
+  const mail = emailDuJeton();
+  const nom = moi?.nom || mail;
+  $('#moi-nom').textContent = nom;
+  $('#qui').textContent = moi ? moi.fonction.replace('_', ' ') : 'Pôle Technique';
+  $('#avatar').textContent = nom.split(/[\s.@-]+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
+  $('#portee').textContent = portee();
+  $('#portee').hidden = !portee();
+  $('#chargement').hidden = true;
+  $('#tout').hidden = false;
+  dessiner();
+})();
+</script>
+</body>
+</html>
