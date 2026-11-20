@@ -288,6 +288,7 @@ body.verre header.haut p{ color: var(--sur-verre-doux); text-shadow: none; opaci
     <div class="marque"><img src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="29" height="42" decoding="async"><span>Relais<small>Pôle Technique</small></span></div>
     <a href="#haut-de-page" class="actif" aria-current="page"><svg aria-hidden="true"><use href="#i-bord"/></svg><span class="lib">Poste de travail</span></a>
     <a href="#t-liste"><svg aria-hidden="true"><use href="#i-liste"/></svg><span class="lib">Demandes</span><span class="compte" id="menu-a-prendre" title="À prendre en charge" hidden></span></a>
+    <a href="releve-ventilateurs.html"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="10" r="7"/><circle cx="12" cy="10" r="1.5"/><path d="M12 8.5V4.5M13.3 10.8l3.4 2M10.7 10.8l-3.4 2M12 17v4M8 21h8"/></svg><span class="lib">Relevé ventilateurs</span></a>
     <a href="tableau-de-bord-v4.html" id="vers-tableau" hidden><svg aria-hidden="true"><use href="#i-graph"/></svg><span class="lib">Tableau de bord</span></a>
     <div class="bas">
       <button type="button" id="exporter"><svg aria-hidden="true"><use href="#i-export"/></svg><span class="lib">Exporter</span></button>
@@ -1401,6 +1402,9 @@ function montrerConnexion(message) {
   $('#vers-tableau').hidden = moi?.fonction === 'technicien';
   remplirFiltres();
   brancherFiltres();
+  //  Lien venu du relevé des ventilateurs (D31) : ?cherche=DEM-… ouvre la liste filtrée sur ce numéro.
+  const cherche = new URLSearchParams(location.search).get('cherche');
+  if (cherche) { $('#f-texte').value = cherche.slice(0, 60); filtres.texte = cherche.slice(0, 60); }
   dessinerCompteurs();
   dessinerListe();
   brancherTableau();

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Relevé ventilateurs — Pôle Technique</title>
+<!--
+  RELAIS v4 — relevé des ventilateurs et brasseurs d'air des écoles (D31, novembre 2026).
+  Page nouvelle, à côté des autres : elle ne touche à aucune table existante (lecture des écoles et de
+  l'annuaire seulement). Elle écrit dans releve_ventil_ecoles et releve_ventil_appareils, créées par
+  A-APPLIQUER-2026-11-20-releve-ventilateurs.sql. Même session que le poste de travail : un agent
+  connecté à gestion-v4.html l'est ici. Rien ne s'efface : une ligne fausse est « retirée ».
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="systeme-design/jetons.css">
+<link rel="stylesheet" href="systeme-design/socle.css">
+<link rel="stylesheet" href="systeme-design/composants.css">
+<link rel="stylesheet" href="systeme-design/verre.css">
+<script src="relais-config.js"></script>
+<style>
+/* Propre à cette page. Le reste : jetons, socle, composants, puis verre.css. */
+body.verre{ font-size: 15px; line-height: 1.45 }
+.appli{ display: grid; grid-template-columns: 228px minmax(0, 1fr); min-height: 100vh }
+
+/* ── Menu latéral (verre sombre), repris du poste de travail ─────────────── */
+.menu{ position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px;
+       padding: 18px 12px; color: #eef1f4;
+       background: rgba(30,40,50,.62); -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+       border-right: 1px solid rgba(255,255,255,.12) }
+.menu .marque{ display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; color: #fff; font-weight: 700; font-size: 17px; line-height: 1.2 }
+.menu .marque img{ height: 42px; width: auto; background: #fff; border-radius: 9px; padding: 3px 5px }
+.menu .marque small{ display: block; font-weight: 400; font-size: 12.5px; color: #e3e7ec }
+.menu a, .menu button{ display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 9px;
+       color: #eef1f4; text-decoration: none; font: inherit; font-size: 14.5px; background: none; border: 0; cursor: pointer; text-align: left; width: 100% }
+.menu a svg, .menu button svg{ width: 19px; height: 19px; flex: none }
+.menu a:hover, .menu button:hover{ background: rgba(255,255,255,.14); color: #fff }
+.menu a.actif{ background: var(--marine); color: #fff; font-weight: 600 }
+.menu .bas{ margin-top: auto; display: flex; flex-direction: column; gap: 4px }
+
+/* ── Barre du haut ───────────────────────────────────────────────────────── */
+body.verre header.haut{ position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+       padding: 12px 24px 0; color: var(--encre); text-shadow: none;
+       background: rgba(255,255,255,.62); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+       border-bottom: 1px solid var(--verre-bord) }
+body.verre header.haut h1{ color: var(--encre); font-size: 19px; text-shadow: none; margin: 0 }
+body.verre header.haut p{ color: var(--sur-verre-doux); text-shadow: none; opacity: 1; margin: 1px 0 0; font-size: 13px }
+.haut .titres{ flex: 1 1 260px; min-width: 0 }
+.haut .actions-haut{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.haut .maj{ font-size: 12.5px; color: var(--sur-verre-doux) }
+nav.onglets-rv{ flex-basis: 100%; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-top: 4px }
+nav.onglets-rv a{ padding: 9px 14px 10px; border-radius: 10px 10px 0 0; white-space: nowrap; font-weight: 600; color: var(--sur-verre-doux); text-decoration: none; font-size: 14.5px }
+nav.onglets-rv a[aria-current="page"]{ background: var(--marine-encre); color: #fff }
+nav.onglets-rv a:hover{ color: var(--encre) }
+nav.onglets-rv a[aria-current="page"]:hover{ color: #fff }
+
+main.rv{ max-width: 1180px; padding: 20px 24px 60px; display: grid; gap: 18px }
+.rv h2{ font-size: 18px; font-weight: 700; margin: 0 0 12px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap }
+.rv h2 small{ font-weight: 400; font-size: 14px }
+.rv .carte-verre{ margin: 0; min-width: 0 }
+.rv .aide{ color: var(--sur-verre-doux); font-size: 14px; margin: 0 }
+.num{ font-variant-numeric: tabular-nums }
+.ic{ width: 18px; height: 18px; flex: none }
+.rv .encart{ margin: 0 }
+
+/* Boutons de la page */
+.btn{ display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 8px 15px; border-radius: 10px;
+      border: 1px solid var(--marine-encre); background: rgba(255,255,255,.85); color: var(--marine-encre); font: inherit; font-weight: 700; cursor: pointer; text-decoration: none }
+.btn:hover{ background: var(--marine-pale) }
+.btn.action{ background: var(--magenta); border-color: var(--magenta); color: #fff }
+.btn.action:hover{ background: #8f0948 }
+.btn.danger{ border-color: var(--alerte); color: var(--alerte) }
+.btn.danger.arme{ background: var(--alerte); color: #fff }
+.btn.petit{ min-height: 34px; padding: 5px 11px; font-size: 14px }
+.btn:disabled{ opacity: .55; cursor: not-allowed }
+.boutons{ display: flex; gap: 8px; flex-wrap: wrap }
+
+/* Cartes-compteurs (bandeau de couleur, plus clair à gauche) */
+.kpis{ display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px }
+.kpi{ border-radius: var(--rayon-carte); overflow: hidden; background: rgba(255,255,255,.8); border: 1px solid var(--verre-bord); box-shadow: var(--ombre-verre); min-width: 0 }
+.kpi .degrade{ padding: 8px 14px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px }
+.kpi .corps{ padding: 10px 14px 12px }
+.kpi .grand{ font-size: 30px; font-weight: 700; line-height: 1.1 }
+.kpi .grand span{ font-size: 15px; font-weight: 400; color: var(--sur-verre-doux) }
+.kpi .sous{ color: var(--sur-verre-doux); font-size: 14px }
+.rouge{ color: var(--alerte); font-weight: 700 }
+.zero{ color: #6d6969 }
+
+/* Avancement par agent */
+.agents{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px }
+.agent{ background: var(--verre-leger); border: 1px solid var(--verre-bord); border-radius: var(--rayon-carte); padding: 14px;
+        display: grid; gap: 8px; text-decoration: none; color: inherit; min-width: 0 }
+body.verre .carte-verre a.agent{ color: inherit }
+.agent:hover{ background: rgba(255,255,255,.8) }
+.agent .nom{ font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px }
+.teinte{ width: 12px; height: 12px; border-radius: 4px; background: var(--teinte); flex: none }
+.barre{ display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: rgba(32,30,29,.12) }
+.barre i{ display: block; height: 100% }
+.barre .b-fait{ background: var(--fait) } .barre .b-cours{ background: #c99a2e }
+.legende{ display: flex; gap: 12px; flex-wrap: wrap; font-size: 13.5px; color: var(--sur-verre-doux) }
+.legende b{ color: var(--encre) }
+
+/* Filtres et tableau */
+.filtres-rv{ display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end }
+.filtres-rv label{ display: grid; gap: 2px; font-size: 13px; color: var(--sur-verre-doux); font-weight: 600; margin: 0 }
+.filtres-rv select, .filtres-rv input{ min-height: 38px !important; padding: 6px 10px !important; min-width: 0; width: auto }
+.defile{ overflow-x: auto; border-radius: 12px }
+.rv table{ font-size: 14.5px }
+.rv th, .rv td{ padding: 8px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(32,30,29,.12) }
+.rv th{ font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--sur-verre-doux); background: rgba(255,255,255,.55) }
+.rv td.n, .rv th.n{ text-align: right; font-variant-numeric: tabular-nums }
+.rv tfoot td{ font-weight: 700; background: rgba(255,255,255,.6) }
+.rv td a{ font-weight: 600 }
+.rv td .aide{ font-size: 12.5px }
+
+/* Puces d'état */
+.puce{ display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 99px; font-size: 12.5px; font-weight: 700; white-space: nowrap }
+.p-afaire{ background: rgba(32,30,29,.08); color: var(--sur-verre-doux) }
+.p-cours, .p-reparable{ background: var(--agir-pale); color: var(--agir) }
+.p-fait, .p-marche{ background: var(--fait-pale); color: var(--fait) }
+.p-remplacer{ background: var(--alerte-pale); color: var(--alerte) }
+.p-urgente{ background: var(--alerte); color: #fff }
+.p-haute{ background: var(--magenta-pale); color: var(--magenta) }
+
+/* Fiche agent */
+.quartier{ display: grid; gap: 10px }
+.quartier h3{ font-size: 15.5px; color: var(--marine-encre); margin: 0; display: flex; gap: 8px; align-items: baseline }
+.quartier h3 small{ font-weight: 400; color: var(--sur-verre-doux) }
+.ecoles{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px }
+a.carte-ecole{ background: var(--verre-leger); border: 1px solid var(--verre-bord); border-radius: var(--rayon-carte); padding: 12px 14px;
+       display: grid; gap: 8px; min-width: 0; text-decoration: none }
+body.verre .carte-verre a.carte-ecole{ color: var(--encre) }
+a.carte-ecole:hover{ background: rgba(255,255,255,.8) }
+.carte-ecole .haut-c{ display: flex; gap: 8px; align-items: flex-start; justify-content: space-between }
+.carte-ecole .nom{ font-weight: 700 }
+.carte-ecole .type{ color: var(--sur-verre-doux); font-size: 13.5px }
+.six{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px }
+.six div{ background: rgba(255,255,255,.62); border-radius: 9px; padding: 5px 8px; min-width: 0 }
+.six b{ display: block; font-size: 18px; font-variant-numeric: tabular-nums }
+.six span{ font-size: 12px; color: var(--sur-verre-doux); line-height: 1.15; display: block }
+.six.grand6 b{ font-size: 24px }
+
+/* Fiche école */
+.retour{ font-weight: 600; text-decoration: none; display: inline-flex; gap: 6px; align-items: center }
+.coord{ display: flex; gap: 6px 18px; flex-wrap: wrap; color: var(--sur-verre-doux); font-size: 14.5px; margin: 6px 0 0 }
+.colonnes{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 18px; align-items: start }
+.rv form{ display: grid; gap: 12px; margin: 0 }
+.rv form label{ margin: 0 }
+.champ{ display: grid; gap: 4px; min-width: 0 }
+.champ > span, .legend{ font-weight: 600; font-size: 14.5px }
+.rv .champ input[type=text], .rv .champ input[type=date], .rv .champ select, .rv .champ textarea{ width: 100%; min-width: 0 }
+.rv textarea{ min-height: 64px }
+.ligne{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px }
+.choix{ display: flex; flex-wrap: wrap; gap: 6px }
+.rv .choix label{ display: inline-block; margin: 0; font-weight: 400; cursor: pointer }
+.choix input{ position: absolute; opacity: 0; pointer-events: none }
+.choix span{ display: inline-flex; align-items: center; padding: 8px 13px; border-radius: 99px; border: 1px solid #7d7979; background: #fff; font-weight: 600; font-size: 14.5px }
+.choix input:checked + span{ background: var(--marine-encre); border-color: var(--marine-encre); color: #fff }
+.choix input:focus-visible + span{ outline: 3px solid var(--marine-clair); outline-offset: 2px }
+.choix.etat input[value="marche"]:checked + span{ background: var(--fait); border-color: var(--fait) }
+.choix.etat input[value="reparable"]:checked + span{ background: var(--agir); border-color: var(--agir) }
+.choix.etat input[value="remplacer"]:checked + span, .choix.prio input[value="urgente"]:checked + span{ background: var(--alerte); border-color: var(--alerte) }
+.choix.prio input[value="haute"]:checked + span{ background: var(--magenta); border-color: var(--magenta) }
+.coche{ display: flex !important; gap: 8px; align-items: center; font-weight: 600 }
+.pas{ display: flex; align-items: center; gap: 6px }
+.pas button{ width: 40px; height: 40px; border-radius: 10px; border: 1px solid #7d7979; background: #fff; font-size: 20px; font-weight: 700; cursor: pointer }
+.rv .pas input{ width: 74px; text-align: center }
+.salle{ display: grid; gap: 8px }
+.salle h3{ font-size: 15.5px; margin: 0; color: var(--marine-encre) }
+.app{ background: var(--verre-leger); border: 1px solid var(--verre-bord); border-radius: 12px; padding: 10px 12px;
+      display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: start }
+.app .vign{ width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: rgba(32,30,29,.08); display: grid; place-items: center; color: var(--sur-verre-doux); border: 0; padding: 0; cursor: pointer }
+.app .vign svg{ width: 26px; height: 26px }
+.app .quoi{ font-weight: 700 }
+.app .det{ font-size: 13.5px; color: var(--sur-verre-doux) }
+.app .puces{ display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px }
+.app .act{ display: flex; flex-direction: column; gap: 6px }
+.vide{ padding: 18px; border: 1px dashed rgba(32,30,29,.3); border-radius: 12px; color: var(--sur-verre-doux); text-align: center }
+.photo-apercu{ display: flex; gap: 10px; align-items: center; flex-wrap: wrap }
+.photo-apercu img{ width: 72px; height: 72px; object-fit: cover; border-radius: 10px }
+.mode-edit{ background: var(--agir-pale); color: var(--agir); padding: 6px 10px; border-radius: 10px; font-weight: 600; font-size: 14px }
+.liste-rempl{ display: grid; gap: 8px }
+.toast{ position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--encre); color: #fff;
+        padding: 10px 16px; border-radius: 12px; z-index: 60; max-width: calc(100% - 32px); box-shadow: 0 8px 24px rgba(0,0,0,.25) }
+.toast.ko{ background: var(--alerte) }
+
+/* Connexion */
+.connexion{ max-width: 460px; margin: 60px auto }
+.connexion form{ display: grid; gap: 10px }
+
+/* Fiche papier (impression) */
+.papier{ background: #fff; color: #201e1d; padding: 18px; display: none }
+.papier h1{ font-size: 20px; margin: 0 0 6px } .papier h2{ font-size: 16px; margin: 0 }
+.papier section{ page-break-after: always; break-after: page; padding-top: 6px }
+.papier table{ border-collapse: collapse; width: 100%; margin-top: 8px }
+.papier th, .papier td{ border: 1px solid #777; padding: 5px; font-size: 12px; text-align: left; vertical-align: top }
+.papier td{ height: 26px } .papier .tot td{ height: 30px } .papier th{ background: #eef3f6 }
+.papier .c{ margin: 3px 0; font-size: 13px } .papier .leg{ font-size: 12px; color: #444 }
+body.mode-papier .appli, body.mode-papier .connexion{ display: none !important }
+body.mode-papier .papier{ display: block }
+body.mode-papier::before{ display: none }
+body.mode-papier{ background: #fff }
+@media print{ .papier .outil{ display: none } @page{ size: A4 landscape; margin: 10mm } }
+
+@media (max-width: 900px){ .colonnes{ grid-template-columns: 1fr } }
+@media (max-width: 820px){
+  .appli{ grid-template-columns: 1fr }
+  .menu{ position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 10px }
+  .menu .marque{ padding: 0 8px 0 0 } .menu .bas{ margin: 0; flex-direction: row }
+  .menu a, .menu button{ width: auto }
+  .menu .lib-long{ display: none }
+  body.verre header.haut{ padding: 10px 14px 0 } main.rv{ padding: 14px 12px 40px }
+}
+@media (max-width: 520px){ .app{ grid-template-columns: auto minmax(0, 1fr) } .app .act{ grid-column: 1 / -1; flex-direction: row } }
+@media (prefers-reduced-transparency: reduce){ .agent, a.carte-ecole, .app, .kpi{ background: #fff } }
+</style>
+</head>
+<body class="verre">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-bord" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-vent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="10" r="7"/><circle cx="12" cy="10" r="1.5"/><path d="M12 8.5V4.5M13.3 10.8l3.4 2M10.7 10.8l-3.4 2M12 17v4M8 21h8"/></symbol>
+  <symbol id="i-bras" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3v5M3 11h7M14 11h7"/><circle cx="12" cy="11" r="2.5"/><path d="M10 14l-2 5M14 14l2 5"/></symbol>
+  <symbol id="i-ecole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-alerte" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></symbol>
+  <symbol id="i-sortie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></symbol>
+  <symbol id="i-relance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-imprimer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H4v-8h16v8h-3"/><path d="M7 14h10v7H7z"/></symbol>
+  <symbol id="i-retour" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-cloche" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+</svg>
+
+<div id="arret" class="encart erreur carte-verre" role="alert" hidden style="max-width:560px;margin:60px auto"></div>
+<p class="carte-verre" id="chargement" style="max-width:420px;margin:60px auto">Chargement…</p>
+
+<!-- ─── Connexion (même lien que le poste de travail) ─────────────────── -->
+<section class="connexion carte-verre" id="ecran-connexion" hidden>
+  <h2>Relevé des ventilateurs</h2>
+  <p>Saisissez votre adresse professionnelle. Vous recevrez un lien qui vous connecte directement, sans mot de passe.
+     Si vous êtes déjà connecté au poste de travail Relais sur cet appareil, rechargez simplement la page.</p>
+  <form id="form-connexion" novalidate>
+    <label for="email" class="masque">Adresse email</label>
+    <input type="email" id="email" required autocomplete="email" inputmode="email" placeholder="prenom.nom@saintdenis.re">
+    <button type="submit" class="principal" id="bouton-lien">Recevoir mon lien</button>
+  </form>
+  <div id="lien-envoye" class="encart info" role="status" hidden>
+    <strong>Regardez votre boîte mail</strong>
+    Ouvrez le lien <strong>depuis cet appareil</strong>. Il ne sert qu'une fois.
+  </div>
+  <div id="erreur-connexion" class="encart erreur" role="alert" hidden></div>
+</section>
+
+<!-- ─── Page ─────────────────────────────────────────────────────────── -->
+<div class="appli" id="ecran-travail" hidden>
+  <nav class="menu" aria-label="Menu Relais">
+    <div class="marque"><img src="logo-saint-denis.png" alt="Ville de Saint-Denis" width="29" height="42" decoding="async"><span class="lib-long">Relais<small>Pôle Technique</small></span></div>
+    <a href="gestion-v4.html"><svg aria-hidden="true"><use href="#i-bord"/></svg><span>Poste de travail</span></a>
+    <a href="releve-ventilateurs.html" class="actif" aria-current="page"><svg aria-hidden="true"><use href="#i-vent"/></svg><span>Relevé ventilateurs</span></a>
+    <a href="tableau-de-bord-v4.html" class="lib-long"><svg aria-hidden="true"><use href="#i-graph"/></svg><span>Tableau de bord</span></a>
+    <div class="bas">
+      <button type="button" id="deconnexion"><svg aria-hidden="true"><use href="#i-sortie"/></svg><span class="lib-long">Se déconnecter</span></button>
+    </div>
+  </nav>
+
+  <div style="min-width:0">
+    <header class="haut">
+      <div class="titres">
+        <h1>Relevé des ventilateurs et brasseurs d'air</h1>
+        <p id="qui">Pôle Technique</p>
+      </div>
+      <div class="actions-haut">
+        <span class="maj" id="maj"></span>
+        <button type="button" class="btn petit" id="actualiser"><svg class="ic" aria-hidden="true"><use href="#i-relance"/></svg>Actualiser</button>
+      </div>
+      <nav class="onglets-rv" id="onglets" aria-label="Vues du relevé"></nav>
+    </header>
+    <main class="rv" id="vue"></main>
+  </div>
+</div>
+
+<div class="papier" id="papier"></div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════════════
+//  Relevé des ventilateurs et brasseurs d'air (D31).
+//
+//  Comme le poste de travail : tout passe par PostgREST avec le jeton de la
+//  session, et c'est la sécurité par ligne qui tranche. Les boutons ne sont
+//  qu'un confort : le secrétariat lit sans pouvoir saisir, et la base
+//  refuserait de toute façon une saisie qui ne lui revient pas.
+//  Rien ne s'efface : « Retirer » pose retire = vrai sur la ligne.
+// ═════════════════════════════════════════════════════════════════════════
+const CONFIG = window.RELAIS_CONFIG || { pret: false, motif: 'relais-config.js introuvable.' };
+const API = CONFIG.API, CLE = CONFIG.CLE;
+const CLEF_SESSION = 'demandes-ecoles-pole' + (CONFIG.suffixeSession || '');
+const BUCKET = 'photos-releve';
+const SAISIE = ['direction','assistante','chef_cellule','referent','technicien'];
+
+const AGENTS = {
+  axel:   { nom:'Axel ANDY',        court:'Axel',   teinte:'#5b3f8f', jours:2, note:'Présent le jeudi et le vendredi' },
+  michel: { nom:'Michel LACOUTURE', court:'Michel', teinte:'#2d6b66', jours:5, note:'Zone Est' },
+  alain:  { nom:'Alain BOURGES',    court:'Alain',  teinte:'#006786', jours:5, note:'Zone Ouest' }
+};
+const ORDRE = ['axel','michel','alain'];
+const STATUTS = { a_faire:['À faire','p-afaire'], en_cours:['En cours','p-cours'], terminee:['Terminée','p-fait'] };
+const ETATS = { marche:['En marche','p-marche'], reparable:['Panne réparable','p-reparable'], remplacer:['À remplacer','p-remplacer'] };
+const PRIOS = { normale:['Normale',''], haute:['Haute','p-haute'], urgente:['Urgente','p-urgente'] };
+const CATS = { ventilateur:'Ventilateur', brasseur:'Brasseur d’air' };
+const POSES = { mural:'Mural', pied:'Sur pied', plafond:'Plafond' };
+const PANNES = ['Ne démarre pas','Bruit ou vibration','Vitesse bloquée','Commande ou interrupteur HS','Pale cassée ou manquante',
+  'Oscillation bloquée','Fixation à reprendre','Câble ou prise abîmé','Autre'];
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const auj = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const dateFr = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'short' }) : '';
+const coll = new Intl.Collator('fr');
+const icone = (id, cls) => `<svg class="${cls || 'ic'}" aria-hidden="true"><use href="#${id}"/></svg>`;
+function toast(m, ko) { const t = $('#toast'); t.textContent = m; t.className = 'toast' + (ko ? ' ko' : ''); t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 3800); }
+
+// ─── Session (la même que le poste de travail) ───────────────────────────
+let session = null, moi = null;
+function lireSession() { try { return JSON.parse(localStorage.getItem(CLEF_SESSION) || 'null'); } catch (e) { return null; } }
+function ecrireSession(s) { localStorage.setItem(CLEF_SESSION, JSON.stringify(s)); }
+function oublierSession() { localStorage.removeItem(CLEF_SESSION); }
+function recupererJetonsDuLien() {
+  if (!location.hash || location.hash.indexOf('access_token=') === -1 && location.hash.indexOf('error_description=') === -1) return null;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const acces = p.get('access_token');
+  if (!acces) { history.replaceState(null, '', location.pathname); return null; }
+  const s = { access_token: acces, refresh_token: p.get('refresh_token'), expire_le: Date.now() + (Number(p.get('expires_in') || 3600) * 1000) };
+  ecrireSession(s); history.replaceState(null, '', location.pathname); return s;
+}
+async function rafraichirJeton() {
+  if (!session?.refresh_token) return false;
+  const r = await fetch(API + '/auth/v1/token?grant_type=refresh_token', { method:'POST',
+    headers:{ apikey: CLE, 'Content-Type':'application/json' }, body: JSON.stringify({ refresh_token: session.refresh_token }) });
+  if (!r.ok) return false;
+  const j = await r.json();
+  session = { access_token: j.access_token, refresh_token: j.refresh_token, expire_le: Date.now() + (Number(j.expires_in || 3600) * 1000) };
+  ecrireSession(session); return true;
+}
+function emailDuJeton() {
+  try { const brut = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(brut + '==='.slice((brut.length + 3) % 4));
+    return (JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)))).email || '').toLowerCase();
+  } catch (e) { return ''; }
+}
+async function appel(url, options = {}) {
+  const lancer = () => fetch(url, { ...options, headers: { apikey: CLE, Authorization: 'Bearer ' + session.access_token, ...(options.headers || {}) } });
+  let r = await lancer();
+  if (r.status === 401 && await rafraichirJeton()) r = await lancer();
+  return r;
+}
+async function api(chemin, options = {}) {
+  const r = await appel(API + '/rest/v1/' + chemin, { ...options, headers: { 'Content-Type':'application/json', ...(options.headers || {}) } });
+  if (!r.ok) { const d = await r.text().catch(() => ''); throw new Error(r.status + ' ' + d.slice(0, 200)); }
+  const corps = await r.text();
+  return corps ? JSON.parse(corps) : null;
+}
+
+// ─── Données ─────────────────────────────────────────────────────────────
+const ECOLES = new Map();       // id → { ...école, releve: {...}, appareils: [...] }
+const URLS = {};                // chemin de photo → adresse signée (1 h)
+//  Demandes déposées par les écoles dans le domaine « Ventilateur / brasseur d'air » de Relais.
+//  Lecture seule : la page ne touche jamais à une demande. La sécurité par ligne décide de ce
+//  que chacun en voit (l'assistante et la direction : tout ; un technicien : les siennes).
+const CLOS_D = ['resolu','annule','archive'];
+const ETATS_D = { nouveau:'Nouvelle', en_cours:'En cours', en_attente_pieces:'Attente de pièces', en_attente_devis:'Attente de devis',
+  planifie:'Planifiée', transmis_externe:'Transmise au dehors', en_attente_validation_ecole:'Attente de l’école', resolu:'Résolue',
+  rouvert:'Rouverte', annule:'Annulée', archive:'Archivée' };
+let DEMANDES_V = [], TYPES_V = {}, demandesLues = false;
+const ouverteD = d => !CLOS_D.includes(d.statut);
+async function chargerDemandes() {
+  try {
+    const dom = await api('domaines?select=id&code=eq.VENTILATION');
+    if (!dom || !dom.length) { DEMANDES_V = []; demandesLues = true; return; }
+    const [types, dem] = await Promise.all([
+      api('types_demande?select=id,libelle&domaine_id=eq.' + dom[0].id),
+      api('demandes?select=id,numero,ecole_id,type_demande_id,statut,priorite,description,localisation,created_at&domaine_id=eq.'
+        + dom[0].id + '&order=created_at.desc')]);
+    TYPES_V = Object.fromEntries(types.map(t => [t.id, t.libelle])); DEMANDES_V = dem; demandesLues = true;
+  } catch (e) { DEMANDES_V = []; demandesLues = false; }
+}
+async function charger() {
+  const [ecoles, releves, appareils] = await Promise.all([
+    api('ecoles?select=id,nom,type_ecole,secteur,zone,adresse,telephone&order=nom'),
+    api('releve_ventil_ecoles?select=*'),
+    api('releve_ventil_appareils?select=*&retire=eq.false&order=created_at')
+  ]);
+  const parId = Object.fromEntries(ecoles.map(e => [e.id, e]));
+  ECOLES.clear();
+  releves.forEach(r => { const e = parId[r.ecole_id]; if (e) ECOLES.set(e.id, { ...e, releve: r, appareils: [] }); });
+  appareils.forEach(a => { const e = ECOLES.get(a.ecole_id); if (e) e.appareils.push(a); });
+  await chargerDemandes();
+  ECOLES.forEach(e => { e.demandes = DEMANDES_V.filter(d => d.ecole_id === e.id); });
+  $('#maj').textContent = 'À jour à ' + new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+  await signerPhotos(appareils.map(a => a.photo_chemin).filter(c => c && !URLS[c]));
+}
+async function signerPhotos(chemins) {
+  if (!chemins.length) return;
+  try {
+    const r = await appel(API + '/storage/v1/object/sign/' + BUCKET, { method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ expiresIn: 3600, paths: chemins }) });
+    if (!r.ok) return;
+    (await r.json()).forEach(x => { if (x.signedURL) URLS[x.path] = API + '/storage/v1' + x.signedURL; });
+  } catch (e) { /* les vignettes restent des icônes */ }
+}
+const peutSaisir = () => SAISIE.includes(moi?.fonction);
+const nbOuvertes = e => (e.demandes || []).filter(ouverteD).length;
+const lienDemande = d => 'gestion-v4.html?cherche=' + encodeURIComponent(d.numero);
+function carteDemande(e, d, avecEcole, action) {
+  const desc = (d.description || '').length > 220 ? d.description.slice(0, 217) + '…' : (d.description || '');
+  const prio = d.priorite === 'urgente' ? '<span class="puce p-urgente">Urgente</span>' : d.priorite === 'haute' ? '<span class="puce p-haute">Haute</span>' : '';
+  return `<div class="app demande"><div class="vign">${icone('i-cloche', '')}</div><div style="min-width:0">`
+    + `<div class="quoi">${esc(d.numero)} · ${esc(TYPES_V[d.type_demande_id] || 'Demande')}${avecEcole ? ` · <a href="#ecole-${e.id}">${esc(e.nom)}</a>` : ''}</div>`
+    + `<div class="det">Déposée le ${new Date(d.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' })}${d.localisation ? ' · ' + esc(d.localisation) : ''}</div>`
+    + `<div class="puces"><span class="puce ${ouverteD(d) ? 'p-cours' : 'p-fait'}">${esc(ETATS_D[d.statut] || d.statut)}</span>${prio}</div>`
+    + (desc ? `<div class="det" style="margin-top:4px">${esc(desc)}</div>` : '') + `</div>`
+    + `<div class="act"><a class="btn petit" href="${lienDemande(d)}">Ouvrir la demande</a>${action || ''}</div></div>`;
+}
+const statut = e => e.releve.statut || 'a_faire';
+function stats(e) {
+  const s = { vp:0, vr:0, vrep:0, bp:0, bm:0, bpanne:0, urg:0, lignes:0 };
+  for (const a of e.appareils) {
+    const n = Math.max(1, +a.nombre || 1); s.lignes++;
+    if (a.categorie === 'brasseur') { s.bp += n; if (a.etat === 'marche') s.bm += n; else s.bpanne += n; }
+    else { s.vp += n; if (a.etat === 'remplacer') s.vr += n; if (a.etat === 'reparable') s.vrep += n; }
+    if (a.etat !== 'marche' && a.priorite === 'urgente') s.urg += n;
+  }
+  return s;
+}
+function brasseurOui(e, s) { return s.bp > 0 ? 'Oui' : (statut(e) === 'terminee' ? 'Non' : '—'); }
+function triees(f) {
+  return [...ECOLES.values()].filter(f || (() => true)).sort((a, b) =>
+    ORDRE.indexOf(a.releve.agent_terrain) - ORDRE.indexOf(b.releve.agent_terrain)
+    || coll.compare(a.secteur || '', b.secteur || '') || coll.compare(a.nom, b.nom));
+}
+const nomEcole = e => (e.type_ecole ? e.type_ecole + ' ' : '') + e.nom;
+const secteurLisible = s => (s || '').toLowerCase().replace(/(^|[\s-])\S/g, m => m.toUpperCase());
+
+// ─── Routage ─────────────────────────────────────────────────────────────
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (AGENTS[h]) return { v:'agent', id:h };
+  if (/^ecole-\d+$/.test(h)) return { v:'ecole', id:+h.slice(6) };
+  if (/^fiche-(axel|michel|alain)$/.test(h)) return { v:'papier', id:h.slice(6) };
+  return { v:'suivi' };
+}
+let vueCourante = '';
+window.addEventListener('hashchange', () => { if (location.hash.indexOf('access_token=') !== -1) return; afficher(); window.scrollTo(0, 0); });
+function onglets(r) {
+  const actif = r.v === 'suivi' ? 'suivi' : r.v === 'agent' ? r.id : (ECOLES.get(r.id)?.releve.agent_terrain);
+  $('#onglets').innerHTML = `<a href="#suivi"${actif === 'suivi' ? ' aria-current="page"' : ''}>Vue d’ensemble</a>`
+    + ORDRE.map(k => `<a href="#${k}"${actif === k ? ' aria-current="page"' : ''}>Fiche ${esc(AGENTS[k].nom)}</a>`).join('');
+}
+function afficher() {
+  const r = route(); vueCourante = r.v + ':' + (r.id || '');
+  document.body.classList.toggle('mode-papier', r.v === 'papier');
+  if (r.v === 'papier') return fichePapier(r.id);
+  onglets(r);
+  const v = $('#vue');
+  if (!ECOLES.size) { v.innerHTML = `<section class="carte-verre"><h2>Le relevé n’est pas encore installé</h2><p class="aide">La liste des écoles du relevé est vide. Le fichier A-APPLIQUER-2026-11-20-releve-ventilateurs.sql doit être appliqué à la base.</p></section>`; return; }
+  if (r.v === 'agent') vueAgent(v, r.id); else if (r.v === 'ecole') vueEcole(v, r.id); else vueSuivi(v);
+}
+function rafraichirVue() { const r = route(); if (r.v === 'ecole' && vueCourante === 'ecole:' + r.id && $('#e-liste')) majEcole(r.id); else afficher(); }
+
+function six(e, s, cls) {
+  const c = (v, l, rouge) => `<div><b class="${v === 0 || v === '—' ? 'zero' : (rouge ? 'rouge' : '')}">${esc(v)}</b><span>${l}</span></div>`;
+  return `<div class="six ${cls || ''}">` + c(s.vp, 'ventilateurs présents') + c(s.vr, 'ventilateurs à remplacer', 1)
+    + c(brasseurOui(e, s), 'brasseurs d’air ?') + c(s.bp, 'brasseurs présents') + c(s.bm, 'brasseurs en marche')
+    + c(s.bpanne, 'brasseurs en panne', 1) + '</div>';
+}
+
+// ─── Vue d'ensemble ──────────────────────────────────────────────────────
+const filtres = { agent:'', secteur:'', statut:'', q:'' };
+function vueSuivi(v) {
+  const toutes = triees(); const T = { vp:0, vr:0, vrep:0, bp:0, bm:0, bpanne:0, urg:0 }; let faites = 0, cours = 0, avecBr = 0;
+  toutes.forEach(e => { const s = stats(e); for (const k in T) T[k] += s[k];
+    if (statut(e) === 'terminee') faites++; else if (statut(e) === 'en_cours') cours++; if (s.bp) avecBr++; });
+  const kpi = (teinte, ic, titre, grand, sous) => `<div class="kpi" style="--teinte:${teinte}"><div class="degrade">${icone(ic)}${esc(titre)}</div>`
+    + `<div class="corps"><div class="grand num">${grand}</div><div class="sous">${sous}</div></div></div>`;
+  let h = peutSaisir() ? '' : `<div class="encart attention">Vous consultez le relevé en lecture. La saisie est réservée à la direction, à l’assistante, aux chefs de cellule, aux référents et aux techniciens.</div>`;
+  h += `<section class="kpis" aria-label="Chiffres clés">`
+    + kpi('#004961', 'i-ecole', 'Écoles visitées', `${faites} <span>/ ${toutes.length}</span>`, `${cours} en cours · ${toutes.length - faites - cours} à faire`)
+    + kpi('#006786', 'i-vent', 'Ventilateurs', `${T.vp} <span>relevés</span>`, `<b class="rouge">${T.vr}</b> à remplacer · ${T.vrep} réparables`)
+    + kpi('#2d6b66', 'i-bras', 'Brasseurs d’air', `${T.bp} <span>relevés</span>`, `${T.bm} en marche · <b class="rouge">${T.bpanne}</b> en panne · ${avecBr} école${avecBr > 1 ? 's' : ''} équipée${avecBr > 1 ? 's' : ''}`)
+    + kpi('#8a5b00', 'i-cloche', 'Demandes des écoles', `${DEMANDES_V.filter(ouverteD).length} <span>ouvertes</span>`,
+        demandesLues ? `${DEMANDES_V.length} reçues dans Relais (ventilateurs et brasseurs)` : 'demandes illisibles pour l’instant')
+    + kpi('#b3261e', 'i-alerte', 'Urgences', `${T.urg} <span>appareils</span>`, 'risque électrique, de chute, ou classe sans air')
+    + `</section>`;
+  h += `<section class="carte-verre"><h2>Avancement par agent <small>nombre d’écoles adapté au temps de présence</small></h2><div class="agents">`
+    + ORDRE.map(k => { const A = AGENTS[k], L = toutes.filter(e => e.releve.agent_terrain === k);
+        const f = L.filter(e => statut(e) === 'terminee').length, c = L.filter(e => statut(e) === 'en_cours').length, n = L.length || 1;
+        const a = L.reduce((m, e) => { const s = stats(e); m.vr += s.vr; m.bp += s.bpanne; return m; }, { vr:0, bp:0 });
+        return `<a class="agent" href="#${k}" style="--teinte:${A.teinte}"><div class="nom"><span class="teinte"></span>${esc(A.nom)}</div>`
+          + `<div class="aide">${esc(A.note)} · ${L.length} écoles · ≈ ${String(Math.round(L.length / A.jours * 10) / 10).replace('.', ',')} par jour de présence</div>`
+          + `<div class="barre" role="img" aria-label="${f} terminées, ${c} en cours sur ${L.length}"><i class="b-fait" style="width:${f / n * 100}%"></i><i class="b-cours" style="width:${c / n * 100}%"></i></div>`
+          + `<div class="legende"><span><b>${f}</b> terminées</span><span><b>${c}</b> en cours</span><span><b>${L.length - f - c}</b> à faire</span><span><b class="rouge">${a.vr}</b> vent. à remplacer</span><span><b class="rouge">${a.bp}</b> brass. en panne</span></div></a>`;
+      }).join('') + `</div></section>`;
+  const secteurs = [...new Set(toutes.map(e => e.secteur))].sort(coll.compare);
+  h += `<section class="carte-verre"><h2>Toutes les écoles</h2><div class="filtres-rv">`
+    + `<label>Agent<select id="f-agent"><option value="">Tous</option>${ORDRE.map(k => `<option value="${k}">${esc(AGENTS[k].nom)}</option>`).join('')}</select></label>`
+    + `<label>Quartier<select id="f-secteur"><option value="">Tous</option>${secteurs.map(s => `<option value="${esc(s)}">${esc(secteurLisible(s))}</option>`).join('')}</select></label>`
+    + `<label>Passage<select id="f-statut"><option value="">Tous</option>${Object.entries(STATUTS).map(([k, x]) => `<option value="${k}">${x[0]}</option>`).join('')}</select></label>`
+    + `<label>Recherche<input id="f-q" type="search" placeholder="Nom d’école"></label>`
+    + `<span class="boutons" style="margin-left:auto"><button type="button" class="btn petit" id="csv-ecoles">${icone('i-export')}Export écoles</button>`
+    + `<button type="button" class="btn petit" id="csv-app">${icone('i-export')}Export appareils</button></span></div>`
+    + `<div class="defile"><table><thead><tr><th>École</th><th>Quartier</th><th>Agent</th><th>Passage</th><th class="n">Vent. présents</th><th class="n">Vent. à remplacer</th><th>Brasseur ?</th><th class="n">Brass. en marche</th><th class="n">Brass. en panne</th><th class="n">Urgences</th><th class="n">Demandes</th></tr></thead>`
+    + `<tbody id="t-corps"></tbody><tfoot id="t-pied"></tfoot></table></div></section>`;
+  h += `<section class="carte-verre"><h2>Demandes des écoles <small>reçues dans Relais, domaine « Ventilateur / brasseur d’air »</small></h2><div class="liste-rempl" id="l-dem"></div></section>`;
+  h += `<section class="carte-verre"><h2>À réparer ou à remplacer <small>urgences en tête</small></h2><div class="liste-rempl" id="l-rempl"></div></section>`;
+  v.innerHTML = h;
+  for (const k of ['agent', 'secteur', 'statut', 'q']) { const el = $('#f-' + k); el.value = filtres[k]; el.addEventListener('input', () => { filtres[k] = el.value; tableau(); }); }
+  $('#csv-ecoles').addEventListener('click', exportEcoles); $('#csv-app').addEventListener('click', exportAppareils);
+  tableau(); listeRempl(); listeDemandes();
+}
+function listeDemandes() {
+  const ouvertes = [], closes = [];
+  DEMANDES_V.forEach(d => { const e = ECOLES.get(d.ecole_id); if (e) (ouverteD(d) ? ouvertes : closes).push([e, d]); });
+  const prio = { urgente:0, haute:1 };
+  ouvertes.sort((x, y) => (prio[x[1].priorite] ?? 2) - (prio[y[1].priorite] ?? 2) || (x[1].created_at < y[1].created_at ? -1 : 1));
+  $('#l-dem').innerHTML = !demandesLues ? '<div class="vide">Les demandes de Relais n’ont pas pu être lues. Cliquez sur « Actualiser ».</div>'
+    : (ouvertes.length ? ouvertes.map(([e, d]) => carteDemande(e, d, true)).join('') : '<div class="vide">Aucune demande ouverte sur les ventilateurs ou les brasseurs d’air.</div>')
+      + (closes.length ? `<p class="aide">${closes.length} demande${closes.length > 1 ? 's' : ''} close${closes.length > 1 ? 's' : ''} (résolue, annulée ou archivée) : visible${closes.length > 1 ? 's' : ''} dans la fiche de chaque école.</p>` : '');
+}
+function tableau() {
+  const q = filtres.q.trim().toLowerCase();
+  const L = triees(e => (!filtres.agent || e.releve.agent_terrain === filtres.agent) && (!filtres.secteur || e.secteur === filtres.secteur)
+    && (!filtres.statut || statut(e) === filtres.statut) && (!q || e.nom.toLowerCase().includes(q)));
+  const T = { vp:0, vr:0, bp:0, bm:0, bpanne:0, urg:0, br:0, dem:0 };
+  const n = (v, rouge) => `<td class="n${v ? (rouge ? ' rouge' : '') : ' zero'}">${v}</td>`;
+  $('#t-corps').innerHTML = L.map(e => { const s = stats(e); for (const k in T) if (k in s) T[k] += s[k]; if (s.bp) T.br++; const nd = nbOuvertes(e); T.dem += nd; const st = STATUTS[statut(e)];
+    return `<tr><td><a href="#ecole-${e.id}">${esc(e.nom)}</a><div class="aide">${esc(e.type_ecole)}</div></td><td>${esc(secteurLisible(e.secteur))}</td>`
+      + `<td>${esc(AGENTS[e.releve.agent_terrain]?.court || '—')}</td><td><span class="puce ${st[1]}">${st[0]}</span>${e.releve.date_passage ? `<div class="aide">${dateFr(e.releve.date_passage)}</div>` : ''}</td>`
+      + n(s.vp) + n(s.vr, 1) + `<td>${brasseurOui(e, s)}</td>` + n(s.bm) + n(s.bpanne, 1) + n(s.urg, 1) + n(nd, 1) + '</tr>'; }).join('')
+    || '<tr><td colspan="11" class="aide">Aucune école ne correspond à ces filtres.</td></tr>';
+  $('#t-pied').innerHTML = `<tr><td colspan="4">Total · ${L.length} écoles</td><td class="n">${T.vp}</td><td class="n">${T.vr}</td><td>${T.br} équipée${T.br > 1 ? 's' : ''}</td><td class="n">${T.bm}</td><td class="n">${T.bpanne}</td><td class="n">${T.urg}</td><td class="n">${T.dem}</td></tr>`;
+}
+function carteAppareil(e, a, avecEcole, actions) {
+  const pann = (a.pannes || []).map(p => `<span class="puce p-afaire">${esc(p)}</span>`).join('');
+  const pr = a.etat !== 'marche' && a.priorite !== 'normale' ? `<span class="puce ${PRIOS[a.priorite][1]}">${PRIOS[a.priorite][0]}</span>` : '';
+  const url = a.photo_chemin && URLS[a.photo_chemin];
+  const vign = url ? `<a href="${esc(url)}" target="_blank" rel="noopener"><img class="vign" src="${esc(url)}" alt="Photo de l’appareil" loading="lazy"></a>`
+                   : `<div class="vign">${icone(a.categorie === 'brasseur' ? 'i-bras' : 'i-vent', '')}</div>`;
+  return `<div class="app">${vign}<div style="min-width:0"><div class="quoi">${a.nombre > 1 ? a.nombre + ' × ' : ''}${esc(CATS[a.categorie])} ${esc((POSES[a.pose] || '').toLowerCase())}`
+    + (avecEcole ? ` · <a href="#ecole-${e.id}">${esc(e.nom)}</a>` : '') + `</div>`
+    + `<div class="det">${avecEcole ? esc(a.salle) + ' · ' : ''}${a.marque ? esc(a.marque) + ' · ' : ''}${a.releve_par ? 'relevé par ' + esc(AGENTS[a.releve_par]?.court || '') : ''}</div>`
+    + `<div class="puces"><span class="puce ${ETATS[a.etat][1]}">${ETATS[a.etat][0]}</span>${pr}${pann}</div>`
+    + (a.observation ? `<div class="det" style="margin-top:4px">${esc(a.observation)}</div>` : '') + `</div>${actions || ''}</div>`;
+}
+const RANG = { urgente:0, haute:1, normale:2 };
+function listeRempl() {
+  const L = []; ECOLES.forEach(e => e.appareils.forEach(a => { if (a.etat !== 'marche') L.push([e, a]); }));
+  L.sort((x, y) => RANG[x[1].priorite] - RANG[y[1].priorite] || (x[1].etat === 'remplacer' ? 0 : 1) - (y[1].etat === 'remplacer' ? 0 : 1) || coll.compare(x[0].nom, y[0].nom));
+  $('#l-rempl').innerHTML = L.length ? L.map(([e, a]) => carteAppareil(e, a, true)).join('')
+    : '<div class="vide">Aucun appareil en panne relevé pour l’instant. Les pannes saisies apparaîtront ici.</div>';
+}
+
+// ─── Fiche agent ─────────────────────────────────────────────────────────
+function vueAgent(v, k) {
+  const A = AGENTS[k], L = triees(e => e.releve.agent_terrain === k);
+  const f = L.filter(e => statut(e) === 'terminee').length, c = L.filter(e => statut(e) === 'en_cours').length, n = L.length || 1;
+  const parQ = new Map(); L.forEach(e => { if (!parQ.has(e.secteur)) parQ.set(e.secteur, []); parQ.get(e.secteur).push(e); });
+  let h = `<section class="carte-verre" style="--teinte:${A.teinte}"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">`
+    + `<span class="teinte" style="width:18px;height:18px"></span><div style="flex:1 1 240px"><h2 style="margin:0">Fiche de ${esc(A.nom)}</h2>`
+    + `<p class="aide">${esc(A.note)} · ${L.length} écoles dans ${parQ.size} quartiers</p></div>`
+    + `<a class="btn" href="#fiche-${k}" id="vers-papier">${icone('i-imprimer')}Fiche papier à imprimer</a></div>`
+    + `<div class="barre" style="margin-top:14px"><i class="b-fait" style="width:${f / n * 100}%"></i><i class="b-cours" style="width:${c / n * 100}%"></i></div>`
+    + `<div class="legende" style="margin-top:6px"><span><b>${f}</b> terminées</span><span><b>${c}</b> en cours</span><span><b>${L.length - f - c}</b> à faire</span></div></section>`;
+  h += `<section class="carte-verre"><h2>Écoles <small>cliquez sur une école pour saisir son relevé</small></h2><div style="display:grid;gap:18px">`;
+  parQ.forEach((es, q) => {
+    h += `<div class="quartier"><h3>${esc(secteurLisible(q))} <small>${esc(es[0].zone || '')} · ${es.length} école${es.length > 1 ? 's' : ''}</small></h3><div class="ecoles">`
+      + es.map(e => { const s = stats(e), st = STATUTS[statut(e)];
+          return `<a class="carte-ecole" href="#ecole-${e.id}"><div class="haut-c"><div><div class="nom">${esc(e.nom)}</div><div class="type">${esc(e.type_ecole)} · ${esc(e.adresse || '')}</div></div>`
+            + `<span style="display:grid;gap:4px;justify-items:end"><span class="puce ${st[1]}">${st[0]}</span>${nbOuvertes(e) ? `<span class="puce p-haute">${nbOuvertes(e)} demande${nbOuvertes(e) > 1 ? 's' : ''}</span>` : ''}</span></div>${six(e, s)}</a>`; }).join('') + `</div></div>`;
+  });
+  v.innerHTML = h + `</div></section>`;
+}
+
+// ─── Fiche école ─────────────────────────────────────────────────────────
+let edition = null, photoAttente = null;
+function vueEcole(v, id) {
+  const e = ECOLES.get(id);
+  if (!e) { v.innerHTML = `<section class="carte-verre"><a class="retour" href="#suivi">${icone('i-retour')}Vue d’ensemble</a><h2 style="margin-top:10px">École introuvable</h2></section>`; return; }
+  edition = null; photoAttente = null;
+  const A = AGENTS[e.releve.agent_terrain];
+  const opts = ORDRE.map(k => `<option value="${k}">${esc(AGENTS[k].nom)}</option>`).join('');
+  const radios = (name, obj, cls, def) => `<div class="choix ${cls || ''}" role="radiogroup">` + Object.entries(obj).map(([k, l]) =>
+    `<label><input type="radio" name="${name}" value="${k}"${k === def ? ' checked' : ''}><span>${esc(Array.isArray(l) ? l[0] : l)}</span></label>`).join('') + '</div>';
+  const lecture = !peutSaisir();
+  v.innerHTML = `<section class="carte-verre"><a class="retour" href="#${e.releve.agent_terrain}">${icone('i-retour')}Fiche de ${esc(A.nom)}</a>`
+    + `<h2 style="margin:8px 0 0;font-size:22px">${esc(nomEcole(e))}</h2><div class="coord"><span>${esc(secteurLisible(e.secteur))} (${esc(e.zone)})</span><span>${esc(e.adresse || '')}</span>${e.telephone ? `<span>Tél. ${esc(e.telephone)}</span>` : ''}</div>`
+    + `<div id="e-resume" style="margin-top:12px"></div></section>`
+    + `<section class="carte-verre" id="e-demandes-bloc"><h2>Demandes de l’école <small>reçues dans Relais</small></h2><div class="liste-rempl" id="e-demandes"></div></section>`
+    + (lecture ? '' : `<div class="colonnes">`
+    + `<section class="carte-verre"><h2>Passage dans l’école</h2><form id="f-passage">`
+    + `<div class="ligne"><label class="champ"><span>Date de passage</span><input type="date" id="p-date"></label>`
+    + `<label class="champ"><span>Relevé par</span><select id="p-agent">${opts}</select></label></div>`
+    + `<div class="champ"><span class="legend">Où en est le relevé ?</span>${radios('p-statut', STATUTS, '', statut(e))}</div>`
+    + `<label class="coche"><input type="checkbox" id="p-aucun">Aucun ventilateur ni brasseur d’air dans l’école</label>`
+    + `<label class="champ"><span>Observations sur l’école</span><textarea id="p-obs" maxlength="2000" placeholder="Accès, clés, gardien, classes fermées, à revoir…"></textarea></label>`
+    + `<div class="boutons"><button type="submit" class="btn action">${icone('i-ok')}Enregistrer le passage</button></div></form></section>`
+    + `<section class="carte-verre"><h2 id="a-titre">Ajouter un appareil</h2><form id="f-app"><div id="a-mode"></div>`
+    + `<label class="champ"><span>Salle ou local</span><input type="text" id="a-salle" list="salles" maxlength="80" placeholder="Ex. CP 1, réfectoire, dortoir, BCD" autocomplete="off"><datalist id="salles"></datalist></label>`
+    + `<div class="boutons" id="a-salles-vite" aria-label="Salles déjà saisies"></div>`
+    + `<div class="ligne"><div class="champ"><span class="legend">Appareil</span>${radios('a-cat', CATS, '', 'ventilateur')}</div>`
+    + `<div class="champ"><span class="legend">Pose</span>${radios('a-pose', POSES, '', 'mural')}</div></div>`
+    + `<div class="ligne"><div class="champ"><span class="legend">Nombre d’appareils identiques</span><div class="pas"><button type="button" id="a-moins" aria-label="Un de moins">−</button>`
+    + `<input type="number" id="a-nombre" min="1" max="50" value="1" inputmode="numeric" aria-label="Nombre"><button type="button" id="a-plus" aria-label="Un de plus">+</button></div></div>`
+    + `<label class="champ"><span>Marque ou modèle (si lisible)</span><input type="text" id="a-marque" maxlength="80"></label></div>`
+    + `<div class="champ"><span class="legend">État</span>${radios('a-etat', ETATS, 'etat', 'marche')}</div>`
+    + `<div id="a-panne" hidden><div style="display:grid;gap:12px"><div class="champ"><span class="legend">Type de panne</span><div class="choix">`
+    + PANNES.map(p => `<label><input type="checkbox" name="a-pannes" value="${esc(p)}"><span>${esc(p)}</span></label>`).join('') + `</div></div>`
+    + `<div class="champ"><span class="legend">Priorité</span>${radios('a-prio', PRIOS, 'prio', 'normale')}<span class="aide">Urgente : risque électrique, risque de chute, ou classe sans aucun appareil en marche.</span></div></div></div>`
+    + `<div class="champ"><span class="legend">Photo</span><div class="photo-apercu"><label class="btn petit">${icone('i-photo')}<span id="a-photo-txt">Prendre ou choisir une photo</span>`
+    + `<input type="file" id="a-photo" accept="image/*" capture="environment" hidden></label><span id="a-photo-ap"></span></div></div>`
+    + `<label class="champ"><span>Observation</span><textarea id="a-obs" maxlength="1000" placeholder="Ce qu’il faut savoir pour l’intervention"></textarea></label>`
+    + `<div class="boutons"><button type="submit" class="btn action" id="a-ok">${icone('i-ok')}<span>Ajouter l’appareil</span></button>`
+    + `<button type="button" class="btn" id="a-annuler" hidden>Annuler la modification</button></div></form></section></div>`)
+    + `<section class="carte-verre"><h2>Appareils relevés <small id="e-compte"></small></h2><div id="e-liste" style="display:grid;gap:16px"></div></section>`;
+  if (!lecture) brancherFormulaires(id);
+  majEcole(id);
+}
+function remplirPassage(id) {
+  const f = $('#f-passage'); if (!f || f.dataset.sale) return; const r = ECOLES.get(id).releve;
+  $('#p-date').value = r.date_passage || ''; $('#p-agent').value = r.releve_par || r.agent_terrain; $('#p-obs').value = r.observations || '';
+  $('#p-aucun').checked = !!r.aucun_appareil;
+  const x = f.querySelector(`input[name="p-statut"][value="${r.statut}"]`); if (x) x.checked = true;
+}
+function brancherFormulaires(id) {
+  remplirPassage(id);
+  const fp = $('#f-passage');
+  fp.addEventListener('input', () => { fp.dataset.sale = '1'; });
+  fp.addEventListener('submit', async ev => { ev.preventDefault();
+    const st = fp.querySelector('input[name="p-statut"]:checked').value;
+    const maj = { statut: st, date_passage: $('#p-date').value || (st !== 'a_faire' ? auj() : null), releve_par: $('#p-agent').value,
+                  observations: $('#p-obs').value.trim() || null, aucun_appareil: $('#p-aucun').checked };
+    if (await ecrireReleve(id, maj)) { delete fp.dataset.sale; toast('Passage enregistré'); remplirPassage(id); majEcole(id); } });
+  const f = $('#f-app');
+  f.querySelectorAll('input[name="a-cat"]').forEach(r => r.addEventListener('change', () => {
+    const cat = f.querySelector('input[name="a-cat"]:checked').value, pose = f.querySelector('input[name="a-pose"]:checked').value;
+    if (cat === 'brasseur' && pose !== 'plafond') f.querySelector('input[name="a-pose"][value="plafond"]').checked = true;
+    if (cat === 'ventilateur' && pose === 'plafond') f.querySelector('input[name="a-pose"][value="mural"]').checked = true; }));
+  f.querySelectorAll('input[name="a-etat"]').forEach(r => r.addEventListener('change', () => {
+    $('#a-panne').hidden = f.querySelector('input[name="a-etat"]:checked').value === 'marche'; }));
+  $('#a-moins').addEventListener('click', () => { $('#a-nombre').value = Math.max(1, (+$('#a-nombre').value || 1) - 1); });
+  $('#a-plus').addEventListener('click', () => { $('#a-nombre').value = Math.min(50, (+$('#a-nombre').value || 1) + 1); });
+  $('#a-photo').addEventListener('change', ev => envoyerPhoto(ev, id));
+  $('#a-annuler').addEventListener('click', () => videForm(false));
+  f.addEventListener('submit', async ev => { ev.preventDefault(); await enregistrerAppareil(id); });
+}
+function majEcole(id) {
+  const e = ECOLES.get(id); if (!e) return; const s = stats(e);
+  $('#e-resume').innerHTML = six(e, s, 'grand6');
+  remplirPassage(id);
+  const parSalle = new Map();
+  e.appareils.forEach(a => { const k = a.salle.trim(); if (!parSalle.has(k)) parSalle.set(k, []); parSalle.get(k).push(a); });
+  const salles = [...parSalle.keys()].sort(coll.compare);
+  if ($('#salles')) {
+    $('#salles').innerHTML = salles.map(x => `<option value="${esc(x)}">`).join('');
+    $('#a-salles-vite').innerHTML = salles.slice(0, 12).map(x => `<button type="button" class="btn petit" data-salle="${esc(x)}">${esc(x)}</button>`).join('');
+    $('#a-salles-vite').querySelectorAll('[data-salle]').forEach(b => b.addEventListener('click', () => { $('#a-salle').value = b.dataset.salle; }));
+  }
+  const dems = e.demandes || [];
+  $('#e-demandes-bloc').hidden = !dems.length && demandesLues;
+  $('#e-demandes').innerHTML = !demandesLues ? '<div class="vide">Les demandes de Relais n’ont pas pu être lues.</div>'
+    : dems.map(d => carteDemande(e, d, false, peutSaisir() && ouverteD(d) ? `<button type="button" class="btn petit" data-reprendre="${d.id}">Reprendre dans le relevé</button>` : '')).join('');
+  $('#e-demandes').querySelectorAll('[data-reprendre]').forEach(b => b.addEventListener('click', () => reprendreDemande(id, b.dataset.reprendre)));
+  $('#e-compte').textContent = e.appareils.length ? `${s.lignes} ligne${s.lignes > 1 ? 's' : ''} · ${salles.length} salle${salles.length > 1 ? 's' : ''}` : '';
+  const actions = a => peutSaisir() ? `<div class="act"><button type="button" class="btn petit" data-modif="${a.id}">Modifier</button><button type="button" class="btn petit danger" data-retirer="${a.id}">Retirer</button></div>` : '';
+  $('#e-liste').innerHTML = e.appareils.length
+    ? salles.map(sal => `<div class="salle"><h3>${esc(sal)}</h3>` + parSalle.get(sal).map(a => carteAppareil(e, a, false, actions(a))).join('') + '</div>').join('')
+    : `<div class="vide">${e.releve.aucun_appareil ? 'Aucun appareil dans cette école (noté au passage).' : 'Aucun appareil saisi. Commencez par une salle avec « Ajouter un appareil ».'}</div>`;
+  $('#e-liste').querySelectorAll('[data-modif]').forEach(b => b.addEventListener('click', () => chargerForm(id, b.dataset.modif)));
+  $('#e-liste').querySelectorAll('[data-retirer]').forEach(b => b.addEventListener('click', async () => {
+    if (!b.classList.contains('arme')) { b.classList.add('arme'); b.textContent = 'Confirmer'; setTimeout(() => { if (b.isConnected) { b.classList.remove('arme'); b.textContent = 'Retirer'; } }, 4000); return; }
+    try { await api('releve_ventil_appareils?id=eq.' + b.dataset.retirer, { method:'PATCH', body: JSON.stringify({ retire: true }) });
+      e.appareils = e.appareils.filter(a => a.id !== b.dataset.retirer); toast('Ligne retirée du relevé'); if (edition === b.dataset.retirer) videForm(false); majEcole(id);
+    } catch (err) { toast(messageErreur(err), true); } }));
+}
+function chargerForm(id, aid) {
+  const a = ECOLES.get(id).appareils.find(x => x.id === aid); if (!a) return; const f = $('#f-app');
+  edition = aid; photoAttente = a.photo_chemin || null;
+  $('#a-salle').value = a.salle; $('#a-nombre').value = a.nombre; $('#a-marque').value = a.marque || ''; $('#a-obs').value = a.observation || '';
+  const coche = (n, val) => { const r = f.querySelector(`input[name="${n}"][value="${val}"]`); if (r) r.checked = true; };
+  coche('a-cat', a.categorie); coche('a-pose', a.pose); coche('a-etat', a.etat); coche('a-prio', a.priorite);
+  f.querySelectorAll('input[name="a-pannes"]').forEach(c => { c.checked = (a.pannes || []).includes(c.value); });
+  $('#a-panne').hidden = a.etat === 'marche';
+  $('#a-photo-ap').innerHTML = a.photo_chemin && URLS[a.photo_chemin] ? `<img src="${esc(URLS[a.photo_chemin])}" alt="Photo actuelle">` : '';
+  $('#a-titre').textContent = 'Modifier un appareil'; $('#a-ok span').textContent = 'Enregistrer la modification'; $('#a-annuler').hidden = false;
+  $('#a-mode').innerHTML = `<div class="mode-edit">Modification en cours : ${esc(a.salle)}</div>`;
+  f.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+}
+//  Une demande d'école devient une ligne du relevé : salle, panne et texte de l'école sont repris,
+//  l'assistante complète (appareil, nombre, état) puis enregistre. Rien n'est écrit sans son clic.
+function reprendreDemande(id, did) {
+  const d = (ECOLES.get(id).demandes || []).find(x => x.id === did); if (!d) return;
+  videForm(false);
+  const f = $('#f-app');
+  $('#a-salle').value = (d.localisation || '').slice(0, 80);
+  f.querySelector('input[name="a-etat"][value="reparable"]').checked = true; $('#a-panne').hidden = false;
+  const pr = f.querySelector(`input[name="a-prio"][value="${d.priorite === 'urgente' ? 'urgente' : d.priorite === 'haute' ? 'haute' : 'normale'}"]`); if (pr) pr.checked = true;
+  $('#a-obs').value = ('Demande ' + d.numero + ' : ' + (d.description || '')).slice(0, 1000);
+  $('#a-mode').innerHTML = `<div class="mode-edit">Repris de la demande ${esc(d.numero)} : complétez l’appareil, le nombre et l’état, puis ajoutez.</div>`;
+  f.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  $('#a-salle').focus();
+}
+function videForm(garderSalle) {
+  const f = $('#f-app'); if (!f) return; const salle = $('#a-salle').value;
+  f.reset(); if (garderSalle) $('#a-salle').value = salle;
+  edition = null; photoAttente = null; $('#a-photo-ap').innerHTML = ''; $('#a-photo-txt').textContent = 'Prendre ou choisir une photo';
+  $('#a-titre').textContent = 'Ajouter un appareil'; $('#a-ok span').textContent = 'Ajouter l’appareil'; $('#a-annuler').hidden = true; $('#a-mode').innerHTML = ''; $('#a-panne').hidden = true;
+}
+async function reduire(fichier) {
+  try { const bmp = await createImageBitmap(fichier), k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    return await new Promise((ok, ko) => c.toBlob(b => b ? ok(b) : ko(new Error('image')), 'image/jpeg', .8));
+  } catch (e) { return null; }
+}
+async function envoyerPhoto(ev, id) {
+  const fichier = ev.target.files && ev.target.files[0]; if (!fichier) return;
+  $('#a-photo-txt').textContent = 'Envoi de la photo…'; $('#a-ok').disabled = true;
+  try {
+    const blob = await reduire(fichier);
+    if (!blob) throw new Error('format');
+    const chemin = id + '/' + crypto.randomUUID() + '.jpg';
+    const r = await appel(API + '/storage/v1/object/' + BUCKET + '/' + chemin, { method:'POST', headers:{ 'Content-Type':'image/jpeg', 'x-upsert':'false' }, body: blob });
+    if (!r.ok) throw new Error(String(r.status));
+    photoAttente = chemin; URLS[chemin] = URL.createObjectURL(blob);
+    $('#a-photo-ap').innerHTML = `<img src="${URLS[chemin]}" alt="Photo jointe">`; $('#a-photo-txt').textContent = 'Changer la photo';
+  } catch (e) {
+    toast(e.message === 'format' ? 'Cette image n’a pas pu être lue. Essayez une photo JPEG.' : 'La photo n’a pas été envoyée. Vous pouvez enregistrer sans photo.', true);
+    $('#a-photo-txt').textContent = 'Prendre ou choisir une photo';
+  } finally { $('#a-ok').disabled = false; ev.target.value = ''; }
+}
+async function enregistrerAppareil(id) {
+  const f = $('#f-app'), e = ECOLES.get(id);
+  const salle = $('#a-salle').value.trim();
+  if (!salle) { toast('Indiquez la salle ou le local.', true); $('#a-salle').focus(); return; }
+  const etat = f.querySelector('input[name="a-etat"]:checked').value;
+  const ligne = { ecole_id: id, salle, categorie: f.querySelector('input[name="a-cat"]:checked').value, pose: f.querySelector('input[name="a-pose"]:checked').value,
+    nombre: Math.max(1, Math.min(50, +$('#a-nombre').value || 1)), marque: $('#a-marque').value.trim() || null, etat,
+    pannes: etat === 'marche' ? [] : [...f.querySelectorAll('input[name="a-pannes"]:checked')].map(c => c.value),
+    priorite: etat === 'marche' ? 'normale' : f.querySelector('input[name="a-prio"]:checked').value,
+    photo_chemin: photoAttente, observation: $('#a-obs').value.trim() || null, releve_par: $('#p-agent').value || e.releve.agent_terrain };
+  const bouton = $('#a-ok'); bouton.disabled = true;
+  try {
+    const enModif = !!edition;
+    const rep = enModif
+      ? await api('releve_ventil_appareils?id=eq.' + edition, { method:'PATCH', headers:{ Prefer:'return=representation' }, body: JSON.stringify(ligne) })
+      : await api('releve_ventil_appareils', { method:'POST', headers:{ Prefer:'return=representation' }, body: JSON.stringify(ligne) });
+    const neuf = rep && rep[0]; if (!neuf) throw new Error('403 aucune ligne');
+    const i = e.appareils.findIndex(a => a.id === neuf.id); if (i >= 0) e.appareils[i] = neuf; else e.appareils.push(neuf);
+    if (e.releve.statut === 'a_faire') await ecrireReleve(id, { statut:'en_cours', date_passage: e.releve.date_passage || auj(),
+      releve_par: e.releve.releve_par || ligne.releve_par, aucun_appareil: false });
+    toast(enModif ? 'Modification enregistrée' : 'Appareil ajouté · ' + salle);
+    videForm(!enModif); majEcole(id); $('#a-salle').focus();
+  } catch (err) { toast(messageErreur(err), true); }
+  bouton.disabled = false;
+}
+async function ecrireReleve(id, maj) {
+  try {
+    const rep = await api('releve_ventil_ecoles?ecole_id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=representation' }, body: JSON.stringify(maj) });
+    if (!rep || !rep[0]) throw new Error('403 aucune ligne');
+    ECOLES.get(id).releve = rep[0]; return true;
+  } catch (err) { toast(messageErreur(err), true); return false; }
+}
+function messageErreur(err) {
+  const m = String(err && err.message || '');
+  if (/^(401|403)/.test(m) || /row-level security|aucune ligne/.test(m)) return 'Enregistrement refusé : votre fonction ne permet pas de saisir le relevé.';
+  if (/^(400|422)/.test(m)) return 'Enregistrement refusé : une valeur n’est pas acceptée (texte trop long ?).';
+  return 'Enregistrement impossible. Vérifiez la connexion, puis réessayez.';
+}
+
+// ─── Exports (tableur) ───────────────────────────────────────────────────
+function telecharger(nom, lignes) {
+  const txt = '﻿' + lignes.map(l => l.map(v => { const s = String(v == null ? '' : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(';')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type:'text/csv;charset=utf-8' })); a.download = nom;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function exportEcoles() {
+  const L = [['Agent','Quartier','Zone','École','Type','Passage','Date de passage','Relevé par','Ventilateurs présents','Ventilateurs à remplacer','Ventilateurs réparables',
+    'Présence brasseur','Brasseurs présents','Brasseurs en marche','Brasseurs en panne','Urgences','Demandes ouvertes','Observations']];
+  triees().forEach(e => { const s = stats(e), r = e.releve; L.push([AGENTS[r.agent_terrain]?.nom, secteurLisible(e.secteur), e.zone, e.nom, e.type_ecole, STATUTS[statut(e)][0],
+    r.date_passage || '', AGENTS[r.releve_par]?.nom || '', s.vp, s.vr, s.vrep, brasseurOui(e, s), s.bp, s.bm, s.bpanne, s.urg, nbOuvertes(e), r.observations || '']); });
+  telecharger('releve-ventilateurs-ecoles-' + auj() + '.csv', L);
+}
+function exportAppareils() {
+  const L = [['Agent','Quartier','École','Salle','Appareil','Pose','Nombre','Marque/modèle','État','Type de panne','Priorité','Observation','Photo','Relevé par','Saisi par','Mis à jour']];
+  triees().forEach(e => e.appareils.forEach(a => L.push([AGENTS[e.releve.agent_terrain]?.nom, secteurLisible(e.secteur), e.nom, a.salle, CATS[a.categorie], POSES[a.pose],
+    a.nombre, a.marque || '', ETATS[a.etat][0], (a.pannes || []).join(', '), PRIOS[a.priorite][0], a.observation || '', a.photo_chemin ? 'oui' : '',
+    AGENTS[a.releve_par]?.nom || '', a.saisi_par || '', (a.updated_at || '').slice(0, 10)])));
+  telecharger('releve-ventilateurs-appareils-' + auj() + '.csv', L);
+}
+
+// ─── Fiche papier (une page A4 paysage par école) ────────────────────────
+function fichePapier(k) {
+  const A = AGENTS[k], L = triees(e => e.releve.agent_terrain === k);
+  const vides = Array.from({ length: 10 }, () => '<tr><td></td><td>V ☐ B ☐</td><td>M ☐ P ☐ Pl ☐</td><td></td><td></td><td>☐ marche ☐ réparable ☐ à remplacer</td><td></td><td>N ☐ H ☐ U ☐</td><td></td></tr>').join('');
+  $('#papier').innerHTML = `<div class="outil boutons" style="margin-bottom:12px"><a class="btn" href="#${k}">${icone('i-retour')}Revenir à la fiche</a>`
+    + `<button type="button" class="btn action" id="imprimer">${icone('i-imprimer')}Imprimer</button></div>`
+    + `<h1>Relevé des ventilateurs et brasseurs d’air · ${esc(A.nom)}</h1>`
+    + `<p class="leg">${L.length} écoles. Appareil : V = ventilateur, B = brasseur d’air. Pose : M = mural, P = sur pied, Pl = plafond. Priorité : N = normale, H = haute, U = urgente (risque électrique, de chute, classe sans air). Une ligne par groupe d’appareils identiques dans une salle. Fiche à remettre à l’assistante pour saisie dans Relais.</p>`
+    + L.map(e => `<section><h2>${esc(nomEcole(e))} <small style="font-weight:400">· ${esc(secteurLisible(e.secteur))}</small></h2>`
+      + `<p class="c">${esc(e.adresse || '')}${e.telephone ? ' · Tél. ' + esc(e.telephone) : ''}</p>`
+      + ((e.demandes || []).filter(ouverteD).length ? `<p class="c"><b>Demandes de l’école à vérifier sur place :</b> ${(e.demandes || []).filter(ouverteD).map(d =>
+          esc(d.numero) + (d.localisation ? ' (' + esc(d.localisation) + ')' : '') + ' : ' + esc((d.description || '').slice(0, 120))).join(' ; ')}</p>` : '')
+      + `<p class="c">Date de passage : ............ &nbsp; Relevé par : ${esc(A.nom)} &nbsp; ☐ Aucun ventilateur ni brasseur dans l’école</p>`
+      + `<table><thead><tr><th>Salle / local</th><th>Appareil</th><th>Pose</th><th>Nb</th><th>Marque / modèle</th><th>État</th><th>Type de panne</th><th>Priorité</th><th>Photo n°</th></tr></thead><tbody>${vides}</tbody></table>`
+      + `<table class="tot"><tr><th>Ventilateurs présents</th><th>Ventilateurs à remplacer</th><th>Brasseur d’air (oui/non)</th><th>Brasseurs en marche</th><th>Brasseurs en panne</th></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></table>`
+      + `<p class="c">Observations : ...............................................................................................................................................</p></section>`).join('');
+  $('#imprimer').addEventListener('click', () => window.print());
+}
+
+// ─── Démarrage ───────────────────────────────────────────────────────────
+$('#form-connexion').addEventListener('submit', async ev => {
+  ev.preventDefault(); const b = $('#bouton-lien'); b.disabled = true; b.textContent = 'Envoi en cours…'; $('#erreur-connexion').hidden = true;
+  try {
+    const r = await fetch(API + '/auth/v1/otp?redirect_to=' + encodeURIComponent(location.origin + location.pathname), { method:'POST',
+      headers:{ apikey: CLE, 'Content-Type':'application/json' }, body: JSON.stringify({ email: $('#email').value.trim(), create_user: true }) });
+    if (!r.ok) throw new Error(r.status === 429 ? 'Trop de demandes en peu de temps. Patientez quelques minutes.' : 'L’envoi a échoué. Vérifiez l’adresse saisie, puis réessayez.');
+    $('#form-connexion').hidden = true; $('#lien-envoye').hidden = false;
+  } catch (e) { $('#erreur-connexion').textContent = e.message || 'L’envoi a échoué.'; $('#erreur-connexion').hidden = false; }
+  b.disabled = false; b.textContent = 'Recevoir mon lien';
+});
+$('#deconnexion').addEventListener('click', () => { oublierSession(); location.reload(); });
+$('#actualiser').addEventListener('click', async () => { const b = $('#actualiser'); b.disabled = true;
+  try { await charger(); rafraichirVue(); toast('Relevé actualisé'); } catch (e) { toast('Le relevé n’a pas pu être rechargé.', true); } b.disabled = false; });
+
+function montrerConnexion(message) {
+  oublierSession(); $('#chargement').hidden = true; $('#ecran-travail').hidden = true; $('#ecran-connexion').hidden = false;
+  if (message) { $('#erreur-connexion').textContent = message; $('#erreur-connexion').hidden = false; }
+}
+(async function demarrer() {
+  if (!CONFIG.pret) { $('#chargement').hidden = true; $('#arret').textContent = CONFIG.motif; $('#arret').hidden = false; return; }
+  session = recupererJetonsDuLien() || lireSession();
+  if (session?.expire_le && session.expire_le < Date.now() + 60000) { if (!await rafraichirJeton()) session = null; }
+  if (!session) return montrerConnexion();
+  const mail = emailDuJeton();
+  try {
+    const ag = await api('agents?select=nom,fonction&actif=eq.true&email=ilike.' + encodeURIComponent(mail));
+    moi = ag && ag[0] || null;
+  } catch (e) {
+    if (String(e.message).startsWith('401')) return montrerConnexion('Votre session a expiré. Demandez un nouveau lien.');
+  }
+  if (!moi) return montrerConnexion('Cette adresse n’est pas celle d’un agent du Pôle Technique. Si vous devez accéder au relevé, demandez à être inscrit à l’annuaire du pôle.');
+  $('#qui').textContent = moi.nom + ' · ' + moi.fonction.replace('_', ' ') + (peutSaisir() ? '' : ' (lecture seule)');
+  try { await charger(); }
+  catch (e) { $('#chargement').hidden = true; $('#arret').textContent = 'Le relevé n’a pas pu être chargé. Si la page est neuve, le fichier SQL du relevé n’est peut-être pas encore appliqué.'; $('#arret').hidden = false; return; }
+  $('#chargement').hidden = true; $('#ecran-travail').hidden = false;
+  afficher();
+  // Les autres saisissent en même temps : la vue se recharge toutes les 2 minutes, sauf pendant une saisie.
+  setInterval(async () => {
+    if (document.hidden || document.activeElement?.closest('form') || $('#f-passage')?.dataset.sale) return;
+    try { await charger(); rafraichirVue(); } catch (e) { /* on réessaiera */ }
+  }, 120000);
+})();
+</script>
+</body>
+</html>
