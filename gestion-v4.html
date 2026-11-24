@@ -627,13 +627,18 @@ function peutPrendre() {
 const COMPTEURS_TECHNICIEN = ['', 'a_prendre', 'en_cours', 'en_retard', 'closes'];
 
 function compteursVisibles() {
-  return moi?.fonction === 'technicien'
-    ? COMPTEURS.filter(c => COMPTEURS_TECHNICIEN.includes(c.cle))
-    : COMPTEURS;
+  if (moi?.fonction === 'technicien') return COMPTEURS.filter(c => COMPTEURS_TECHNICIEN.includes(c.cle));
+  //  « À valider » : seulement pour la direction, et seulement s'il y en a.
+  return COMPTEURS.filter(c => !c.direction
+    || (moi?.fonction === 'direction' && (DEMANDES.some(c.test) || filtres.compteur === c.cle)));
 }
+
+//  D32 : demandes retenues au dépôt, en attente de la validation de la direction.
+const aValider = d => d.validation_pole === 'a_valider';
 
 const COMPTEURS = [
   { cle:'',           libelle:'Toutes',            classe:'',       test: () => true },
+  { cle:'a_valider',  libelle:'À valider (DST)',   classe:'agir',   test: aValider, direction: true },
   //  « Nouvelles » a disparu : elle comptait exactement « À prendre en charge »
   //  moins « Rouvertes », soit trois compteurs pour deux informations.
   { cle:'a_prendre',  libelle:'À prendre en charge',classe:'agir',
@@ -653,6 +658,7 @@ const COMPTEURS = [
 const ALLURE = {
   '':          { teinte: 'var(--marine-encre)', ico: 'i-tout' },
   a_prendre:   { teinte: 'var(--marine)',       ico: 'i-alerte' },
+  a_valider:   { teinte: 'var(--agir)',         ico: 'i-alerte' },
   en_cours:    { teinte: 'var(--agir)',         ico: 'i-cle-plate' },
   en_retard:   { teinte: 'var(--alerte)',       ico: 'i-chrono' },
   ecole:       { teinte: 'var(--violet)',       ico: 'i-ecole' },
@@ -764,7 +770,7 @@ function dessinerListe() {
       <span class="dom" ${ico.style ? 'style="' + ico.style + '"' : ''}>${ico.html.replace('class="pique"', 'class="pique mini"')}
         <span class="nom-dom">${echapper(dom.libelle || '—')}</span></span>
       <span class="prio ${echapper(d.priorite)}">${d.priorite === 'urgente' || d.priorite === 'haute' ? '● ' : ''}${echapper(PRIORITES[d.priorite] || d.priorite)}</span>
-      <span class="etat-col"><span class="etat ${classeEtat(d.statut)}">${echapper(e.texte)}</span>
+      <span class="etat-col"><span class="etat ${aValider(d) ? 'e-ecole' : classeEtat(d.statut)}">${echapper(aValider(d) ? 'À valider' : e.texte)}</span>
         <span class="age${retard ? ' retard' : ''}">${echapper(age)}</span></span>
     </button>`;
   }).join('');
@@ -831,6 +837,18 @@ function dessinerFiche(d, notes, journal, photos) {
     <div id="fiche-erreur" class="encart erreur" role="alert" hidden></div>
     <div id="fiche-ok" class="encart info" role="status" hidden></div>
 
+    ${aValider(d) ? (moi?.fonction === 'direction' ? `<div class="carte" id="carte-validation">
+      <h3>Validation avant envoi au service</h3>
+      <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
+        Cette demande n'a pas encore été envoyée au service
+        ${echapper(REF.services[dom.service_externe_id]?.libelle || 'extérieur')}.
+        « Valider et transmettre » lui envoie le mail de la demande. « Garder au pôle » ne lui envoie rien :
+        la demande reste chez vous.</p>
+      <button type="button" class="principal" id="valider-transmettre">Valider et transmettre</button>
+      <button type="button" class="discret" id="garder-pole" style="margin-left:8px">Garder au pôle</button>
+    </div>` : `<div class="encart attention"><strong>En attente de validation</strong>
+      La direction du pôle doit valider cette demande avant qu'elle parte au service.</div>`) : ''}
+
     ${enRetard(d) ? `<div class="encart erreur"><strong>Sans réponse depuis
       ${del.delai_reaction_jours} jours ouvrés</strong>
       Personne n'a encore pris cette demande en charge.</div>` : ''}
@@ -860,6 +878,9 @@ function dessinerFiche(d, notes, journal, photos) {
         ${paire('Prise en charge', d.pris_en_charge_le ? echapper(jourHeure(d.pris_en_charge_le))
                                                        : '<em>pas encore</em>')}
         ${d.transmis_le ? paire('Transmise le', echapper(jourHeure(d.transmis_le))) : ''}
+        ${d.validation_pole === 'validee' || d.validation_pole === 'gardee'
+          ? paire(d.validation_pole === 'validee' ? 'Validée' : 'Gardée au pôle',
+                  echapper(jourHeure(d.valide_le)) + (d.valide_par ? ' — ' + echapper(d.valide_par) : '')) : ''}
         ${del.jours_chez_service != null
           ? paire('Attente dehors', del.jours_chez_service + ' jours ouvrés'
               + (sansNouvelles(d) ? ' — sans nouvelles' : '')) : ''}
@@ -908,7 +929,7 @@ function dessinerFiche(d, notes, journal, photos) {
         Le dépôt est privé : chaque ouverture crée un lien valable une heure.</p>
     </div>` : ''}
 
-    ${clos || !peutPrendre() || !['nouveau', 'rouvert'].includes(d.statut) ? '' : `<div class="carte">
+    ${clos || aValider(d) || !peutPrendre() || !['nouveau', 'rouvert'].includes(d.statut) ? '' : `<div class="carte">
       <h3>Prendre en charge</h3>
       <p style="font-size:14px;color:var(--encre-doux);margin:0 0 12px">
         Dites que vous vous en saisissez. L'école n'en est pas avertie ; c'est
@@ -1054,6 +1075,27 @@ function brancherActionsFiche(d) {
       messageFiche(lireRefus(err), true);
     }
   });
+
+  //  D32 : valider (transmettre au service) ou garder au pôle.
+  const valider = async (transmettre) => {
+    const bs = [$('#valider-transmettre'), $('#garder-pole')];
+    bs.forEach(b => { if (b) b.disabled = true; });
+    try {
+      const r = await api('rpc/valider_demande_pole', { method: 'POST',
+        body: JSON.stringify({ _demande_id: d.id, _transmettre: transmettre }) });
+      if (r?.ok !== true) throw new Error(r?.motif || 'refus');
+      await rafraichirTout();
+      await ouvrirFiche(d.id);
+      messageFiche(transmettre
+        ? `Demande validée et transmise${r.service ? ' à ' + r.service : ''}. Le service reçoit le mail.`
+        : 'Demande gardée au pôle. Rien n\'a été envoyé au service.', false);
+    } catch (err) {
+      bs.forEach(b => { if (b) b.disabled = false; });
+      messageFiche(lireRefus(err), true);
+    }
+  };
+  $('#valider-transmettre')?.addEventListener('click', () => valider(true));
+  $('#garder-pole')?.addEventListener('click', () => valider(false));
 
   $('#prendre')?.addEventListener('click', async () => {
     const b = $('#prendre');
