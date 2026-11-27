@@ -543,9 +543,12 @@ async function chargerReferentiels() {
     api('services_externes?select=id,libelle,contact_nom,contact_email'),
     api('secteurs_intervention?select=code,libelle&order=code')
   ]);
+  //  Référents par domaine, pour le menu Technicien. Facultatif : si la lecture
+  //  échoue, le poste de travail s'ouvre quand même, avec le menu d'avant.
+  const domaineReferents = await api('domaine_referents?select=domaine_id,agent_id').catch(() => []) || [];
   REF = { ecoles: parId(ecoles), domaines: parId(domaines), types: parId(types),
           cellules: parId(cellules), agents: parId(agents), services: parId(services),
-          secteurs, listeAgents: agents, listeDomaines: domaines };
+          secteurs, listeAgents: agents, listeDomaines: domaines, domaineReferents };
 }
 
 async function chargerDemandes() {
@@ -830,7 +833,14 @@ function dessinerFiche(d, notes, journal, photos) {
   const paire = (t, v) => v ? `<dt>${t}</dt><dd>${v}</dd>` : '';
   const opt = (v, t, sel) => `<option value="${echapper(v)}"${String(sel) === String(v) ? ' selected' : ''}>${echapper(t)}</option>`;
 
-  const techniciens = REF.listeAgents.filter(a => a.actif && a.fonction === 'technicien');
+  //  Menu Technicien : les techniciens, les référents du domaine de la demande,
+  //  et toujours l'agent déjà affecté — sans quoi enregistrer la fiche effacerait
+  //  une affectation à quelqu'un qui n'est pas « technicien ».
+  const refsDuDomaine = new Set((REF.domaineReferents || [])
+    .filter(r => r.domaine_id === d.domaine_id).map(r => r.agent_id));
+  const techniciens = REF.listeAgents.filter(a =>
+    (a.actif && (a.fonction === 'technicien' || refsDuDomaine.has(a.id)))
+    || String(a.id) === String(d.technicien_agent_id ?? ''));
   const referents   = REF.listeAgents.filter(a => a.actif && a.fonction !== 'technicien');
 
   $('#fiche .corps').innerHTML = `
